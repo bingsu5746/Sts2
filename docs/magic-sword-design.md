@@ -103,3 +103,29 @@
 - 검을 잃으면 그 검의 카드를 덱에서 제거하고, 다시 얻으면 자동으로 전부 돌아온다.
 - 구현 근거: 기존 유물 `PaelsTooth`가 같은 동작을 함 — `ToSerializable()`로 카드를 `[SavedProperty] List<SerializableCard>`에 저장 → `CardPileCmd.RemoveFromDeck` → 나중에 `CardModel.FromSerializable` + `CardPileCmd.Add(…, PileType.Deck)`로 복귀. `SerializableCard`가 강화 단계·인챈트·속성값을 함께 저장하므로 강화 상태도 유지될 것으로 보임.
 - 소유 상한: 기본 3 (임시)
+
+## 마검 획득처 (사용자 결정, 2026-10-01)
+- 1막 보스 처치 후 확정 획득 이벤트 (후보 3자루 중 1 선택)
+- 2막 보스 처치 후 확정 획득 이벤트 (후보 3자루 중 1 선택)
+- ? 방에서 낮은 확률, 상점에서 낮은 확률로 구매·획득
+- 상한 3(임시)이라 그람 + 1막 + 2막이면 3막 시작 시 상한 도달 → 이후 획득은 교체
+
+## 시작 덱 · 카드 풀 틀 (초안, 미확정)
+### 게임 원본 기준값 (sts2.dll 디컴파일 확인)
+| 캐릭터 | HP | 시작 덱 | 시작 유물 |
+|---|---|---|---|
+| Ironclad | 80 | 타격5 수비4 Bash (10장) | Burning Blood |
+| Silent | 70 | 타격5 수비5 Neutralize Survivor (12장) | Ring of the Snake |
+| Defect | 75 | 타격4 수비4 Zap Dualcast (10장) | Cracked Core |
+| Regent | 75 | 타격4 수비4 Falling Star Venerate (10장) | Divine Right |
+| Necrobinder | 66 | 타격4 수비4 Bodyguard Unleash (10장) | Bound Phylactery |
+- 모든 캐릭터 시작 골드 99, 기본 에너지 3.
+- 캐릭터 카드 풀 파일의 카드 등록 수: 87~88장 (시작 카드 포함 여부는 미확인).
+
+### 마검사 초안
+- 시작 덱 10장: 타격4, 수비4, 그람 카드1, 공용 고유 카드1 (검 전환 등)
+- 시작 유물: 마검 보관 유물 — 보유 마검 목록 저장, 전투 시작 시 검 띄우기, 보상·상점 필터, 잃은 검의 카드 보관
+- 카드 풀: 공용 카드군 + 검별 카드군
+  - 예시 규모: 공용 약 40장 + 검 11자루 × 4~5장 ≈ 85~95장 (원본 캐릭터 풀과 비슷한 규모)
+  - 한 런의 보상 풀 = 공용 + 보유 검(최대 3자루) 카드
+- 검을 얻을 때 받는 카드: 그 검의 기본 카드 2장 정도 (임시)
