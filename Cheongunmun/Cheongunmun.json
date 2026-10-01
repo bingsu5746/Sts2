@@ -1,0 +1,17 @@
+{
+  "id": "Cheongunmun",
+  "name": "Cheongunmun (청운문)",
+  "author": "bingsu5746",
+  "description": "청운문 제자 — 여러 문파의 무공을 익혀 강해지는 무협 캐릭터 모드 (BaseLib 필요)",
+  "version": "v0.0.0",
+  "min_game_version": "0.107.0",
+  "has_pck": true,
+  "has_dll": true,
+  "dependencies": [
+    {
+      "id": "BaseLib",
+      "min_version": "3.4.7"
+    }
+  ],
+  "affects_gameplay": true
+}

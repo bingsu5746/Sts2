@@ -1,0 +1,16 @@
+{
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.title": "The Cheongun Disciple",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.titleObject": "The Cheongun Disciple",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.description": "A disciple of the Blue Cloud Sect.\nGrows stronger by mastering the arts of many sects.",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.aromaPrinciple": "[sine]The higher the cloud climbs, the bluer it becomes...[/sine]",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.banter.alive.endTurnPing": "[sine]Steady the breath.[/sine]",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.banter.dead.endTurnPing": "...",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.cardsModifierTitle": "Cheongun Cards",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.cardsModifierDescription": "Cheongun cards will now appear in rewards and shops.",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.eventDeathPrevention": "I cannot fall yet.",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.goldMonologue": "[sine]Enough for a manual or two.[/sine]",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.possessiveAdjective": "their",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.pronounObject": "them",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.pronounPossessive": "theirs",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.pronounSubject": "they"
+}

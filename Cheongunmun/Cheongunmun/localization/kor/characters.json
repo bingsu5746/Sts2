@@ -1,0 +1,16 @@
+{
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.title": "청운문 제자",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.titleObject": "청운문 제자",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.description": "푸른 구름의 뜻을 품은 청운문의 제자.\n여러 문파의 무공을 익혀 강해진다.",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.aromaPrinciple": "[sine]구름은 높이 오를수록 푸르다...[/sine]",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.banter.alive.endTurnPing": "[sine]호흡을 고른다.[/sine]",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.banter.dead.endTurnPing": "...",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.cardsModifierTitle": "청운문",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.cardsModifierDescription": "이제 청운문 카드가 보상과 상점에 등장합니다.",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.eventDeathPrevention": "아직 쓰러질 수 없다.",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.goldMonologue": "[sine]비급 한 권 값은 되겠군.[/sine]",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.possessiveAdjective": "그의",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.pronounObject": "그를",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.pronounPossessive": "그의 것",
+  "CHEONGUNMUN-CHEONGUNMUN_CHARACTER.pronounSubject": "그"
+}
