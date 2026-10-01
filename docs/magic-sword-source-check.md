@@ -7,7 +7,7 @@
 - `CardModel.IsRemovable => !Keywords.Contains(CardKeyword.Eternal)` — Eternal은 **제거 방지**만 담당.
 - `Enchantments/Clone.cs`는 빈 클래스. `EnchantmentModel.CanEnchant`는 카드 타입(Status/Curse/Quest 제외), 덱의 Unplayable, 기존 인챈트만 검사하고 Eternal은 보지 않음.
   → 소환 카드에 Clone 인챈트가 붙을 수 있고, 휴식처 `CloneRestSiteOption`이 Clone 붙은 카드를 `RunState.CloneCard`로 복제함.
-- `RunState.CloneCard`를 쓰는 다른 복제 경로: `DollysMirror`(필터는 Quest 타입만 제외), 이벤트 `Reflections`의 Shatter(덱 전체 복제), `SilverCrucible`, `Glitter`, 알 유물들 등 다수.
+- `RunState.CloneCard`를 쓰는 다른 복제 경로: `DollysMirror`(필터는 Quest 타입만 제외), 이벤트 `Reflections`의 Shatter(덱 전체 복제). (`SilverCrucible`, `Glitter`, 알 유물들도 `CloneCard`를 호출하지만 용도는 미확인)
 - 결론: Eternal만으로는 부족. 대응 후보
   - 소환 카드 타입을 `Quest`로 두기 → `CanEnchant`와 DollysMirror 필터에서 자동 제외 (단 Quest 타입의 다른 부작용은 미확인)
   - 또는 덱에 추가될 때 끼어드는 훅 `Hook.ModifyCardBeingAddedToDeck`로 두 번째 사본을 막기
