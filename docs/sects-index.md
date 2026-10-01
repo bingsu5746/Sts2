@@ -11,9 +11,9 @@
 | 5 | 사천당가 | `sacheondang-research.docx` | ✅ 완료 |
 | 6 | 제갈세가 | `jegal-research.docx` | ✅ 완료 |
 | 7 | 남궁세가 | `namgung-research.docx` | ✅ 완료 |
-| 8 | 하북팽가 | `habukpaeng-research.docx` | ✅ 완료 |
+| 8 | 하북팽가 | `habukpaeng-research.docx` + `sect-research-supplements.md` | ✅ 완료 (보충 포함 18개) |
 | 9 | 천마신교 | `cheonmasingyo-research.docx` | ✅ 완료 |
-| 10 | 북해빙궁 | `bukhae-research.docx` | ✅ 완료 |
+| 10 | 북해빙궁 | `bukhae-research.docx` + `sect-research-supplements.md` | ✅ 완료 (보충 포함 16개) |
 
 ## 각 문파 한 줄 요약 (리서치 문서 서두 기준)
 
