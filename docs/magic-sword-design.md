@@ -98,3 +98,8 @@
 ### Claude 제안 (미확정)
 - 4번: 보유 마검 목록을 **시작 유물**에 저장(`[SavedProperty]`), 전투 시작 훅(`Hook.BeforeCombatStart`)에서 검을 띄움. 같은 유물이 보상·상점 필터도 담당. 소환 카드가 없으니 복제·Soul's Power 문제가 사라짐.
 - 5번 처리 후보: 덱에서 제거(`CardPileCmd.RemoveFromDeck`) / 공용 카드로 변환(`CardCmd.Transform`, `TransformToRandom`) / 덱에 남기되 사용 불가
+
+## 검 교체·상실 시 카드 처리 (사용자 결정, 2026-10-01)
+- 검을 잃으면 그 검의 카드를 덱에서 제거하고, 다시 얻으면 자동으로 전부 돌아온다.
+- 구현 근거: 기존 유물 `PaelsTooth`가 같은 동작을 함 — `ToSerializable()`로 카드를 `[SavedProperty] List<SerializableCard>`에 저장 → `CardPileCmd.RemoveFromDeck` → 나중에 `CardModel.FromSerializable` + `CardPileCmd.Add(…, PileType.Deck)`로 복귀. `SerializableCard`가 강화 단계·인챈트·속성값을 함께 저장하므로 강화 상태도 유지될 것으로 보임.
+- 소유 상한: 기본 3 (임시)
