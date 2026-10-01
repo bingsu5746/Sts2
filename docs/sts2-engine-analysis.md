@@ -25,6 +25,12 @@
 
 ---
 
+## 1.5 고대(Ancient) 등급 카드
+- 아이언클래드 풀의 Ancient 카드: `Break`, `Corruption` / 사일런트: `Suppress`, `WraithForm`
+- 유물 `ArchaicTooth`(RelicRarity=7 → Ancient 유물)의 `TranscendenceUpgrades` 사전이 시작 카드 → 고대 카드 변환표를 가짐: Bash→Break, Neutralize→Suppress, Unleash→Protector, FallingStar→MeteorShower, Dualcast→Quadcast
+- 즉 고대 카드 중 적어도 일부는 "캐릭터 대표 시작 카드의 초월 버전". 사전이 바닐라 정적 데이터라 모드 캐릭터를 넣으려면 패치 필요
+- `Corruption`/`WraithForm`의 획득 경로는 미확인 (위 사전에 없음)
+
 ## 2. 핵심 열거형 (정수값 = 선언 순서)
 
 | enum | 값 |
