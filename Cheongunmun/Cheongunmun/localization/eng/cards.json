@@ -1,0 +1,10 @@
+{
+  "CHEONGUNMUN-SAMJAE_GEOMBEOP.title": "Three Powers Sword",
+  "CHEONGUNMUN-SAMJAE_GEOMBEOP.description": "Deal {Damage:diff()} damage.",
+  "CHEONGUNMUN-CHEOLPOSAM.title": "Iron Shirt",
+  "CHEONGUNMUN-CHEOLPOSAM.description": "Gain {Block:diff()} [gold]Block[/gold].",
+  "CHEONGUNMUN-UNGI_JOSIK.title": "Qi Circulation",
+  "CHEONGUNMUN-UNGI_JOSIK.description": "Restore {Naegong:diff()} [gold]Internal Energy[/gold].",
+  "CHEONGUNMUN-YUKHAP_GEOMBEOP.title": "Six Harmonies Sword",
+  "CHEONGUNMUN-YUKHAP_GEOMBEOP.description": "Deal {Damage:diff()} damage to ALL enemies."
+}

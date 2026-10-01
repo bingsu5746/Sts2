@@ -1,0 +1,10 @@
+{
+  "CHEONGUNMUN-SAMJAE_GEOMBEOP.title": "삼재검법",
+  "CHEONGUNMUN-SAMJAE_GEOMBEOP.description": "피해를 {Damage:diff()} 줍니다.",
+  "CHEONGUNMUN-CHEOLPOSAM.title": "철포삼",
+  "CHEONGUNMUN-CHEOLPOSAM.description": "[gold]방어도[/gold]를 {Block:diff()} 얻습니다.",
+  "CHEONGUNMUN-UNGI_JOSIK.title": "운기조식",
+  "CHEONGUNMUN-UNGI_JOSIK.description": "[gold]내공[/gold]을 {Naegong:diff()} 회복합니다.",
+  "CHEONGUNMUN-YUKHAP_GEOMBEOP.title": "육합검법",
+  "CHEONGUNMUN-YUKHAP_GEOMBEOP.description": "모든 적에게 피해를 {Damage:diff()} 줍니다."
+}
