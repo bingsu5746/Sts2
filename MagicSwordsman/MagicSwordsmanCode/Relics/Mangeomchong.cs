@@ -1,3 +1,4 @@
+using MagicSwordsman.MagicSwordsmanCode.Visuals;
 using System.Runtime.CompilerServices;
 using MagicSwordsman.MagicSwordsmanCode.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
@@ -515,6 +516,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {
         if (player != Owner) return;
+        SwordVisuals.Sync(Owner); // presentation only (creates the rig once the combat room exists, e.g. Onimaru)
         foreach (var sword in OwnedSwords)
             await SwordRegistry.Get(sword).OnPlayerTurnStart(SwordCombat.ContextFor(Owner, sword), choiceContext);
     }

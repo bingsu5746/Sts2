@@ -1,0 +1,262 @@
+using Godot;
+using MagicSwordsman.MagicSwordsmanCode.Combat;
+using MagicSwordsman.MagicSwordsmanCode.Swords;
+using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Nodes.Combat;
+using MegaCrit.Sts2.Core.Nodes.Rooms;
+
+namespace MagicSwordsman.MagicSwordsmanCode.Visuals;
+
+/// <summary>
+/// Presentation only (no game state): the swords floating around the Magic Swordsman and Mangeomchong standing behind
+/// them. Everything here is derived from <see cref="SwordCombatState"/> via <see cref="Sync"/>, so it can be called
+/// from anywhere, any number of times, and never changes gameplay. Every entry point swallows exceptions — a visual
+/// bug must never break a combat.
+///
+/// Layout (player faces right): Mangeomchong behind the player, idle swords in an arc above/behind, the current
+/// sword in front at hand height. A sword that leaves (Kusanagi going back) flies into the tomb and fades.
+/// Art: drop <c>images/swords/&lt;sword id lowercase&gt;.png</c> (blade pointing up) and <c>images/swords/tomb.png</c>
+/// to replace the drawn placeholder shapes. TODO(art): real art, VFX on summon.
+/// UNVERIFIED in game: node offsets relative to the creature node, z-ordering against the creature body.
+/// </summary>
+public static class SwordVisuals
+{
+    private sealed class Rig
+    {
+        public required Node2D Root;
+        public required Node2D Tomb;
+        public required Node2D Door;
+        public readonly Dictionary<SwordId, Node2D> Swords = new();
+        public SwordId? Current;
+    }
+
+    private static readonly Dictionary<Player, Rig> Rigs = new();
+
+    private static readonly Vector2 TombPos = new(-170, -40);
+    private static readonly Vector2 CurrentPos = new(110, -175);
+    private static readonly Vector2[] IdleSlots =
+    {
+        new(-120, -330), new(-30, -380), new(60, -360), new(-200, -260), new(140, -300),
+    };
+
+    // ------------------------------------------------------------------ entry points
+
+    /// <summary>Reconciles the floating swords with the combat state (present swords, current sword).</summary>
+    public static void Sync(Player player)
+    {
+        try { SyncInner(player); }
+        catch (Exception e) { MainFile.Logger.Warn($"[SwordVisuals] Sync failed: {e.Message}"); }
+    }
+
+    /// <summary>Kusanagi card played while Kusanagi is back in Mangeomchong: the tomb door rattles.</summary>
+    public static void RattleTomb(Player player)
+    {
+        try
+        {
+            var rig = GetRig(player, create: true);
+            if (rig == null) return;
+            var door = rig.Door;
+            var t = door.CreateTween();
+            for (var i = 0; i < 4; i++)
+            {
+                t.TweenProperty(door, "rotation", i % 2 == 0 ? 0.12f : -0.12f, 0.06);
+            }
+            t.TweenProperty(door, "rotation", 0f, 0.08);
+        }
+        catch (Exception e) { MainFile.Logger.Warn($"[SwordVisuals] Rattle failed: {e.Message}"); }
+    }
+
+    /// <summary>Combat over: forget the rig (its nodes die with the combat room).</summary>
+    public static void Clear(Player player) => Rigs.Remove(player);
+
+    // ------------------------------------------------------------------ internals
+
+    private static void SyncInner(Player player)
+    {
+        var state = SwordCombat.Get(player);
+        if (state == null) return;
+        var rig = GetRig(player, create: state.Present.Count > 0 || state.ReturnedToVault.Count > 0);
+        if (rig == null) return;
+
+        // swords that left -> into the tomb
+        foreach (var gone in rig.Swords.Keys.Where(s => !state.Present.Contains(s)).ToList())
+        {
+            var node = rig.Swords[gone];
+            rig.Swords.Remove(gone);
+            var t = node.CreateTween().SetParallel();
+            t.TweenProperty(node, "position", TombPos + new Vector2(0, -40), 0.4).SetTrans(Tween.TransitionType.Quad);
+            t.TweenProperty(node, "modulate:a", 0f, 0.4);
+            t.Chain().TweenCallback(Callable.From(node.QueueFree));
+        }
+
+        // new swords -> out of the tomb
+        foreach (var sword in state.Present.Where(s => !rig.Swords.ContainsKey(s)))
+        {
+            var node = CreateSword(sword);
+            rig.Root.AddChild(node);
+            node.Position = TombPos + new Vector2(0, -40);
+            node.Scale = new Vector2(0.3f, 0.3f);
+            rig.Swords[sword] = node;
+            OpenDoor(rig);
+        }
+
+        rig.Current = state.Current;
+        Layout(rig);
+    }
+
+    private static void Layout(Rig rig)
+    {
+        var slot = 0;
+        foreach (var (sword, node) in rig.Swords.OrderBy(kv => (int)kv.Key))
+        {
+            var isCurrent = rig.Current == sword;
+            var pos = isCurrent ? CurrentPos : IdleSlots[slot++ % IdleSlots.Length];
+            var t = node.CreateTween().SetParallel();
+            t.TweenProperty(node, "position", pos, 0.35).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+            t.TweenProperty(node, "scale", isCurrent ? new Vector2(1.15f, 1.15f) : new Vector2(0.8f, 0.8f), 0.3);
+            t.TweenProperty(node, "rotation", isCurrent ? 0.5f : -0.15f, 0.3);
+            t.TweenProperty(node, "modulate", isCurrent ? Colors.White : new Color(0.75f, 0.75f, 0.8f, 0.9f), 0.3);
+            node.ZIndex = isCurrent ? 1 : -1;
+        }
+    }
+
+    private static Rig? GetRig(Player player, bool create)
+    {
+        if (Rigs.TryGetValue(player, out var rig) && GodotObject.IsInstanceValid(rig.Root)) return rig;
+        Rigs.Remove(player);
+        if (!create) return null;
+
+        NCreature? creatureNode = NCombatRoom.Instance?.GetCreatureNode(player.Creature);
+        if (creatureNode == null) return null;
+
+        var root = new Node2D { Name = "MagicSwordsRig" };
+        creatureNode.AddChild(root);
+
+        var (tomb, door) = CreateTomb();
+        tomb.Position = TombPos;
+        tomb.ZIndex = -2;
+        root.AddChild(tomb);
+
+        rig = new Rig { Root = root, Tomb = tomb, Door = door };
+        Rigs[player] = rig;
+        HookIdleReturn(creatureNode);
+        return rig;
+    }
+
+    private static void OpenDoor(Rig rig)
+    {
+        var t = rig.Door.CreateTween();
+        t.TweenProperty(rig.Door, "scale:x", 0.15f, 0.15);
+        t.TweenInterval(0.35);
+        t.TweenProperty(rig.Door, "scale:x", 1f, 0.2);
+    }
+
+    /// <summary>
+    /// BaseLib plays our AnimationPlayer clips by name but does not go back to "idle" after one-shot clips
+    /// (Attack / Cast / Hit). Queue idle when a non-looping clip finishes. Dead stays on its last frame.
+    /// </summary>
+    private static void HookIdleReturn(NCreature creatureNode)
+    {
+        var player = FindChild<AnimationPlayer>(creatureNode.Visuals);
+        if (player == null || player.HasMeta("ms_idle_hook") || !player.HasAnimation("idle")) return;
+        player.SetMeta("ms_idle_hook", true);
+        player.AnimationFinished += name =>
+        {
+            if (name != "idle" && name != "Dead" && GodotObject.IsInstanceValid(player)) player.Play("idle");
+        };
+    }
+
+    private static T? FindChild<T>(Node? node) where T : Node
+    {
+        if (node == null) return null;
+        if (node is T found) return found;
+        foreach (var child in node.GetChildren())
+        {
+            var r = FindChild<T>(child);
+            if (r != null) return r;
+        }
+        return null;
+    }
+
+    // ------------------------------------------------------------------ placeholder art
+
+    private static Node2D CreateSword(SwordId sword)
+    {
+        var holder = new Node2D { Name = $"Sword_{sword}" };
+        Node2D blade;
+        var texPath = $"{MainFile.ResPath}/images/swords/{sword.ToString().ToLowerInvariant()}.png";
+        if (ResourceLoader.Exists(texPath))
+        {
+            blade = new Sprite2D { Texture = GD.Load<Texture2D>(texPath) };
+        }
+        else
+        {
+            blade = new Node2D();
+            var color = ColorOf(sword);
+            blade.AddChild(new Polygon2D
+            {
+                Color = color,
+                Polygon = new[] { new Vector2(0, -70), new Vector2(7, -55), new Vector2(6, 18), new Vector2(-6, 18), new Vector2(-7, -55) },
+            });
+            blade.AddChild(new Polygon2D
+            {
+                Color = color.Darkened(0.45f),
+                Polygon = new[] { new Vector2(-18, 18), new Vector2(18, 18), new Vector2(18, 25), new Vector2(-18, 25) },
+            });
+            blade.AddChild(new Polygon2D
+            {
+                Color = new Color(0.25f, 0.18f, 0.12f),
+                Polygon = new[] { new Vector2(-4, 25), new Vector2(4, 25), new Vector2(4, 48), new Vector2(-4, 48) },
+            });
+        }
+
+        holder.AddChild(blade);
+
+        // gentle bob, offset per sword so they don't move in lockstep
+        var period = 1.1 + (int)sword % 4 * 0.15;
+        var bob = blade.CreateTween().SetLoops();
+        bob.TweenProperty(blade, "position:y", -8f, period).SetTrans(Tween.TransitionType.Sine);
+        bob.TweenProperty(blade, "position:y", 0f, period).SetTrans(Tween.TransitionType.Sine);
+        return holder;
+    }
+
+    private static (Node2D Tomb, Node2D Door) CreateTomb()
+    {
+        var tomb = new Node2D { Name = "Mangeomchong" };
+        var texPath = $"{MainFile.ResPath}/images/swords/tomb.png";
+        if (ResourceLoader.Exists(texPath))
+            tomb.AddChild(new Sprite2D { Texture = GD.Load<Texture2D>(texPath), Position = new Vector2(0, -60) });
+        else
+            tomb.AddChild(new Polygon2D
+            {
+                Color = new Color(0.32f, 0.30f, 0.34f),
+                Polygon = new[] { new Vector2(-60, 0), new Vector2(60, 0), new Vector2(50, -100), new Vector2(0, -130), new Vector2(-50, -100) },
+            });
+
+        // the door pivots on its left edge so "scale:x" opens it and "rotation" rattles it
+        var door = new Node2D { Name = "Door", Position = new Vector2(-20, 0) };
+        door.AddChild(new Polygon2D
+        {
+            Color = new Color(0.12f, 0.10f, 0.12f),
+            Polygon = new[] { new Vector2(0, 0), new Vector2(40, 0), new Vector2(40, -70), new Vector2(0, -70) },
+        });
+        tomb.AddChild(door);
+        return (tomb, door);
+    }
+
+    private static Color ColorOf(SwordId sword) => sword switch
+    {
+        SwordId.Gram => new Color(0.95f, 0.78f, 0.30f),
+        SwordId.Ganjiang => new Color(0.45f, 0.55f, 0.75f),
+        SwordId.Moye => new Color(0.90f, 0.75f, 0.82f),
+        SwordId.Kusanagi => new Color(0.45f, 0.80f, 0.55f),
+        SwordId.Tyrfing => new Color(1.00f, 0.55f, 0.20f),
+        SwordId.Dainsleif => new Color(0.75f, 0.15f, 0.20f),
+        SwordId.Durandal => new Color(0.98f, 0.95f, 0.85f),
+        SwordId.Skofnung => new Color(0.65f, 0.85f, 1.00f),
+        SwordId.Onimaru => new Color(0.45f, 0.30f, 0.60f),
+        SwordId.ClaiomhSolais => new Color(1.00f, 1.00f, 0.75f),
+        SwordId.Caladbolg => new Color(0.40f, 0.90f, 0.95f),
+        _ => Colors.White,
+    };
+}

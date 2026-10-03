@@ -1,3 +1,4 @@
+using MagicSwordsman.MagicSwordsmanCode.Visuals;
 using System.Runtime.CompilerServices;
 using MagicSwordsman.MagicSwordsmanCode.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Powers;
@@ -51,7 +52,11 @@ public static class SwordCombat
     }
 
     /// <summary>Drops the state after combat. Called by Mangeomchong.AfterCombatEnd.</summary>
-    internal static void Clear(Player player) => States.Remove(player);
+    internal static void Clear(Player player)
+    {
+        States.Remove(player);
+        SwordVisuals.Clear(player);
+    }
 
     public static SwordId? CurrentSword(Player player) => Get(player)?.Current;
 
@@ -210,6 +215,7 @@ public static class SwordCombat
         if (card.Sword is not { } sword || !card.IsMutable) return;
         var owner = card.Owner;
         if (owner?.PlayerCombatState == null) return;
+        if (Get(owner)?.ReturnedToVault.Contains(sword) == true) SwordVisuals.RattleTomb(owner); // 만검총 문이 들썩임
         await SwitchTo(owner, sword, choiceContext, SwitchReason.CardPlayed);
     }
 
@@ -256,6 +262,7 @@ public static class SwordCombat
         }
         state.SwitchesInLastSwitchTurn++;
         if (sword == SwordId.Kusanagi && old != null) state.KusanagiSwitchIns++;
+        SwordVisuals.Sync(player);
 
         await EnsureCurrentSwordPower(player, choiceContext);
 
@@ -287,6 +294,7 @@ public static class SwordCombat
 
         state.Present.Add(sword);
         state.Summoned.Add(sword);
+        SwordVisuals.Sync(player);
         await SwordRegistry.Get(sword).OnSummoned(ContextFor(player, sword), choiceContext);
 
         if (!state.FirstSummonBonusUsed)
@@ -309,6 +317,7 @@ public static class SwordCombat
     {
         var state = GetOrCreate(player);
         state?.Present.Add(sword);
+        SwordVisuals.Sync(player);
     }
 
     /// <summary>
@@ -321,6 +330,7 @@ public static class SwordCombat
         if (state == null) return;
         state.Present.Remove(sword);
         state.ReturnedToVault.Add(sword);
+        SwordVisuals.Sync(player);
         if (state.Current == sword)
         {
             state.Previous = sword;

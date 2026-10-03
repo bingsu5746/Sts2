@@ -74,7 +74,26 @@
 - 만검총이 가득 찼을 때 검을 얻으면, 내보낼 검을 먼저 고른다(그람은 내보낼 수 없음). 중간에 취소하면 아무 검도 잃지 않고, 상점에서 샀다면 골드를 돌려받는다.
 - 고대인 대사 (한국어·영어)
 
+## 그림·연출 넣는 법
+파일만 정해진 이름으로 넣으면 코드 수정 없이 바뀐다. 파일이 없으면 기본 그림(또는 아래의 임시 도형)이 나온다.
+
+| 무엇 | 파일 | 크기 |
+|---|---|---|
+| 카드 | `MagicSwordsman/images/card_portraits/<카드id 소문자>.png`, `.../big/<같은 이름>.png` | 250×190, 1000×760 |
+| 유물 | `images/relics/<id>.png`, `images/relics/big/<id>.png` | 94×94, 256×256 |
+| 파워 | `images/powers/<id>.png`, `images/powers/big/<id>.png` | 64×64 (큰 것은 템플릿 참고) |
+| 캐릭터 몸 | `images/character/magic_swordsman.png` (지금은 임시 실루엣) | 260×400 기준 |
+| 떠 있는 검 | `images/swords/<검 id 소문자>.png` (칼날이 위를 향하게). 예: `gram.png`, `claiomhsolais.png` | 자유 (약 60×130 기준) |
+| 만검총 | `images/swords/tomb.png` | 자유 |
+
+- 카드 id 예: `MAGICSWORDSMAN-BROKEN_BLADE` → `broken_blade.png`
+- 캐릭터 씬: `MagicSwordsman/scenes/magic_swordsman_combat.tscn`(전투), `_rest_site.tscn`(휴식처), `_merchant.tscn`(상점). Spine 없이 Godot `AnimationPlayer`로 움직인다. 애니메이션 이름 `idle`(반복), `Attack`, `Cast`, `Hit`, `Dead`를 BaseLib이 게임 동작에 맞춰 재생한다. 그림을 바꾸거나 MegaDot에서 열어 애니메이션을 다듬으면 된다.
+- 씬 파일을 찾지 못하면 아이언클래드 모습으로 대신 나온다.
+- 상점 화면 멈춤 문제는 BaseLib 3.4.7에 이미 패치가 있어 따로 처리하지 않았다.
+- 떠 있는 검·만검총 코드: `MagicSwordsmanCode/Visuals/SwordVisuals.cs` (연출 전용, 게임 규칙에 영향 없음). 검이 처음 소환되면 만검총 문이 열리며 날아 나오고, 현재 검은 손앞으로 오고 나머지는 뒤쪽에 떠서 흔들린다. 쿠사나기가 만검총으로 돌아가면 날아 들어가고, 그 뒤 쿠사나기 카드를 쓰면 문이 들썩인다.
+
 ## 데모에서 아직 안 되는 것 / 검증 안 된 것
+- 캐릭터 씬·떠 있는 검 연출은 빌드만 확인. 손으로 쓴 `.tscn`이라 MegaDot에서 한 번 열어 확인 필요. 검·만검총 위치는 화면에서 보고 `SwordVisuals.cs`의 좌표를 조정해야 할 수 있음
 - **게임에서 한 번도 실행해 보지 않았다.** 실제 게임 DLL로 빌드가 되는 것까지만 확인했다. 아래에서 "확인 필요"라고 적은 것은 특히 실제 플레이로 확인해야 한다.
 - **그림이 없다.** 캐릭터, 카드 그림, 유물, 파워, 포션, 캐릭터 선택 화면 모두 템플릿 기본 이미지다. 두 획득 이벤트는 게임의 기존 이벤트 그림을, 마검 강화는 기존 "강화" 아이콘을 빌려 쓴다.
 - **연출이 없다.** 검을 얻을 때의 기원 원화 슬라이드(첫 획득은 전체 연출) 대신 글로만 보여 준다. 쿠사나기가 만검총으로 돌아갈 때 "만검총 문이 들썩이는 연출"도 없다.

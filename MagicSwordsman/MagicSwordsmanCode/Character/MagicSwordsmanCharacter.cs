@@ -56,6 +56,21 @@ public class MagicSwordsmanCharacter : PlaceholderCharacterModel
         }
     }
 
+    // Character body scenes (MagicSwordsman/scenes). BaseLib converts these plain scenes into the game's node types
+    // (RegisterSceneForConversion) and plays their AnimationPlayer clips by name (idle / Attack / Cast / Hit / Dead)
+    // since there is no Spine rig. If a scene is missing from the .pck, fall back to the placeholder (Ironclad) visuals.
+    public override string CustomVisualPath => SceneOrPlaceholder("magic_swordsman_combat.tscn", base.CustomVisualPath);
+    public override string CustomRestSiteAnimPath =>
+        SceneOrPlaceholder("magic_swordsman_rest_site.tscn", base.CustomRestSiteAnimPath);
+    public override string CustomMerchantAnimPath =>
+        SceneOrPlaceholder("magic_swordsman_merchant.tscn", base.CustomMerchantAnimPath);
+
+    private static string SceneOrPlaceholder(string file, string? fallback)
+    {
+        var path = $"{MainFile.ResPath}/scenes/{file}";
+        return ResourceLoader.Exists(path) || fallback == null ? path : fallback;
+    }
+
     public override string CustomIconTexturePath => "character_icon_char_name.png".CharacterUiPath();
     public override string CustomCharacterSelectIconPath => "char_select_char_name.png".CharacterUiPath();
     public override string CustomCharacterSelectLockedIconPath => "char_select_char_name_locked.png".CharacterUiPath();
