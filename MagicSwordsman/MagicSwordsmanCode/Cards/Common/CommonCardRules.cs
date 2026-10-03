@@ -134,6 +134,35 @@ public static class CommonCardRules
     }
 
     /// <summary>
+    /// 칼날 세우기 / 담금질 물: the current sword (or, with no current sword, one owned sword the player chooses)
+    /// counts as <paramref name="levels"/> levels higher for the rest of this combat (max 5).
+    /// Returns the sword that was tempered, or null when nothing could be raised.
+    /// </summary>
+    public static async Task<SwordId?> TemperSword(Player player, int levels, PlayerChoiceContext choiceContext)
+    {
+        var state = SwordCombat.Get(player);
+        var relic = player.GetRelic<Mangeomchong>();
+        if (state == null || relic == null || levels <= 0) return null;
+
+        SwordId? target = state.Current;
+        if (target == null)
+        {
+            var candidates = relic.OwnedSwords
+                .Where(s => SwordCombat.LevelOf(player, s) < SwordRegistry.MaxLevel)
+                .DistinctBy(s => SwordRegistry.GetDefinition(s).LevelOwner)
+                .ToList();
+            if (candidates.Count == 0) return null;
+            target = candidates.Count == 1
+                ? candidates[0]
+                : await SwordAcquisition.PickSword(player, candidates, choiceContext, canSkip: false, TemperPrompt);
+        }
+
+        if (target is not { } sword) return null;
+        await AddCombatLevels(player, sword, levels, choiceContext);
+        return sword;
+    }
+
+    /// <summary>
     /// "이번 전투 동안 단계를 +N으로 취급(최대 5)": adds to the per-combat level bonus of the sword's LevelOwner
     /// (<see cref="SwordCombat.CombatLevelBonusKey"/>, read by <see cref="SwordCombat.LevelOf"/>) without passing 5,
     /// then refreshes the "현재 검" power. Returns the levels actually gained.

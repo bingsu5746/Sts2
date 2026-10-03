@@ -1,1 +1,10 @@
-{}
+{
+  "MAGICSWORDSMAN-SUMMONING_DRAUGHT.title": "부름의 물약",
+  "MAGICSWORDSMAN-SUMMONING_DRAUGHT.description": "이번 전투에서 아직 나오지 않은 보유 마검 하나를 골라 소환해 [gold]현재 검[/gold]으로 삼습니다.\n그 검의 카드 {Cards}장을 뽑을 카드 더미에서 무작위로 골라 손으로 가져옵니다.",
+  "MAGICSWORDSMAN-PURIFYING_WATER.title": "정화수",
+  "MAGICSWORDSMAN-PURIFYING_WATER.description": "손에 있는 상태이상·저주 카드를 모두 [gold]소멸[/gold]시킵니다.\n내 디버프 1종류를 제거합니다.",
+  "MAGICSWORDSMAN-QUENCHING_WATER.title": "담금질 물",
+  "MAGICSWORDSMAN-QUENCHING_WATER.description": "이번 전투 동안 [gold]현재 검[/gold]의 단계를 {Levels} 높게 취급합니다(최대 5). 현재 검이 없으면 보유 마검 하나를 고릅니다.",
+  "MAGICSWORDSMAN-BLADE_ESSENCE.title": "칼날 정수",
+  "MAGICSWORDSMAN-BLADE_ESSENCE.description": "이번 턴 동안 손에 있는 마검 카드의 비용이 {CostReduction} 줄어듭니다(최소 0)."
+}

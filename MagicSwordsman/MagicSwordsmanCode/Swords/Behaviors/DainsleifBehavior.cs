@@ -14,8 +14,9 @@ namespace MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 /// <summary>
 /// 다인슬레이프. Spec §7 [확정]:
 ///  - Current effect: played cards that would go to the discard pile go to a RANDOM position of the draw pile
-///    instead (content doc 0.4 #17). Exhausted / power cards are unchanged. Engine safety: at most 12 cards per
-///    turn (<see cref="DainsleifReturn.MaxReturnsPerTurn"/>), after that cards are discarded normally.
+///    instead (content doc 0.4 #17). Exhausted / power cards are unchanged. Spec §9 [확정] (2026-10-03, replaces the
+///    old 12-per-turn cap): only cards that cost 1 or more return (<see cref="DainsleifReturn.CanReturn"/>), so 0-cost
+///    cards cannot loop forever; 0-cost cards are discarded normally.
 ///    Kusanagi inherits: only the first such card each turn.
 ///  - Cost: cannot gain block while Dainsleif is current (ModifyBlockMultiplicative -> 0, like the game's
 ///    NoBlockPower). Not inherited by Kusanagi.
@@ -62,8 +63,13 @@ public sealed class DainsleifBehavior : SwordBehavior
 /// </summary>
 public static class DainsleifReturn
 {
-    /// <summary>Content doc 0.4 #17: engine safety cap per turn.</summary>
-    public const int MaxReturnsPerTurn = 12;
+    /// <summary>
+    /// Spec §9 [확정]: only cards that cost 1 or more return (loop guard; replaces the old 12-per-turn cap).
+    /// Printed cost is used (a 1-cost card made free this turn still counts as a 1-cost card). X-cost cards return
+    /// only when at least 1 energy was spent on them.
+    /// </summary>
+    public static bool CanReturn(CardModel card, ResourceInfo resources) =>
+        card.EnergyCost.CostsX ? resources.EnergySpent >= 1 : card.EnergyCost.Canonical >= 1;
 
     private const string TurnKey = "return_turn";
     private const string CountKey = "returned";
@@ -103,7 +109,7 @@ public static class DainsleifReturn
             state.SetCounter(SwordId.Dainsleif, TopKey, 0);
         }
 
-        if (state.GetCounter(SwordId.Dainsleif, CountKey) >= MaxReturnsPerTurn) return (pileType, position);
+        if (!CanReturn(card, resources)) return (pileType, position);
         if (inherited)
         {
             // Kusanagi inheritance [확정]: only the first card each turn.

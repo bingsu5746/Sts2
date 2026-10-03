@@ -223,6 +223,14 @@ public static class SwordCombat
         var state = GetOrCreate(player);
         if (state == null) return false;
         if (state.Current == sword) return true;
+
+        // Spec §3 [확정]: the first card of a sword summons it, even when the sword cannot become current
+        // (e.g. Durandal at HP 30% or less — its cost only forbids the switch). A refused swap effect does not summon.
+        if (reason == SwitchReason.CardPlayed && !state.Present.Contains(sword) &&
+            !state.ReturnedToVault.Contains(sword) && player.GetRelic<Mangeomchong>() is { } owner &&
+            owner.Owns(sword))
+            await Summon(player, sword, choiceContext);
+
         if (!CanSwitchTo(player, sword, reason)) return false;
 
         var behavior = SwordRegistry.Get(sword);

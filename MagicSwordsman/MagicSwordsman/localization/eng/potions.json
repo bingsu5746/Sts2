@@ -1,1 +1,10 @@
-{}
+{
+  "MAGICSWORDSMAN-SUMMONING_DRAUGHT.title": "Summoning Draught",
+  "MAGICSWORDSMAN-SUMMONING_DRAUGHT.description": "Choose one of your swords that has not come out this combat, summon it and make it your [gold]current sword[/gold].\nPut {Cards} random cards of that sword from your draw pile into your hand.",
+  "MAGICSWORDSMAN-PURIFYING_WATER.title": "Purifying Water",
+  "MAGICSWORDSMAN-PURIFYING_WATER.description": "[gold]Exhaust[/gold] all Status and Curse cards in your hand.\nRemove 1 of your debuffs.",
+  "MAGICSWORDSMAN-QUENCHING_WATER.title": "Quenching Water",
+  "MAGICSWORDSMAN-QUENCHING_WATER.description": "This combat, your [gold]current sword[/gold] counts as {Levels} levels higher (max 5). If you have no current sword, choose one of your swords.",
+  "MAGICSWORDSMAN-BLADE_ESSENCE.title": "Blade Essence",
+  "MAGICSWORDSMAN-BLADE_ESSENCE.description": "This turn, sword cards in your hand cost {CostReduction} less (min 0)."
+}

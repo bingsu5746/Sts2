@@ -1,5 +1,26 @@
 {
   "MAGICSWORDSMAN-MANGEOMCHONG.title": "만검총",
   "MAGICSWORDSMAN-MANGEOMCHONG.description": "보유한 마검과 강화 단계를 기억합니다. 카드 보상과 상점에는 공용 카드와 보유한 마검의 카드만 나옵니다. 휴식처에서 [gold]마검 강화[/gold]를 할 수 있습니다.\n전투마다 처음 마검을 소환할 때 [gold]방어도[/gold]를 {Block:diff()} 얻고 카드를 {Cards:diff()}장 뽑습니다.\n{SwordList}",
-  "MAGICSWORDSMAN-MANGEOMCHONG.flavor": "수많은 검이 잠든 무덤. 부르면 검이 깨어난다."
+  "MAGICSWORDSMAN-MANGEOMCHONG.flavor": "수많은 검이 잠든 무덤. 부르면 검이 깨어난다.",
+  "MAGICSWORDSMAN-BRANSTOCK.title": "브란스톡",
+  "MAGICSWORDSMAN-BRANSTOCK.description": "마검 소유 상한이 [gold]1[/gold] 늘어납니다.",
+  "MAGICSWORDSMAN-BRANSTOCK.flavor": "볼숭 왕의 연회장에 선 나무. 오딘이 꽂아 둔 검은 시그문드만 뽑을 수 있었다.",
+  "MAGICSWORDSMAN-WOODEN_PLAQUE.title": "검총의 나무 패",
+  "MAGICSWORDSMAN-WOODEN_PLAQUE.description": "얻을 때 HP를 [green]{Heal}[/green] 회복합니다.\n마검 소유 상한이 [gold]1[/gold] 늘어납니다.",
+  "MAGICSWORDSMAN-WOODEN_PLAQUE.flavor": "검총에는 나무 패만 남아 있다.",
+  "MAGICSWORDSMAN-REGINS_ANVIL.title": "레긴의 모루",
+  "MAGICSWORDSMAN-REGINS_ANVIL.description": "[gold]도박 강화[/gold]의 성공 확률이 {Bonus}%p 오릅니다. (실패 확률에서 뺍니다. 박살 확률은 그대로입니다.)",
+  "MAGICSWORDSMAN-REGINS_ANVIL.flavor": "레긴이 두 조각을 다시 벼렸다. 새 그람은 모루를 둘로 쪼갰다.",
+  "MAGICSWORDSMAN-BLACK_LACQUER_SHEATH.title": "흑칠 칼집",
+  "MAGICSWORDSMAN-BLACK_LACQUER_SHEATH.description": "다음 [gold]박살[/gold] 1번을 강화 실패로 바꿉니다. 그 뒤에는 빈 칼집이 됩니다.",
+  "MAGICSWORDSMAN-BLACK_LACQUER_SHEATH.flavor": "거의 밀폐된 흑칠 나무 칼집. 그 안의 검은 2,500년 동안 녹이 거의 슬지 않았다.",
+  "MAGICSWORDSMAN-SWORD_RACK.title": "검 받침대",
+  "MAGICSWORDSMAN-SWORD_RACK.description": "매 턴 처음 현재 검이 바뀔 때 [gold]방어도[/gold]를 {Block:diff()} 얻습니다.",
+  "MAGICSWORDSMAN-SWORD_RACK.flavor": "걸어 둔 검은 언제든 바꿔 쥘 수 있다.",
+  "MAGICSWORDSMAN-THREE_HUNDRED_BELLOWS.title": "삼백 개의 풀무",
+  "MAGICSWORDSMAN-THREE_HUNDRED_BELLOWS.description": "전투에서 두 번째로 마검을 소환할 때도 [gold]방어도[/gold]를 {Block:diff()} 얻고 카드를 {Cards:diff()}장 뽑습니다.",
+  "MAGICSWORDSMAN-THREE_HUNDRED_BELLOWS.flavor": "아이 300명이 풀무질을 해 3년 만에 완성했다.",
+  "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.title": "열린 만검총",
+  "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.description": "보유한 마검과 강화 단계를 기억합니다. 카드 보상과 상점에는 공용 카드와 보유한 마검의 카드만 나옵니다. 휴식처에서 [gold]마검 강화[/gold]를 할 수 있습니다.\n전투마다 처음 마검을 소환할 때 [gold]방어도[/gold]를 {Block:diff()} 얻고 카드를 {Cards:diff()}장 뽑습니다. 그 뒤 다른 마검을 처음 소환할 때마다 [gold]방어도[/gold]를 {LaterSummonBlock:diff()} 얻습니다.\n{SwordList}",
+  "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.flavor": "문이 활짝 열린 만검총. 잠든 검들이 먼저 손을 내민다."
 }

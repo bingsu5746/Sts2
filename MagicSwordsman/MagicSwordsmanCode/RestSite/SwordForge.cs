@@ -27,6 +27,19 @@ public readonly record struct ForgeOdds(int Success, int Failure, int Shatter);
 public readonly record struct ForgeOutcome(ForgeOutcomeKind Kind, SwordId Sword, int OldLevel, int NewLevel);
 
 /// <summary>
+/// Implement on a relic to change "마검 강화" (content doc §7: 레긴의 모루 odds, 흑칠 칼집 shatter insurance).
+/// Default no-ops. Queried from <c>player.Relics</c> by <see cref="SwordForge"/>.
+/// </summary>
+public interface ISwordForgeModifier
+{
+    /// <summary>Change the odds of one attempt (values are percent; keep the sum at 100).</summary>
+    ForgeOdds ModifyForgeOdds(Player player, SwordId sword, ForgeMode mode, ForgeOdds odds) => odds;
+
+    /// <summary>Called when a shatter was rolled. Return true to turn it into a normal failure (used up or not).</summary>
+    Task<bool> TryPreventShatter(Player player, SwordId sword, ForgeMode mode) => Task.FromResult(false);
+}
+
+/// <summary>
 /// Pure rules of the rest-site "마검 강화" (spec §4). UI lives in <see cref="SwordForgeRestSiteOption"/>.
 /// Odds are [임시] values from the spec: +2 = 65/32/3, +3 = 40/52/8 (percent).
 /// </summary>
@@ -47,6 +60,19 @@ public static class SwordForge
         ForgeMode.GamblePlus3 => new ForgeOdds(40, 52, 8),
         _ => new ForgeOdds(100, 0, 0),
     };
+
+    /// <summary>Odds for this player and sword, after every relic's <see cref="ISwordForgeModifier"/>.</summary>
+    public static ForgeOdds OddsFor(Player player, SwordId sword, ForgeMode mode)
+    {
+        var odds = OddsFor(mode);
+        if (mode == ForgeMode.Safe) return odds; // 안전 강화 is always certain
+        foreach (var modifier in Modifiers(player))
+            odds = modifier.ModifyForgeOdds(player, sword, mode, odds);
+        return odds;
+    }
+
+    public static IEnumerable<ISwordForgeModifier> Modifiers(Player player) =>
+        player.Relics.OfType<ISwordForgeModifier>().ToList();
 
     /// <summary>Spec: a gamble that would exceed the max level cannot be chosen.</summary>
     public static bool IsAllowed(ForgeMode mode, int currentLevel) =>
@@ -69,7 +95,7 @@ public static class SwordForge
                     throw new InvalidOperationException("SwordForge requires Mangeomchong");
         sword = SwordRegistry.GroupLeader(sword);
         var oldLevel = relic.GetLevel(sword);
-        var odds = OddsFor(mode);
+        var odds = OddsFor(player, sword, mode);
 
         var roll = rng.NextInt(100);
         if (roll < odds.Success)
@@ -82,7 +108,13 @@ public static class SwordForge
         if (roll < odds.Success + odds.Failure)
             return await ApplyFailure(player, relic, sword, oldLevel, rng);
 
-        // shatter
+        // shatter (a relic may turn it into a normal failure: 흑칠 칼집)
+        foreach (var modifier in Modifiers(player))
+        {
+            if (await modifier.TryPreventShatter(player, sword, mode))
+                return await ApplyFailure(player, relic, sword, oldLevel, rng);
+        }
+
         if (!SwordRegistry.GetDefinition(sword).CanBeLost)
         {
             await relic.SetLevel(sword, 0);

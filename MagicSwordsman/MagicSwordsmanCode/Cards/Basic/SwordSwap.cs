@@ -1,3 +1,4 @@
+using BaseLib.Utils;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MegaCrit.Sts2.Core.Commands;
@@ -10,14 +11,14 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.Basic;
 /// <summary>
 /// 검 바꾸기 — common card (spec §6): cost 0, Retain. Choose one of your swords (other than the current one)
 /// and make it current; if it has not come out yet this combat it is summoned (Mangeomchong bonus applies).
-/// Upgrade (normal Smith, it is a common card): draw 1 card.
+/// Upgrade (normal Smith, it is a common card): gain 3 Block after the switch (content doc §4.1).
 /// </summary>
 public sealed class SwordSwap : MagicSwordCard
 {
     public SwordSwap() : base(0, CardType.Skill, CardRarity.Basic, TargetType.Self)
     {
         WithKeywords(CardKeyword.Retain);
-        WithCards(0, 1);
+        WithBlock(0, 3);
     }
 
     protected override bool IsPlayableExtra => !IsMutable || Owner?.PlayerCombatState == null ||
@@ -33,8 +34,9 @@ public sealed class SwordSwap : MagicSwordCard
                 await SwordCombat.SwitchTo(Owner, sword, choiceContext, SwitchReason.SwapEffect);
         }
 
-        if (DynamicVars.Cards.IntValue > 0)
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.IntValue, Owner);
+        // Only the upgraded card gains block (base 0: without the guard Moye's block bonus would give block too).
+        if (IsUpgraded)
+            await CommonActions.CardBlock(this, cardPlay);
     }
 
     private Task<SwordId?> Choose(PlayerChoiceContext choiceContext, IReadOnlyList<SwordId> candidates) =>

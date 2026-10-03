@@ -26,6 +26,7 @@ public abstract class SwordCurseCard : ConstructedCardModel
         : base(cost, CardType.Curse, CardRarity.Curse, target)
     {
         if (!playable) WithKeywords(CardKeyword.Unplayable);
+        WithTips(Cards.MagicSwordsmanKeywords.TipsFor); // mod term tooltips (e.g. 주인 없는 칼 -> 명령)
     }
 
     /// <summary>The sword this curse belongs to (informational; used by content and UI).</summary>

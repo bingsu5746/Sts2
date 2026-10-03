@@ -28,15 +28,16 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards;
 ///   like Strength). For any other number use <see cref="WithLevelVar"/> + <see cref="LevelVar"/>.
 /// </summary>
 [Pool(typeof(MagicSwordsmanCardPool))]
-public abstract class MagicSwordCard(
-    int cost,
-    CardType type,
-    CardRarity rarity,
-    TargetType target,
-    bool showInCardLibrary = true,
-    bool autoAdd = true)
-    : ConstructedCardModel(cost, type, rarity, target, showInCardLibrary, autoAdd)
+public abstract class MagicSwordCard : ConstructedCardModel
 {
+    protected MagicSwordCard(int cost, CardType type, CardRarity rarity, TargetType target,
+        bool showInCardLibrary = true, bool autoAdd = true)
+        : base(cost, type, rarity, target, showInCardLibrary, autoAdd)
+    {
+        // Hover tips for the mod's own terms (연속, 짝, 쌍검, 명령, 발도, 현재 검) — see MagicSwordsmanKeywords.
+        WithTips(MagicSwordsmanKeywords.TipsFor);
+    }
+
     private int _damagePerLevel;
     private int _blockPerLevel;
 

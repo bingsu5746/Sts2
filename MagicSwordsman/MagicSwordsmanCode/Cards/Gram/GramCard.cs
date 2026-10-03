@@ -8,7 +8,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace MagicSwordsman.MagicSwordsmanCode.Cards.Gram;
 
 /// <summary>
-/// Base class of every Gram card except the starting card 부서진 칼날 (Cards/Basic/BrokenBlade, framework-owned).
+/// Base class of every Gram card, including the starting card 부서진 칼날 (Cards/Basic/BrokenBlade).
 ///
 /// Content doc §0.2: Gram cards scale at HALF the normal rate (the current-sword effect +L already raises every
 /// attack): cost 0-1 attacks +⌊L/2⌋, cost 2 attacks +1/L, multi-hit +1 per hit from level 4.

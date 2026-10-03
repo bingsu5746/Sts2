@@ -295,8 +295,9 @@ Not saved: the game restarts a combat from the beginning when a run is loaded.
 
 ```csharp
 [Pool(typeof(MagicSwordsmanCardPool))]
-public abstract class MagicSwordCard(int cost, CardType type, CardRarity rarity, TargetType target,
-    bool showInCardLibrary = true, bool autoAdd = true) : ConstructedCardModel(...)
+public abstract class MagicSwordCard : ConstructedCardModel
+protected MagicSwordCard(int cost, CardType type, CardRarity rarity, TargetType target,
+    bool showInCardLibrary = true, bool autoAdd = true)   // also registers MagicSwordsmanKeywords.TipsFor
 public virtual SwordId? Sword => null;                  // override in sword cards
 public bool IsSwordCard { get; }
 public override int MaxUpgradeLevel { get; }            // 0 for sword cards (spec §4), base value for common cards
@@ -314,6 +315,11 @@ protected virtual bool IsPlayableExtra => true;          // extra playability co
 // IsPlayable is overridden: SwordBehavior.CanPlayCard (e.g. Skofnung turn 1) && IsPlayableExtra.
 // Description args added to every card: {SwordLevel}, {SwordName}, {IsSwordCard}.
 ```
+Mod term tooltips (연속, 짝, 쌍검, 명령, 발도, 현재 검): `Cards/MagicSwordsmanKeywords.cs` defines tooltip-only
+`CardKeyword`s with BaseLib `[CustomEnum]` (loc: `card_keywords` `MAGICSWORDSMAN-<NAME>.title/.description`).
+They are NOT put in the card's keyword set; `MagicSwordsmanKeywords.Map` lists which card class shows which tips
+(add new cards there). `SwordCurseCard` registers the same tips.
+
 All BaseLib `ConstructedCardModel` builders work as usual: `WithDamage`, `WithBlock`, `WithCards`, `WithPower<T>`,
 `WithKeywords`, `WithTags`, `WithVar`, `WithCalculatedVar`, ... (see `/tmp/claude-0/baselib-src/BaseLib.Abstracts/ConstructedCardModel.cs`).
 
@@ -361,12 +367,27 @@ public enum ForgeOutcomeKind { Success, FailureLevelDown, FailureCurse, FailureN
 public readonly record struct ForgeOdds(int Success, int Failure, int Shatter);
 public readonly record struct ForgeOutcome(ForgeOutcomeKind Kind, SwordId Sword, int OldLevel, int NewLevel);
 public static int GainFor(ForgeMode mode);
-public static ForgeOdds OddsFor(ForgeMode mode);
+public static ForgeOdds OddsFor(ForgeMode mode);                         // base odds
+public static ForgeOdds OddsFor(Player player, SwordId sword, ForgeMode mode); // after ISwordForgeModifier relics
+public static IEnumerable<ISwordForgeModifier> Modifiers(Player player);  // player.Relics implementing it
 public static bool IsAllowed(ForgeMode mode, int currentLevel);
 public static List<SwordId> UpgradeableSwords(Mangeomchong relic);
 public static Task<ForgeOutcome> Apply(Player player, SwordId sword, ForgeMode mode, Rng rng);
 ```
 Per-sword forge **story events** (spec §4 "검마다 강화 이벤트가 다름") can call `SwordForge.Apply` with the event's Rng.
+
+Relic hook (added by the events/relics slice; implement on a relic, both members have default no-op bodies):
+```csharp
+public interface ISwordForgeModifier
+{
+    ForgeOdds ModifyForgeOdds(Player player, SwordId sword, ForgeMode mode, ForgeOdds odds) => odds; // percent, sum 100
+    Task<bool> TryPreventShatter(Player player, SwordId sword, ForgeMode mode) => Task.FromResult(false); // true = shatter -> failure
+}
+```
+`Apply` uses the modified odds and asks every modifier before a shatter. Users: `ReginsAnvil` (odds),
+`BlackLacquerSheath` (one-time shatter insurance, also protects Gram's reset). The rest-site option now runs
+sword pick -> `Events/Forge/ForgeStory` intro -> story mode cards -> `ForgeStory.Apply` -> story result
+(`SwordForgeRestSiteOption.OnSelect`; the old `PickMode`/`ShowResult` are unused).
 
 ### 3.12 `SwordCurseCard` (Curses/SwordCurseCard.cs)
 
@@ -532,6 +553,8 @@ MagicSwordsman/loc_fragments/<group>/<kor|eng>/<cards|powers|relics|events|potio
 - The build already sees fragment keys: the csproj target `AddLocFragmentsForAnalyzer` copies fragments to
   `obj/.../loc_fragments_localization/...` and passes them to the localization analyzer, so your build passes before
   the merge. **The game itself only loads the merged main files.**
+- Status: all six content groups (g1–g6) were merged into the main files on 2026-10-03 and the whole `loc_fragments/`
+  folder was removed (the csproj target simply finds no `*.json`). New content may create `loc_fragments/<group>/` again.
 - Integrator: `python3 tools/merge_loc_fragments.py` (dry run, exit 1 on conflicts) then `--write`
   (`--group <name>` to merge one group, `--overwrite` to let fragments replace different main values). Re-running is
   safe (identical keys are skipped).
@@ -573,19 +596,21 @@ Unverified (needs an in-game test; nothing here has been run inside the game yet
 
 ---
 
-## 9. Open TODOs (content)
+## 9. Open TODOs (after integration, 2026-10-03)
 
-| Sword | File | To do |
+All 10 swords, 140 cards (99 sword + 3 basic + 38 common), 14 curses, relics, potions, both acquisition events, the
+? room event, forge stories and the shop offer are implemented and build clean. Nothing has been tested in game.
+
+| Area | File | To do |
 |---|---|---|
-| 그람 | `GramBehavior.cs` | failure curse; 5단계 curse "니벨룽의 보물" (playable, gives gold, cannot be removed) in `OnLevelChanged` |
-| 간장·막야 | `GanjiangBehavior.cs`, `MoyeBehavior.cs` | attack/block effects, pair bonus (`OnAnySwordSwitched` / counters), Max HP loss in `OnAcquired(firstTime)` |
-| 쿠사나기 | `KusanagiBehavior.cs` | cards (정화), combat-end HP loss (`OnCombatEnd`, verify a safe HP-loss command), curse |
-| 티르빙 | `TyrfingBehavior.cs` | ignore block (find the game's unblockable `ValueProp`), run curses (first 3 uses), inherited: first attack each turn |
-| 다인슬레이프 | `DainsleifBehavior.cs` | `ModifyCardPlayResultPileTypeAndPosition` -> draw pile; cannot gain block while current |
-| 뒤랑달 | `DurandalBehavior.cs` | verify reduction; cards |
-| 스코프눙 | `SkofnungBehavior.cs` | wound power, burst at 12; inherited: 1 wound per 2 attacks |
-| 오니마루 | `OnimaruBehavior.cs` | auto attack + kinds, command cards, 25% random kind in normal fights, elite/boss bonus |
-| 클라이브 솔라시 | `ClaiomhSolaisBehavior.cs` | light power/counter, 발도 cards |
-| 칼라드볼그 | `CaladbolgBehavior.cs` | hit up to 3 enemies, single-enemy penalty; inherited: 2 targets |
-| all | — | 2 starter cards (Basic), failure curse, `CURRENT_SWORD_POWER.<SWORD>` text, token description lore (from the research doc) |
-| events | `Events/` | act 1/2 boss acquisition events (`SwordAcquisition.OfferRandom(player, 3, rng, ctx)`), ? room/shop acquisition, forge story events, origin slideshow (spec §5 [임시]) |
+| test | `Swords/Behaviors/TyrfingBehavior.cs` | Harmony prefix on `Creature.DamageBlockInternal` really applies (not inlined) |
+| test | `Swords/Behaviors/KusanagiBehavior.cs` | HP loss right after combat end (only when Kusanagi was summoned, spec §9) applies/displays |
+| test | `Swords/Behaviors/DainsleifBehavior.cs` | full hand / empty draw pile; 햐드닝아비그 top placement; cost>=1 rule (spec §9) |
+| test | `Swords/Behaviors/CaladbolgBehavior.cs` | extra targets read the private `_singleTarget` field; logs a warning and does not spread if it fails |
+| test | `Events/TombResonanceTrigger.cs` | post-boss event forcing (Harmony postfixes); lost if saved/reloaded while open |
+| test | `Relics/OpenedMangeomchong.cs` | saved-data copy on `RelicCmd.Replace`, save/load |
+| test | `Relics/SwordShopOffer.cs` | 8% shop offer, price, purchase -> acquisition, release screen over the merchant UI, multiplayer |
+| test | `Cards/MagicSwordsmanKeywords.cs` | tooltip-only custom keywords show their hover tips |
+| balance | `Events/TombEpitaphEvent.cs` | the game has no event weights: ~3% per ? room instead of the ~6% target |
+| art | `MagicSwordsman/images/**` | all card/relic/power/potion/event art (placeholders now); "만검총 문이 들썩이는 연출" |
+| spec 미답 | — | 솔라시 빛 1 고정+강화 / 쿠사나기가 솔라시 계승 중이면 솔라시로 취급 / 다인슬레이프 첫 소환 방어도 3 (spec §9) |

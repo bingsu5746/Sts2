@@ -1,5 +1,6 @@
 using BaseLib.Abstracts;
 using MagicSwordsman.MagicSwordsmanCode.Cards.Tokens;
+using MagicSwordsman.MagicSwordsmanCode.Events.Forge;
 using MagicSwordsman.MagicSwordsmanCode.Relics;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MegaCrit.Sts2.Core.Commands;
@@ -15,8 +16,10 @@ namespace MagicSwordsman.MagicSwordsmanCode.RestSite;
 /// Rest-site option "마검 강화" added by Mangeomchong (pattern: Girya -> LiftRestSiteOption).
 /// Flow (all with the game's own card-selection screens, cancellable):
 ///   1. pick an owned sword (sword token cards; a pair shows its leader, e.g. 간장·막야 -> Ganjiang)
-///   2. pick 안전 강화 (+1) / 도박 강화 +2 / 도박 강화 +3 (gambles that would exceed level 5 are not offered)
-///   3. roll with the run's Niche Rng, apply, show a result card.
+///   2. the sword's story intro (Events/Forge/ForgeStory.cs)
+///   3. pick 안전 강화 (+1) / 도박 강화 +2 / 도박 강화 +3 (gambles that would exceed level 5 are not offered)
+///   4. roll with the run's Niche Rng, apply, show the sword's result card.
+/// The old PickMode/ShowResult helpers (plain ForgeModeToken / ForgeResultToken) are kept as a fallback.
 /// Returning false from OnSelect (cancel) leaves the rest site open, like the game's Smith option.
 /// Localization: rest_site_ui.json  OPTION_MAGICSWORDSMAN_FORGE.name / .description
 /// </summary>
@@ -46,17 +49,22 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
         var sword = await PickSword(choiceContext, candidates);
         if (sword == null) return false;
 
-        // 2) mode
+        // 2) the sword's story intro (Events/Forge/ForgeStory.cs, spec §4 "검마다 강화 이벤트가 다름"); skip = cancel
         var level = relic.GetLevel(sword.Value);
-        var mode = await PickMode(choiceContext, level);
+        if (!await ForgeStory.ShowIntro(Owner, sword.Value, level, choiceContext)) return false;
+
+        // 3) mode (story phrases + odds after relic modifiers)
+        var mode = await ForgeStory.PickMode(Owner, sword.Value, level, choiceContext);
         if (mode == null) return false;
 
-        // 3) roll + apply (game RNG, never System.Random)
-        var outcome = await SwordForge.Apply(Owner, sword.Value, mode.Value, Owner.RunState.Rng.Niche);
+        // 4) roll + apply (game RNG, never System.Random). Per-player stream: in multiplayer every client runs each
+        // player's OnSelect, in different orders (RestSiteSynchronizer runs remote choices when their message
+        // arrives), so a shared stream like RunState.Rng.Niche would give each client a different result.
+        var result = await ForgeStory.Apply(Owner, sword.Value, mode.Value, Owner.PlayerRng.Rewards);
         relic.Flash();
-        MainFile.Logger.Info($"[Forge] {sword} {mode}: {outcome}");
+        MainFile.Logger.Info($"[Forge] {sword} {mode}: {result.Outcome}");
 
-        await ShowResult(choiceContext, outcome);
+        await ForgeStory.ShowResult(Owner, result, choiceContext);
         return true;
     }
 

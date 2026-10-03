@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Merchant;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Entities.RestSite;
@@ -39,7 +40,11 @@ namespace MagicSwordsman.MagicSwordsmanCode.Relics;
 ///  - Combat: first sword summon of each combat -> Block 3 + draw 1 (once). Drives the per-combat sword state and
 ///    the owned-sword lifecycle hooks of every SwordBehavior.
 /// </summary>
-public sealed class Mangeomchong : MagicSwordsmanRelic
+// Not sealed: OpenedMangeomchong (Ancient upgrade, Relics/OpenedMangeomchong.cs) derives from it so that every
+// player.GetRelic<Mangeomchong>() keeps working after the upgrade. The [SavedProperty] setters are protected (not
+// private) because the game sets saved properties by reflection on the runtime type, and .NET hides an inherited
+// PRIVATE setter from a derived type's PropertyInfo.
+public class Mangeomchong : MagicSwordsmanRelic
 {
     private const string SwordListVar = "SwordList";
 
@@ -61,6 +66,13 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
 
     public override bool ShowCounter => IsMutable;
 
+    /// <summary>
+    /// Ancient "Touch of Orobas" upgrade (content doc §9). BaseLib's StarterUpgradePatches calls this; the run data is
+    /// copied into the new relic by Relics/OpenedMangeomchong.cs (Harmony prefix on RelicCmd.Replace).
+    /// </summary>
+    public override RelicModel? GetUpgradeReplacement() =>
+        this is OpenedMangeomchong ? null : ModelDb.Relic<OpenedMangeomchong>();
+
     /// <summary>Counter on the relic icon: number of owned swords.</summary>
     public override int DisplayAmount => IsMutable ? _ownedSwordIds.Length : 0;
 
@@ -72,7 +84,7 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
     public int[] OwnedSwordIds
     {
         get => _ownedSwordIds;
-        private set
+        protected set
         {
             AssertMutable();
             _ownedSwordIds = value ?? [];
@@ -84,7 +96,7 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
     public int[] SwordLevels
     {
         get => _swordLevels;
-        private set
+        protected set
         {
             AssertMutable();
             _swordLevels = value ?? new int[16];
@@ -96,7 +108,7 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
     public int[] EverOwnedIds
     {
         get => _everOwnedIds;
-        private set
+        protected set
         {
             AssertMutable();
             _everOwnedIds = value ?? [];
@@ -107,7 +119,7 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
     public int ExtraSlots
     {
         get => _extraSlots;
-        private set
+        protected set
         {
             AssertMutable();
             _extraSlots = value;
@@ -118,7 +130,7 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
     public List<SerializableCard> StoredCards
     {
         get => _storedCards;
-        private set
+        protected set
         {
             AssertMutable();
             _storedCards.Clear();
@@ -130,7 +142,7 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
     public string RunCounters
     {
         get => _runCounters;
-        private set
+        protected set
         {
             AssertMutable();
             _runCounters = value ?? "";
@@ -411,7 +423,10 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
     public override CardCreationOptions ModifyCardRewardCreationOptions(Player player, CardCreationOptions options)
     {
         if (player != Owner) return options;
-        if (options.Flags.HasFlag(CardCreationFlags.NoCardPoolModifications)) return options;
+        // NoCardPoolModifications is NOT a reason to skip: that flag stops relics from adding/swapping pools
+        // (PrismaticGem, DingyRug), while this filter only removes unowned swords' cards. SeaGlass,
+        // TheFutureOfPotions and InfestedAutomaton build rewards from the owner's own pool with that flag and must
+        // still respect spec §2 [확정] (rewards = common cards + owned swords' cards only).
         if (options.CustomCardPool != null) return options;
         if (options.CardPools.Count == 0) return options;
         var previous = options.CardPoolFilter;
@@ -453,6 +468,16 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
 
         return filtered;
     }
+
+    // Shop sword offer "칼집째 놓인 검" (spec §5 [확정], content doc §6.5) — rules in SwordShopOffer.
+    public override void ModifyMerchantCardCreationResults(Player player, List<CardCreationResult> cards) =>
+        SwordShopOffer.ModifyCreationResults(this, player, cards);
+
+    public override decimal ModifyMerchantPrice(Player player, MerchantEntry entry, decimal cost) =>
+        SwordShopOffer.ModifyPrice(this, player, entry, cost);
+
+    public override Task AfterItemPurchased(Player player, MerchantEntry itemPurchased, int goldSpent) =>
+        SwordShopOffer.AfterPurchased(this, player, itemPurchased, goldSpent);
 
     public override bool TryModifyRestSiteOptions(Player player, ICollection<RestSiteOption> options)
     {

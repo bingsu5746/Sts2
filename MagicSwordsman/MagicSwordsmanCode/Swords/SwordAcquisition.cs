@@ -33,20 +33,41 @@ public static class SwordAcquisition
             new LocString("card_selection", "MAGICSWORDSMAN-CHOOSE_SWORD_TO_ACQUIRE"));
         if (picked is not { } sword) return null;
 
-        while (!relic.CanAcquire(sword))
+        return await AcquireWithRelease(player, relic, sword, choiceContext) ? sword : null;
+    }
+
+    /// <summary>
+    /// Acquires <paramref name="sword"/> (and its partner). When Mangeomchong is full the player picks owned swords
+    /// to release (Gram cannot be released). The picks are only collected at first; they are released only once the
+    /// reserved room is enough for the new sword, so cancelling a later prompt loses nothing.
+    /// Returns false when already owned, the player cancels, or nothing can make room.
+    /// </summary>
+    public static async Task<bool> AcquireWithRelease(Player player, Mangeomchong relic, SwordId sword,
+        PlayerChoiceContext choiceContext)
+    {
+        sword = SwordRegistry.GroupLeader(sword);
+        if (SwordRegistry.WithPartners(sword).Any(relic.Owns)) return false;
+
+        var needed = SwordRegistry.GroupSlotCost(sword);
+        var pending = new List<SwordId>();
+        int Reserved() => relic.FreeSlots + pending.Sum(SwordRegistry.GroupSlotCost);
+
+        while (Reserved() < needed)
         {
             var releasable = relic.OwnedSwords
                 .Select(SwordRegistry.GroupLeader).Distinct()
                 .Where(s => SwordRegistry.GetDefinition(s).CanBeLost)
+                .Where(s => !pending.Contains(s))
                 .ToList();
-            if (releasable.Count == 0) return null;
+            if (releasable.Count == 0) return false;
             var release = await PickSword(player, releasable, choiceContext, canSkip: true,
                 new LocString("card_selection", "MAGICSWORDSMAN-CHOOSE_SWORD_TO_RELEASE"));
-            if (release is not { } r) return null;
-            await relic.LoseSword(r);
+            if (release is not { } r) return false; // nothing released yet
+            pending.Add(r);
         }
 
-        return await relic.AcquireSword(sword) ? sword : null;
+        foreach (var r in pending) await relic.LoseSword(r);
+        return await relic.AcquireSword(sword);
     }
 
     /// <summary>Acquisition with random candidates rolled from the given game Rng (spec §5: 3 candidates).</summary>

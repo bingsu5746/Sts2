@@ -63,8 +63,8 @@ public sealed class GramBehavior : SwordBehavior
         if (relic.GetRunCounter(NibelungCounter) > 0) return; // §0.4 #18: once per run
 
         relic.SetRunCounter(NibelungCounter, 1);
-        // TODO(content: forge event): show the extra line of content doc §5.2 ("…그리고 니벨룽의 보물이 함께
-        // 따라왔다.") on the forge result screen; the rest-site result UI is framework-owned.
+        // The forge story result (Events/Forge/ForgeStory, used by the rest-site option) detects this counter change
+        // and shows the content doc §5.2 line ("…그리고 니벨룽의 보물이 함께 따라왔다.").
         await relic.AddCurse(ModelDb.Card<NibelungTreasure>());
         MainFile.Logger.Info("[Gram] reached level 5 for the first time: added 니벨룽의 보물");
     }

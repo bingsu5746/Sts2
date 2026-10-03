@@ -1,1 +1,14 @@
-{}
+{
+  "MAGICSWORDSMAN-COMBO.title": "Combo",
+  "MAGICSWORDSMAN-COMBO.description": "Triggers if your [gold]current sword[/gold] was already this card's sword right before you played it.",
+  "MAGICSWORDSMAN-PAIR.title": "Pair",
+  "MAGICSWORDSMAN-PAIR.description": "Ganjiang and Moye only. Triggers if your [gold]current sword[/gold] right before playing was the other one (Ganjiang <-> Moye). [gold]Twin Swords[/gold] cards always trigger it, and the next Ganjiang/Moye card right after a Twin Swords card triggers it too.",
+  "MAGICSWORDSMAN-TWIN_SWORD.title": "Twin Swords",
+  "MAGICSWORDSMAN-TWIN_SWORD.description": "Counts as both Ganjiang and Moye. The first time you play one, both are summoned. It gets both Ganjiang's effect (damage) and Moye's effect (Block); afterwards your current sword is Ganjiang.",
+  "MAGICSWORDSMAN-COMMAND.title": "Command",
+  "MAGICSWORDSMAN-COMMAND.description": "[gold]Onimaru[/gold] immediately makes 1 automatic attack of its current kind. The current-sword bonus applies and the kind is never random.",
+  "MAGICSWORDSMAN-DRAW_CUT.title": "Draw-cut",
+  "MAGICSWORDSMAN-DRAW_CUT.description": "An attack that spends all of [gold]Claíomh Solais[/gold]'s [gold]Light[/gold]. This card's damage ignores [gold]Block[/gold].",
+  "MAGICSWORDSMAN-CURRENT_SWORD.title": "Current Sword",
+  "MAGICSWORDSMAN-CURRENT_SWORD.description": "The magic sword you are holding now; its effect applies. Playing a sword card makes that sword current (summoning it the first time). Common cards do not change the current sword."
+}

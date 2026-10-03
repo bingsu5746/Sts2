@@ -217,7 +217,7 @@ public sealed class PommelBash : MagicSwordCard
         await CommonActions.CardAttack(this, cardPlay)
             .WithHitFx("vfx/vfx_attack_blunt", null, "blunt_attack.mp3")
             .Execute(choiceContext);
-        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, DynamicVars.Power<WeakPower>().BaseValue,
+        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, DynamicVars.Weak.BaseValue,
             Owner.Creature, this);
     }
 }
@@ -274,6 +274,6 @@ public sealed class HeavyChop : MagicSwordCard
             .WithHitFx("vfx/vfx_attack_blunt", null, "blunt_attack.mp3")
             .Execute(choiceContext);
         await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target,
-            DynamicVars.Power<VulnerablePower>().BaseValue, Owner.Creature, this);
+            DynamicVars.Vulnerable.BaseValue, Owner.Creature, this);
     }
 }

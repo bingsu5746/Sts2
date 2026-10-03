@@ -26,7 +26,7 @@ public sealed class KusanagiBehavior : SwordBehavior
 {
     public const int MaxSwitchInsPerCombat = 2;
 
-    /// <summary>[Claude] HP lost at the end of every combat while Kusanagi is owned (levels 0-2).</summary>
+    /// <summary>HP lost at the end of a combat in which Kusanagi was summoned (spec §9 [확정]; levels 0-2).</summary>
     public const int CombatEndHpLoss = 2;
 
     /// <summary>[Claude] HP lost at the end of combat from level 3 on (content doc §1.1).</summary>
@@ -83,11 +83,12 @@ public sealed class KusanagiBehavior : SwordBehavior
 
     public override async Task OnCombatEnd(SwordContext ctx, CombatRoom room)
     {
-        // Content doc 0.4 #7: applies after EVERY combat while Kusanagi is owned (this hook only runs for owned
-        // swords), whether or not it came out. Ignores block (HP loss). Same command the game's events use for
+        // Spec §9 [확정] (2026-10-03, overrides content doc 0.4 #7): only applies when Kusanagi was summoned in this
+        // combat. The combat state is still alive here (Mangeomchong clears it after OnCombatEnd). Ignores block (HP loss). Same command the game's events use for
         // out-of-combat HP loss (e.g. SunkenStatue: CreatureCmd.Damage(..., Unblockable | Unpowered, null, null)).
         // Safety deviation: never lethal (leaves at least 1 HP) because a death after the victory screen started
         // is untested. TODO(test): verify in game that damage right after AfterCombatEnd shows/applies correctly.
+        if (ctx.Combat is not { } state || !state.Summoned.Contains(SwordId.Kusanagi)) return;
         var creature = ctx.Creature;
         if (creature.IsDead) return;
         var loss = Math.Min(CombatEndHpLossFor(ctx.Level), creature.CurrentHp - 1);
