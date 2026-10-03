@@ -1,0 +1,16 @@
+{
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.title": "The Magic Swordsman",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.titleObject": "The Magic Swordsman",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.description": "A swordsman who keeps legendary and cursed blades floating nearby\nand fights by switching between them.",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.aromaPrinciple": "[sine]A blade does not choose its master. The master merely endures it...[/sine]",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.banter.alive.endTurnPing": "[sine]Choosing a blade.[/sine]",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.banter.dead.endTurnPing": "...",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.cardsModifierTitle": "Magic Swordsman Cards",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.cardsModifierDescription": "Magic Swordsman cards will now appear in rewards and shops.",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.eventDeathPrevention": "The swords won't let me go yet.",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.goldMonologue": "[sine]Enough for a new scabbard.[/sine]",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.possessiveAdjective": "their",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounObject": "them",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounPossessive": "theirs",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounSubject": "they"
+}

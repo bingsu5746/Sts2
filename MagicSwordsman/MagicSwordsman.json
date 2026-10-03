@@ -1,0 +1,17 @@
+{
+  "id": "MagicSwordsman",
+  "name": "MagicSwordsman (마검사)",
+  "author": "bingsu5746",
+  "description": "마검사 — 세계의 명검·마검을 주변에 띄워 놓고 바꿔 가며 싸우는 검사 캐릭터 모드 (BaseLib 필요). 데모 버전.",
+  "version": "v0.0.1",
+  "min_game_version": "0.107.0",
+  "has_pck": true,
+  "has_dll": true,
+  "dependencies": [
+    {
+      "id": "BaseLib",
+      "min_version": "3.4.7"
+    }
+  ],
+  "affects_gameplay": true
+}

@@ -1,0 +1,14 @@
+{
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.title": "현재 검",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.description": "현재 검: [gold]{SwordName}[/gold] (강화 {Level}단계).",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.smartDescription": "현재 검: [gold]{SwordName}[/gold] (강화 {Level}단계).",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.GRAM.title": "현재 검: 그람",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.GRAM.description": "공격 피해가 {Level} 증가합니다.",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.GRAM.smartDescription": "공격 피해가 {Level} 증가합니다.",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.KUSANAGI.title": "현재 검: 쿠사나기",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.KUSANAGI.description": "바로 전 검 [gold]{InheritedName}[/gold]의 효과를 절반만큼 이어받습니다.",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.KUSANAGI.smartDescription": "바로 전 검 [gold]{InheritedName}[/gold]의 효과를 절반만큼 이어받습니다.",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.DURANDAL.title": "현재 검: 뒤랑달",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.DURANDAL.description": "받는 공격 피해가 줄어듭니다 (강화 {Level}단계).",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.DURANDAL.smartDescription": "받는 공격 피해가 줄어듭니다 (강화 {Level}단계)."
+}

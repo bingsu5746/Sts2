@@ -1,0 +1,63 @@
+using BaseLib.Abstracts;
+using BaseLib.Utils.NodeFactories;
+using Godot;
+using MagicSwordsman.MagicSwordsmanCode.Cards.Basic;
+using MagicSwordsman.MagicSwordsmanCode.Extensions;
+using MagicSwordsman.MagicSwordsmanCode.Relics;
+using MegaCrit.Sts2.Core.Entities.Characters;
+using MegaCrit.Sts2.Core.Models;
+
+namespace MagicSwordsman.MagicSwordsmanCode.Character;
+
+/// <summary>
+/// 마검사 (Magic Swordsman). Spec: docs/magic-swordsman-spec.md §1, §6.
+/// HP 68, gold 99 / energy 3 come from the character base defaults.
+/// </summary>
+public class MagicSwordsmanCharacter : PlaceholderCharacterModel
+{
+    public const string CharacterId = "MagicSwordsman";
+
+    public static readonly Color Color = new("6f7fb8");
+
+    public override Color NameColor => Color;
+    public override CharacterGender Gender => CharacterGender.Neutral;
+    public override int StartingHp => 68;
+
+    public override IEnumerable<CardModel> StartingDeck =>
+    [
+        ModelDb.Card<SwordsmanStrike>(),
+        ModelDb.Card<SwordsmanStrike>(),
+        ModelDb.Card<SwordsmanStrike>(),
+        ModelDb.Card<SwordsmanStrike>(),
+        ModelDb.Card<SwordsmanDefend>(),
+        ModelDb.Card<SwordsmanDefend>(),
+        ModelDb.Card<SwordsmanDefend>(),
+        ModelDb.Card<SwordsmanDefend>(),
+        ModelDb.Card<BrokenBlade>(),
+        ModelDb.Card<SwordSwap>()
+    ];
+
+    public override IReadOnlyList<RelicModel> StartingRelics =>
+    [
+        ModelDb.Relic<Mangeomchong>()
+    ];
+
+    public override CardPoolModel CardPool => ModelDb.CardPool<MagicSwordsmanCardPool>();
+    public override RelicPoolModel RelicPool => ModelDb.RelicPool<MagicSwordsmanRelicPool>();
+    public override PotionPoolModel PotionPool => ModelDb.PotionPool<MagicSwordsmanPotionPool>();
+
+    public override Control CustomIcon
+    {
+        get
+        {
+            var icon = NodeFactory<Control>.CreateFromResource(CustomIconTexturePath);
+            icon.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+            return icon;
+        }
+    }
+
+    public override string CustomIconTexturePath => "character_icon_char_name.png".CharacterUiPath();
+    public override string CustomCharacterSelectIconPath => "char_select_char_name.png".CharacterUiPath();
+    public override string CustomCharacterSelectLockedIconPath => "char_select_char_name_locked.png".CharacterUiPath();
+    public override string CustomMapMarkerPath => "map_marker_char_name.png".CharacterUiPath();
+}

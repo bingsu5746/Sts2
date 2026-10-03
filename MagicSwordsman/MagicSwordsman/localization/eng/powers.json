@@ -1,0 +1,14 @@
+{
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.title": "Current Sword",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.description": "Current sword: [gold]{SwordName}[/gold] (level {Level}).",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.smartDescription": "Current sword: [gold]{SwordName}[/gold] (level {Level}).",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.GRAM.title": "Current Sword: Gram",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.GRAM.description": "Attacks deal {Level} additional damage.",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.GRAM.smartDescription": "Attacks deal {Level} additional damage.",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.KUSANAGI.title": "Current Sword: Kusanagi",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.KUSANAGI.description": "Inherits half of the effect of the previous sword, [gold]{InheritedName}[/gold].",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.KUSANAGI.smartDescription": "Inherits half of the effect of the previous sword, [gold]{InheritedName}[/gold].",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.DURANDAL.title": "Current Sword: Durandal",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.DURANDAL.description": "Reduce attack damage taken (level {Level}).",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.DURANDAL.smartDescription": "Reduce attack damage taken (level {Level})."
+}

@@ -1,0 +1,16 @@
+{
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.title": "마검사",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.titleObject": "마검사",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.description": "세계의 명검과 마검을 주변에 띄워 놓고,\n바꿔 가며 싸우는 검사.",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.aromaPrinciple": "[sine]검은 주인을 고르지 않는다. 주인이 검을 견딜 뿐...[/sine]",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.banter.alive.endTurnPing": "[sine]검을 고르는 중이다.[/sine]",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.banter.dead.endTurnPing": "...",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.cardsModifierTitle": "마검사 카드",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.cardsModifierDescription": "이제 마검사 카드가 보상과 상점에 등장합니다.",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.eventDeathPrevention": "검이 아직 나를 놓아주지 않는다.",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.goldMonologue": "[sine]칼집 하나 값은 되겠군.[/sine]",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.possessiveAdjective": "그의",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounObject": "그를",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounPossessive": "그의 것",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounSubject": "그"
+}
