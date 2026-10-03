@@ -59,8 +59,25 @@ public static class SwordCombat
 
     public static bool IsPresent(Player player, SwordId sword) => Get(player)?.Present.Contains(sword) ?? false;
 
-    /// <summary>Saved upgrade level (0..5) of a sword for this player (0 when not owned / no relic).</summary>
-    public static int LevelOf(Player player, SwordId sword) => player.GetRelic<Mangeomchong>()?.GetLevel(sword) ?? 0;
+    /// <summary>
+    /// Per-combat counter (kept on the sword's LevelOwner) with a temporary level bonus for this combat only,
+    /// e.g. Gram's "레긴의 재단조" (+2). Added by <see cref="LevelOf"/>, clamped to 0..MaxLevel.
+    /// </summary>
+    public const string CombatLevelBonusKey = "combat_level_bonus";
+
+    /// <summary>
+    /// Upgrade level (0..5) of a sword for this player (0 when not owned / no relic): the saved level plus the
+    /// temporary combat bonus (<see cref="CombatLevelBonusKey"/>), clamped to MaxLevel.
+    /// </summary>
+    public static int LevelOf(Player player, SwordId sword)
+    {
+        var relic = player.GetRelic<Mangeomchong>();
+        if (relic == null) return 0;
+        var level = relic.GetLevel(sword);
+        if (!relic.Owns(sword)) return level;
+        var bonus = Get(player)?.GetCounter(SwordRegistry.GetDefinition(sword).LevelOwner, CombatLevelBonusKey) ?? 0;
+        return bonus == 0 ? level : Math.Clamp(level + bonus, 0, SwordRegistry.MaxLevel);
+    }
 
     /// <summary>Builds the context object passed to behaviors.</summary>
     public static SwordContext ContextFor(Player player, SwordId sword)
