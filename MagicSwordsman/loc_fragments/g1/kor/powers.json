@@ -1,0 +1,14 @@
+{
+  "MAGICSWORDSMAN-BALMUNG_NOTHUNG_POWER.title": "발뭉·노퉁",
+  "MAGICSWORDSMAN-BALMUNG_NOTHUNG_POWER.description": "현재 검과 상관없이 공격 피해가 (그람 강화 단계 + 1)만큼 증가합니다. 그람이 현재 검일 때는 그람의 효과 대신 적용됩니다.",
+  "MAGICSWORDSMAN-BALMUNG_NOTHUNG_POWER.smartDescription": "현재 검과 상관없이 공격 피해가 (그람 강화 단계 + 1) × {Amount}만큼 증가합니다. 그람이 현재 검일 때는 그람의 효과 대신 적용됩니다.",
+  "MAGICSWORDSMAN-MOYES_SACRIFICE_POWER.title": "막야의 투신",
+  "MAGICSWORDSMAN-MOYES_SACRIFICE_POWER.description": "[gold]짝[/gold]이 발동할 때마다 [gold]방어도[/gold]를 얻습니다.",
+  "MAGICSWORDSMAN-MOYES_SACRIFICE_POWER.smartDescription": "[gold]짝[/gold]이 발동할 때마다 [gold]방어도[/gold]를 {Amount} 얻습니다.",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.GANJIANG.title": "현재 검: 간장",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.GANJIANG.description": "공격 피해가 증가합니다 (강화 {Level}단계: 0~1단계 +2, 2~3단계 +3, 4단계 +4, 5단계 +5).",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.GANJIANG.smartDescription": "공격 피해가 증가합니다 (강화 {Level}단계: 0~1단계 +2, 2~3단계 +3, 4단계 +4, 5단계 +5).",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.MOYE.title": "현재 검: 막야",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.MOYE.description": "카드로 얻는 [gold]방어도[/gold]가 증가합니다 (강화 {Level}단계: 0~1단계 +2, 2~3단계 +3, 4단계 +4, 5단계 +5).",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.MOYE.smartDescription": "카드로 얻는 [gold]방어도[/gold]가 증가합니다 (강화 {Level}단계: 0~1단계 +2, 2~3단계 +3, 4단계 +4, 5단계 +5)."
+}
