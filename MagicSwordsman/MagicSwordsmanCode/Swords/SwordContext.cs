@@ -34,6 +34,19 @@ public sealed class SwordContext
     /// <summary>Per-combat sword state for this player (null outside combat).</summary>
     public SwordCombatState? Combat { get; init; }
 
+    /// <summary>
+    /// True while the game is only PREVIEWING numbers of a sword card in hand whose sword is not current yet
+    /// (the card would switch to this sword when played). Behaviors normally do not need to care: the same
+    /// Modify* result is used for the preview and for the real play. Never change state when this is true.
+    /// </summary>
+    public bool IsPreview { get; init; }
+
+    /// <summary>
+    /// The sword that was current before <see cref="Sword"/> became current (Kusanagi inherits from it).
+    /// Normally <c>Combat.Previous</c>; during a preview it is the sword that is current right now.
+    /// </summary>
+    public SwordId? PreviousSword { get; init; }
+
     public Creature Creature => Player.Creature;
 
     public Mangeomchong? Relic => Player.GetRelic<Mangeomchong>();
@@ -66,9 +79,9 @@ public sealed class SwordContext
     public SwordContext AsInherited() => new()
     {
         Player = Player, Sword = Sword, Level = Level, IsInherited = true, IsCurrent = IsCurrent,
-        IsPresent = IsPresent, Combat = Combat
+        IsPresent = IsPresent, Combat = Combat, IsPreview = IsPreview, PreviousSword = PreviousSword
     };
 
     public override string ToString() =>
-        $"SwordContext({Sword} lv{Level}{(IsInherited ? " inherited" : "")}{(IsCurrent ? " current" : "")})";
+        $"SwordContext({Sword} lv{Level}{(IsInherited ? " inherited" : "")}{(IsCurrent ? " current" : "")}{(IsPreview ? " preview" : "")})";
 }

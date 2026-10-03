@@ -6,6 +6,7 @@ using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Models;
 
 namespace MagicSwordsman.MagicSwordsmanCode.Combat;
 
@@ -73,7 +74,71 @@ public static class SwordCombat
             IsCurrent = state?.Current == sword,
             IsPresent = state?.Present.Contains(sword) ?? false,
             Combat = state,
+            PreviousSword = state?.Previous,
         };
+    }
+
+    /// <summary>
+    /// Context for previewing a sword that is NOT current yet as if a card had just switched to it
+    /// (IsCurrent = true, IsPreview = true, PreviousSword = the sword current right now).
+    /// </summary>
+    public static SwordContext PreviewContextFor(Player player, SwordId sword)
+    {
+        var state = Get(player);
+        return new SwordContext
+        {
+            Player = player,
+            Sword = sword,
+            Level = LevelOf(player, sword),
+            IsCurrent = true,
+            IsPresent = true,
+            IsPreview = true,
+            Combat = state,
+            PreviousSword = state?.Current,
+        };
+    }
+
+    /// <summary>
+    /// Which sword's current-effect applies to numbers coming from <paramref name="cardSource"/>:
+    ///  - a sword card of this player whose sword is not current but COULD become current (CanSwitchTo with
+    ///    <see cref="SwitchReason.CardPlayed"/>) -> that sword, IsPreview = true (the card is still in hand: playing
+    ///    it switches first, so this is exactly what the real hit will use);
+    ///  - anything else -> the current sword (may be null), IsPreview = false.
+    /// CurrentSwordPower dispatches the non-preview case, Mangeomchong the preview case, so the two never stack.
+    /// </summary>
+    public static (SwordId? Sword, bool IsPreview) EffectiveSwordFor(Player player, CardModel? cardSource)
+    {
+        var state = Get(player);
+        if (state == null) return (null, false);
+        if (cardSource is MagicSwordCard { Sword: { } s } card && card.IsMutable && card.Owner == player &&
+            s != state.Current && CanSwitchTo(player, s, SwitchReason.CardPlayed))
+            return (s, true);
+        return (state.Current, false);
+    }
+
+    /// <summary>
+    /// The behaviors whose current-effect hooks run for <paramref name="sword"/>: the sword itself, then (Kusanagi)
+    /// the inherited sword with ctx.IsInherited = true. Used by CurrentSwordPower and Mangeomchong.
+    /// </summary>
+    public static IEnumerable<(SwordBehavior Behavior, SwordContext Ctx)> CurrentEffects(Player player, SwordId sword,
+        bool preview)
+    {
+        var behavior = SwordRegistry.Get(sword);
+        var ctx = preview ? PreviewContextFor(player, sword) : ContextFor(player, sword);
+        yield return (behavior, ctx);
+
+        if (behavior.GetInheritedSword(ctx) is { } inheritedId && inheritedId != sword)
+        {
+            var inherited = SwordRegistry.Get(inheritedId);
+            if (!inherited.CanBeInherited) yield break;
+            var baseCtx = ContextFor(player, inheritedId);
+            yield return (inherited, new SwordContext
+            {
+                Player = player, Sword = inheritedId, Level = baseCtx.Level, IsInherited = true,
+                IsCurrent = baseCtx.IsCurrent, IsPresent = baseCtx.IsPresent, Combat = baseCtx.Combat,
+                IsPreview = preview, PreviousSword = baseCtx.PreviousSword,
+            });
+        }
     }
 
     // ------------------------------------------------------------------ queries

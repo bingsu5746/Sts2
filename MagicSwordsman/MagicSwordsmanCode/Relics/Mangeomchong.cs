@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using MagicSwordsman.MagicSwordsmanCode.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.RestSite;
@@ -245,18 +246,19 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
         var restored = new List<SerializableCard>();
         foreach (var saved in _storedCards.ToList())
         {
+            if (StoredSwordOf(saved) is not { } s || !group.Contains(s)) continue;
+
             CardModel card;
             try
             {
-                card = CardModel.FromSerializable(saved);
+                card = CardModel.FromSerializable(saved); // pattern: PaelsTooth
             }
             catch (Exception e)
             {
-                MainFile.Logger.Warn($"[Mangeomchong] could not restore stored card {saved}: {e.Message}");
+                MainFile.Logger.Warn($"[Mangeomchong] could not restore stored card {saved.Id}: {e.Message}");
                 continue;
             }
 
-            if (card is not MagicSwordCard { Sword: { } s } || !group.Contains(s)) continue;
             if (!Owner.RunState.ContainsCard(card)) Owner.RunState.AddCard(card, Owner);
             results.Add(await CardPileCmd.Add(card, PileType.Deck));
             restored.Add(saved);
@@ -266,19 +268,19 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
         return results;
     }
 
-    /// <summary>Number of stored cards that belong to a sword (for UI / events).</summary>
-    public int StoredCardCount(SwordId sword) => _storedCards.Count(saved =>
+    /// <summary>The sword a stored card belongs to (looked up on the canonical model; null if unknown/common).</summary>
+    private static SwordId? StoredSwordOf(SerializableCard saved)
     {
-        try
-        {
-            return CardModel.FromSerializable(saved) is MagicSwordCard { Sword: { } s } &&
-                   SwordRegistry.WithPartners(sword).Contains(s);
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    });
+        if (saved.Id is not { } id) return null;
+        return ModelDb.GetByIdOrNull<CardModel>(id) is MagicSwordCard { Sword: { } s } ? s : null;
+    }
+
+    /// <summary>Number of stored cards that belong to a sword or its partners (for UI / events).</summary>
+    public int StoredCardCount(SwordId sword)
+    {
+        var group = SwordRegistry.WithPartners(sword);
+        return _storedCards.Count(saved => StoredSwordOf(saved) is { } s && group.Contains(s));
+    }
 
     // =====================================================================================
     // Levels
@@ -397,16 +399,41 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
         UpdateSwordList();
     }
 
+    /// <summary>
+    /// Our filter delegates, so repeated calls on the same options object (CardFactory calls the hook once per
+    /// generated card and WithCardPools mutates the options in place) do not wrap the filter again and again.
+    /// </summary>
+    private static readonly ConditionalWeakTable<Func<CardModel, bool>, object> OwnFilters = new();
+
+    /// <summary>Below this many allowed non-basic cards the filter is skipped (CardFactory would throw).</summary>
+    private const int MinFilteredRewardCards = 3;
+
     public override CardCreationOptions ModifyCardRewardCreationOptions(Player player, CardCreationOptions options)
     {
         if (player != Owner) return options;
         if (options.Flags.HasFlag(CardCreationFlags.NoCardPoolModifications)) return options;
         if (options.CustomCardPool != null) return options;
         if (options.CardPools.Count == 0) return options;
-
         var previous = options.CardPoolFilter;
-        return options.WithCardPools(options.CardPools.ToList(),
-            card => (previous == null || previous(card)) && IsCardAllowed(card));
+        if (previous != null && OwnFilters.TryGetValue(previous, out _)) return options; // already filtered
+
+        Func<CardModel, bool> filter = card => (previous == null || previous(card)) && IsCardAllowed(card);
+
+        // Safety: CardFactory.CreateForReward throws when no valid card remains. While the mod has very few common
+        // cards (early development) fall back to the unfiltered pool instead of crashing the reward screen.
+        var allowed = options.CardPools
+            .SelectMany(p => p.GetUnlockedCards(player.UnlockState, player.RunState.CardMultiplayerConstraint))
+            .Where(filter)
+            .Count(c => c.Rarity != CardRarity.Basic && c.Rarity != CardRarity.Ancient);
+        if (allowed < MinFilteredRewardCards)
+        {
+            MainFile.Logger.Warn($"[Mangeomchong] only {allowed} allowed reward cards; sword filter skipped. " +
+                                 "Add more common (Sword == null) cards.");
+            return options;
+        }
+
+        OwnFilters.AddOrUpdate(filter, new object());
+        return options.WithCardPools(options.CardPools.ToList(), filter);
     }
 
     public override IEnumerable<CardModel> ModifyMerchantCardPool(Player player, IEnumerable<CardModel> options)
@@ -502,6 +529,55 @@ public sealed class Mangeomchong : MagicSwordsmanRelic
             return false;
         return SwordRegistry.Get(sword)
             .TryModifyEnergyCost(SwordCombat.ContextFor(Owner, sword), msc, originalCost, out modifiedCost);
+    }
+
+    // ---- Preview of a sword card in hand whose sword is not current yet (see SwordCombat.EffectiveSwordFor).
+    // Playing such a card switches first, so its numbers must already show the NEW sword's effect. The visible
+    // CurrentSwordPower skips exactly these card sources, so nothing is counted twice. (Also covers the very first
+    // sword card of a combat, when there is no current sword and therefore no CurrentSwordPower yet.)
+
+    private IEnumerable<(SwordBehavior Behavior, SwordContext Ctx)> PreviewEffects(CardModel? cardSource)
+    {
+        if (cardSource == null || !IsMutable) return [];
+        var (sword, preview) = SwordCombat.EffectiveSwordFor(Owner, cardSource);
+        if (sword is not { } s || !preview) return [];
+        return SwordCombat.CurrentEffects(Owner, s, preview: true);
+    }
+
+    public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource)
+    {
+        decimal sum = 0m;
+        foreach (var (b, ctx) in PreviewEffects(cardSource))
+            sum += b.ModifyDamageAdditive(ctx, target, amount, props, dealer, cardSource);
+        return sum;
+    }
+
+    public override decimal ModifyDamageMultiplicative(Creature? target, decimal amount, ValueProp props,
+        Creature? dealer, CardModel? cardSource)
+    {
+        decimal mult = 1m;
+        foreach (var (b, ctx) in PreviewEffects(cardSource))
+            mult *= b.ModifyDamageMultiplicative(ctx, target, amount, props, dealer, cardSource);
+        return mult;
+    }
+
+    public override decimal ModifyBlockAdditive(Creature target, decimal block, ValueProp props, CardModel? cardSource,
+        CardPlay? cardPlay)
+    {
+        decimal sum = 0m;
+        foreach (var (b, ctx) in PreviewEffects(cardSource))
+            sum += b.ModifyBlockAdditive(ctx, target, block, props, cardSource, cardPlay);
+        return sum;
+    }
+
+    public override decimal ModifyBlockMultiplicative(Creature target, decimal block, ValueProp props,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        decimal mult = 1m;
+        foreach (var (b, ctx) in PreviewEffects(cardSource))
+            mult *= b.ModifyBlockMultiplicative(ctx, target, block, props, cardSource, cardPlay);
+        return mult;
     }
 
     /// <summary>Spec §2: the first sword summon of each combat -> Block 3 + draw 1. Called by SwordCombat.Summon.</summary>

@@ -35,7 +35,8 @@ public sealed class KusanagiBehavior : SwordBehavior
 
     public override SwordId? GetInheritedSword(SwordContext ctx)
     {
-        var previous = ctx.Combat?.Previous;
+        // ctx.PreviousSword (not Combat.Previous) so the hand preview of a Kusanagi card is correct too.
+        var previous = ctx.PreviousSword;
         return previous is { } p && p != SwordId.Kusanagi ? p : null;
     }
 

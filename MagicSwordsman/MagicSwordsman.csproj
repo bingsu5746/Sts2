@@ -67,6 +67,21 @@
       <Folder Include="MagicSwordsman\images\relics\big\" />
     </ItemGroup>
     
+    <!-- Localization fragments written by content agents: loc_fragments/<group>/<kor|eng>/<table>.json.
+         The game does NOT load them; tools/merge_loc_fragments.py merges them into MagicSwordsman/localization.
+         So that the localization analyzer (STS001) already sees their keys before the merge, they are copied to a
+         path that contains "localization" (the analyzer's file filter) and passed as AdditionalFiles. -->
+    <Target Name="AddLocFragmentsForAnalyzer" BeforeTargets="CoreCompile">
+        <ItemGroup>
+            <_MsLocFragment Include="loc_fragments/**/*.json" />
+            <_MsLocFragmentCopy Include="@(_MsLocFragment->'$(IntermediateOutputPath)loc_fragments_localization/%(RecursiveDir)%(Filename)%(Extension)')" />
+        </ItemGroup>
+        <Copy SourceFiles="@(_MsLocFragment)" DestinationFiles="@(_MsLocFragmentCopy)" SkipUnchangedFiles="true" />
+        <ItemGroup>
+            <AdditionalFiles Include="@(_MsLocFragmentCopy)" />
+        </ItemGroup>
+    </Target>
+
     <Target Name="CheckDependencyPaths" >
         <Error
                 Text=" Slay the Spire 2 data not found at path '$(Sts2DataDir)'"

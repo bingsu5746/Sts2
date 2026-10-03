@@ -127,23 +127,18 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         InvokeDisplayAmountChanged();
     }
 
-    /// <summary>The current sword's behavior, then (Kusanagi) the inherited one flagged IsInherited.</summary>
-    private IEnumerable<(SwordBehavior Behavior, SwordContext Ctx)> Active()
+    /// <summary>
+    /// The current sword's behavior, then (Kusanagi) the inherited one flagged IsInherited.
+    /// For number hooks with a card source, nothing is returned while that card is a not-yet-current sword card in
+    /// hand (Mangeomchong previews the sword the card would switch to instead — see SwordCombat.EffectiveSwordFor).
+    /// </summary>
+    private IEnumerable<(SwordBehavior Behavior, SwordContext Ctx)> Active(CardModel? cardSource = null)
     {
         var player = OwnerPlayer;
-        if (player == null) yield break;
-        if (SwordCombat.CurrentSword(player) is not { } current) yield break;
-
-        var behavior = SwordRegistry.Get(current);
-        var ctx = SwordCombat.ContextFor(player, current);
-        yield return (behavior, ctx);
-
-        if (behavior.GetInheritedSword(ctx) is { } inheritedId && inheritedId != current)
-        {
-            var inherited = SwordRegistry.Get(inheritedId);
-            if (inherited.CanBeInherited)
-                yield return (inherited, SwordCombat.ContextFor(player, inheritedId).AsInherited());
-        }
+        if (player == null) return [];
+        var (sword, preview) = SwordCombat.EffectiveSwordFor(player, cardSource);
+        if (sword is not { } current || preview) return [];
+        return SwordCombat.CurrentEffects(player, current, preview: false);
     }
 
     // ------------------------------------------------------------------ forwarded hooks
@@ -152,7 +147,7 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         CardModel? cardSource)
     {
         decimal sum = 0m;
-        foreach (var (b, ctx) in Active()) sum += b.ModifyDamageAdditive(ctx, target, amount, props, dealer, cardSource);
+        foreach (var (b, ctx) in Active(cardSource)) sum += b.ModifyDamageAdditive(ctx, target, amount, props, dealer, cardSource);
         return sum;
     }
 
@@ -160,7 +155,7 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         Creature? dealer, CardModel? cardSource)
     {
         decimal mult = 1m;
-        foreach (var (b, ctx) in Active())
+        foreach (var (b, ctx) in Active(cardSource))
             mult *= b.ModifyDamageMultiplicative(ctx, target, amount, props, dealer, cardSource);
         return mult;
     }
@@ -169,7 +164,7 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         CardPlay? cardPlay)
     {
         decimal sum = 0m;
-        foreach (var (b, ctx) in Active()) sum += b.ModifyBlockAdditive(ctx, target, block, props, cardSource, cardPlay);
+        foreach (var (b, ctx) in Active(cardSource)) sum += b.ModifyBlockAdditive(ctx, target, block, props, cardSource, cardPlay);
         return sum;
     }
 
@@ -177,7 +172,7 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         CardModel? cardSource, CardPlay? cardPlay)
     {
         decimal mult = 1m;
-        foreach (var (b, ctx) in Active())
+        foreach (var (b, ctx) in Active(cardSource))
             mult *= b.ModifyBlockMultiplicative(ctx, target, block, props, cardSource, cardPlay);
         return mult;
     }
