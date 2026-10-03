@@ -29,6 +29,15 @@ public sealed class SwordCombatState
     /// <summary>Total number of current-sword changes this combat.</summary>
     public int SwitchCount { get; internal set; }
 
+    /// <summary>Player turn number (PlayerCombatState.TurnNumber) of the most recent switch (0 = none yet).</summary>
+    public int LastSwitchTurn { get; internal set; }
+
+    /// <summary>Number of current-sword changes during <see cref="LastSwitchTurn"/>.</summary>
+    public int SwitchesInLastSwitchTurn { get; internal set; }
+
+    /// <summary>Current-sword changes during the given player turn (see SwordCombat.SwitchesThisTurn).</summary>
+    public int SwitchesInTurn(int turn) => turn > 0 && turn == LastSwitchTurn ? SwitchesInLastSwitchTurn : 0;
+
     /// <summary>Swords sent back to Mangeomchong for the rest of this combat (Kusanagi exhausted).</summary>
     public HashSet<SwordId> ReturnedToVault { get; } = new();
 

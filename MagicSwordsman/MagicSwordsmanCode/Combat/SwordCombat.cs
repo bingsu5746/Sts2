@@ -60,6 +60,13 @@ public static class SwordCombat
     public static bool IsPresent(Player player, SwordId sword) => Get(player)?.Present.Contains(sword) ?? false;
 
     /// <summary>
+    /// How many times the current sword changed during the player's current turn (none -> sword counts, content doc
+    /// §0.3 "전환"). 0 outside combat.
+    /// </summary>
+    public static int SwitchesThisTurn(Player player) =>
+        Get(player)?.SwitchesInTurn(player.PlayerCombatState?.TurnNumber ?? 0) ?? 0;
+
+    /// <summary>
     /// Per-combat counter (kept on the sword's LevelOwner) with a temporary level bonus for this combat only,
     /// e.g. Gram's "레긴의 재단조" (+2). Added by <see cref="LevelOf"/>, clamped to 0..MaxLevel.
     /// </summary>
@@ -233,6 +240,13 @@ public static class SwordCombat
         state.Previous = old;
         state.Current = sword;
         state.SwitchCount++;
+        var switchTurn = player.PlayerCombatState?.TurnNumber ?? 0;
+        if (state.LastSwitchTurn != switchTurn)
+        {
+            state.LastSwitchTurn = switchTurn;
+            state.SwitchesInLastSwitchTurn = 0;
+        }
+        state.SwitchesInLastSwitchTurn++;
         if (sword == SwordId.Kusanagi && old != null) state.KusanagiSwitchIns++;
 
         await EnsureCurrentSwordPower(player, choiceContext);
