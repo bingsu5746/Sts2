@@ -12,12 +12,12 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace MagicSwordsman.MagicSwordsmanCode.Curses;
 
 /// <summary>
-/// 스바프를라미의 최후 — 1st Tyrfing deed curse. At the end of your turn, if it is in your hand, lose 2 HP (ignores
-/// block). 「주인 스바프를라미도 죽인다. 실제로 스바프를라미는 이 검으로 죽고」.
+/// 스바프를라미의 최후 — 1st Tyrfing deed curse. At the end of your turn, if it is in your hand, take 3 damage that
+/// block can stop (same damage props as the game's Burn: Unpowered | Move, no Unblockable). 「주인 스바프를라미도 죽인다. 실제로 스바프를라미는 이 검으로 죽고」.
 /// </summary>
 public sealed class SvafrlamisEnd : TyrfingDeedCurse
 {
-    public const int HpLoss = 2;
+    public const int HpLoss = 3; // [임시] blockable, so 1 higher than the old unblockable 2
 
     public override bool HasTurnEndInHandEffect => true;
 
@@ -28,6 +28,6 @@ public sealed class SvafrlamisEnd : TyrfingDeedCurse
 
     protected override async Task OnTurnEndInHand(PlayerChoiceContext choiceContext)
     {
-        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this);
+        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, ValueProp.Unpowered | ValueProp.Move, this);
     }
 }
