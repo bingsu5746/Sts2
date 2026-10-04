@@ -15,7 +15,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Dev;
 [HarmonyPatch(typeof(NCardLibraryGrid), "GetCardVisibility")]
 internal static class DevCardLibrary
 {
-    public const bool Enabled = true;
+    public static readonly bool Enabled = true;
 
     [HarmonyPostfix]
     private static void ShowModCards(CardModel card, ref ModelVisibility __result)
