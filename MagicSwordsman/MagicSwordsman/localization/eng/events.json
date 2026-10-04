@@ -189,5 +189,7 @@
   "MAGICSWORDSMAN-TOMB_EPITAPH_EVENT.pages.CONFIRM_PAIR.options.REFUSE.description": "Return the swords to the earth.",
   "MAGICSWORDSMAN-TOMB_EPITAPH_EVENT.pages.FORCE_NOTHING.description": "In the end, the hilt slipped from your hands.",
   "MAGICSWORDSMAN-TOMB_EPITAPH_EVENT.pages.READ.description": "You read the epitaph to the end. The sword at your side answers it.\n[gold]{Sword}[/gold]: level {NewLevel}, {Stage}.",
-  "MAGICSWORDSMAN-TOMB_EPITAPH_EVENT.pages.COVER.description": "You cover the hilt with earth. A few gold coins come up on your fingertips."
+  "MAGICSWORDSMAN-TOMB_EPITAPH_EVENT.pages.COVER.description": "You cover the hilt with earth. A few gold coins come up on your fingertips.",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.START.description": "Before you set out, the tomb behind you hums low.\nOne blade may come along beside the broken Gram.\nThe light of three blades leaks through the gate.{FullNote}",
+  "MAGICSWORDSMAN-SWORD_LORE.ACQUIRED_START": "The tomb's gate opens and [gold]{Sword}[/gold] rises into the air.\n\n{Origin}\n\n[gold]As the current sword[/gold]: {Tagline}\n[red]Cost[/red]: {Cost}"
 }

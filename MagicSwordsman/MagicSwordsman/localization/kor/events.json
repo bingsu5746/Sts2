@@ -189,5 +189,7 @@
   "MAGICSWORDSMAN-TOMB_EPITAPH_EVENT.pages.CONFIRM_PAIR.options.REFUSE.description": "검을 흙 속에 돌려놓는다.",
   "MAGICSWORDSMAN-TOMB_EPITAPH_EVENT.pages.FORCE_NOTHING.description": "칼자루는 끝내 손을 떠났다.",
   "MAGICSWORDSMAN-TOMB_EPITAPH_EVENT.pages.READ.description": "비문을 끝까지 읽어 내려간다. 곁의 검이 그 뜻에 응한다.\n[gold]{Sword}[/gold] — {NewLevel}단계, {Stage}.",
-  "MAGICSWORDSMAN-TOMB_EPITAPH_EVENT.pages.COVER.description": "흙을 덮는다. 손끝에 금화 몇 닢이 걸려 나온다."
+  "MAGICSWORDSMAN-TOMB_EPITAPH_EVENT.pages.COVER.description": "흙을 덮는다. 손끝에 금화 몇 닢이 걸려 나온다.",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.START.description": "길을 나서기 전, 등 뒤의 만검총이 낮게 울린다.\n부서진 그람 곁에 설 검을 하나 데려갈 수 있다.\n문틈으로 칼날 세 자루의 빛이 새어 나온다.{FullNote}",
+  "MAGICSWORDSMAN-SWORD_LORE.ACQUIRED_START": "만검총의 문이 열리고, [gold]{Sword}[/gold]이(가) 허공에 떠오른다.\n\n{Origin}\n\n[gold]현재 검일 때[/gold]: {Tagline}\n[red]대가[/red]: {Cost}"
 }

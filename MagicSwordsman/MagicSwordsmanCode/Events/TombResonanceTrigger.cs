@@ -3,6 +3,7 @@ using MagicSwordsman.MagicSwordsmanCode.Relics;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Hooks;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Nodes.Rooms;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Runs;
 
@@ -66,10 +67,50 @@ internal static class TombResonanceTrigger
         }
     }
 
+    /// <summary>
+    /// Run start (사용자 결정 2026-10-04): when the starting Ancient event ends and its PROCEED would open the map,
+    /// open the start sword pick (TombResonanceEvent in act 0) first. Its own PROCEED then finds the pick done and
+    /// opens the map normally. UNTESTED IN GAME.
+    /// </summary>
+    [HarmonyPatch(typeof(NEventRoom), nameof(NEventRoom.Proceed))]
+    internal static class StartAfterAncientPatch
+    {
+        private static readonly System.Reflection.PropertyInfo? StateProp = AccessTools.Property(typeof(RunManager), "State");
+
+        [HarmonyPrefix]
+        private static bool Prefix(ref Task __result)
+        {
+            try
+            {
+                var runState = StateProp?.GetValue(RunManager.Instance) as IRunState;
+                if (!ShouldStartAtRunStart(runState)) return true;
+                MainFile.Logger.Info("[TombResonance] starting the run-start sword pick");
+                __result = RunManager.Instance.EnterRoomWithoutExitingCurrentRoom(
+                    new EventRoom(ModelDb.Event<TombResonanceEvent>()), fadeToBlack: true);
+                return false;
+            }
+            catch (Exception e)
+            {
+                MainFile.Logger.Error($"[TombResonance] run-start pick failed: {e}");
+                return true;
+            }
+        }
+    }
+
+    private static bool ShouldStartAtRunStart(IRunState? runState)
+    {
+        if (runState == null || runState.CurrentActIndex != 0) return false;
+        return runState.Players.Any(p =>
+            p.GetRelic<Mangeomchong>() is { } tomb &&
+            tomb.GetRunCounter(TombResonanceEvent.DoneKey(0)) == 0);
+    }
+
     private static bool ShouldStart(IRunState? runState, int actIndex)
     {
-        if (runState == null || actIndex is not (1 or 2)) return false;
+        if (runState == null || actIndex is not (0 or 1 or 2)) return false;
         if (runState.CurrentActIndex != actIndex) return false;
+        // Run start with Neow: the starting Ancient room is open now; StartAfterAncientPatch starts the pick instead.
+        if (actIndex == 0 && runState.ExtraFields.StartedWithNeow) return false;
         return runState.Players.Any(p =>
             p.GetRelic<Mangeomchong>() is { } tomb &&
             tomb.GetRunCounter(TombResonanceEvent.DoneKey(actIndex)) == 0);

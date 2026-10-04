@@ -56,10 +56,13 @@ public sealed class TombResonanceEvent : CustomEventModel
 
     private int ActIndex => Owner?.RunState.CurrentActIndex ?? 1;
 
+    /// <summary>Run start (act index 0): pick 1 of 3 swords next to Gram, no PASS (사용자 결정 2026-10-04).</summary>
+    private bool IsStart => ActIndex == 0;
+
     /// <summary>After the act 2 boss (entering the 3rd act, index 2) the "deep" text and exit are used.</summary>
     private bool IsDeep => ActIndex >= 2;
 
-    private string StartPage => IsDeep ? "DEEP" : "INITIAL";
+    private string StartPage => IsStart ? "START" : IsDeep ? "DEEP" : "INITIAL";
 
     private string PageKey(string page) => $"{Id.Entry}.pages.{page}";
 
@@ -105,7 +108,11 @@ public sealed class TombResonanceEvent : CustomEventModel
             }
         }
 
-        if (IsDeep && tomb != null)
+        if (IsStart && tomb != null && options.Count > 0)
+        {
+            // Run start: the player must take one of the three swords.
+        }
+        else if (IsDeep && tomb != null)
         {
             var canForge = SwordForge.UpgradeableSwords(tomb).Count > 0;
             options.Add(new EventOption(this, canForge ? Forgo : (Func<Task>?)null, $"{PageKey(StartPage)}.options.FORGO"));
@@ -162,7 +169,7 @@ public sealed class TombResonanceEvent : CustomEventModel
         }
 
         MarkDone();
-        SetEventFinished(SwordEventHelper.AcquiredText(sword, firstTime));
+        SetEventFinished(IsStart ? SwordEventHelper.StartAcquiredText(sword) : SwordEventHelper.AcquiredText(sword, firstTime));
     }
 
     private async Task Pass()

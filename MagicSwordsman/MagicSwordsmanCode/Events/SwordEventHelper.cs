@@ -69,6 +69,17 @@ public static class SwordEventHelper
         return desc;
     }
 
+    /// <summary>Run-start pick: the sword's story page — origin, what it does as the current sword, and its cost.</summary>
+    public static LocString StartAcquiredText(SwordId sword)
+    {
+        var text = SwordLore.Generic("ACQUIRED_START");
+        text.Add("Sword", SwordLore.Name(sword));
+        text.Add("Origin", SwordLore.Line(sword, "ORIGIN"));
+        text.Add("Tagline", SwordLore.Line(sword, "TAGLINE"));
+        text.Add("Cost", SwordLore.Line(sword, "COST"));
+        return text;
+    }
+
     /// <summary>Text after an acquisition: origin lines the first time (spec §5 [임시] 기원 연출), a short line otherwise.</summary>
     public static LocString AcquiredText(SwordId sword, bool firstTime)
     {
