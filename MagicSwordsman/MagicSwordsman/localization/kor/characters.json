@@ -1,7 +1,7 @@
 {
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.title": "엔시페르",
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.titleObject": "엔시페르",
-  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.description": "만 개의 마검이 봉인되어 있는 감옥, 만검총의 관리자로서,\n감옥의 문을 열고 저주받은 무기들을 다루는 마검사입니다.\n저주받은 쇳덩이들을 허공에 띄운 채, 봉인할 다음 검을 찾으러 나아갑니다.",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.description": "만 개의 마검이 봉인된 감옥, 만검총의 관리자.\n감옥의 문을 열고 저주받은 무기들을 다루는 마검사로,\n저주받은 쇳덩이들을 허공에 띄운 채\n봉인할 다음 검을 찾으러 나아갑니다.",
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.aromaPrinciple": "[sine]검을 쓰는 게 아니다. 가두기 위해 잠시 꺼낼 뿐...[/sine]",
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.banter.alive.endTurnPing": "[sine]봉인을 살피는 중이다.[/sine]",
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.banter.dead.endTurnPing": "...",

@@ -381,9 +381,10 @@ public class Mangeomchong : MagicSwordsmanRelic
         if (DynamicVars[SwordListVar] is not StringVar sv) return;
         try
         {
-            sv.StringValue = string.Join("\n",
-                OwnedSwords.Select(s =>
-                    $"- {SwordRegistry.DisplayName(s)} ({GetLevel(s)}/{SwordRegistry.MaxLevel})"));
+            // Short description (사용자 요청 2026-10-04): the owned-sword list only appears once there is one, on its own lines.
+            var lines = OwnedSwords.Select(s =>
+                $"- {SwordRegistry.DisplayName(s)} ({GetLevel(s)}/{SwordRegistry.MaxLevel})").ToList();
+            sv.StringValue = lines.Count == 0 ? "" : "\n" + string.Join("\n", lines);
         }
         catch (Exception)
         {

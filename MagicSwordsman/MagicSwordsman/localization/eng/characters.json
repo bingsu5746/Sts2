@@ -1,7 +1,7 @@
 {
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.title": "Ensifer",
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.titleObject": "Ensifer",
-  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.description": "Keeper of the Tomb of Ten Thousand Swords, the prison where ten thousand cursed blades are sealed,\na swordsman who opens the prison gate and wields its cursed weapons.\nWith cursed steel floating in the air around him, he sets out to find the next blade to seal.",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.description": "Keeper of the Tomb of Ten Thousand Swords,\nthe prison of ten thousand sealed blades.\nWith cursed steel floating around him,\nhe sets out to find the next blade to seal.",
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.aromaPrinciple": "[sine]I do not wield them. I only let them out long enough to lock them away again...[/sine]",
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.banter.alive.endTurnPing": "[sine]Checking the seals.[/sine]",
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.banter.dead.endTurnPing": "...",
