@@ -196,7 +196,7 @@ public static class SwordVisuals
         return holder;
     }
 
-    private static Color ColorOf(SwordId sword) => sword switch
+    internal static Color ColorOf(SwordId sword) => sword switch
     {
         SwordId.Gram => new Color(0.95f, 0.78f, 0.30f),
         SwordId.Ganjiang => new Color(0.45f, 0.55f, 0.75f),
