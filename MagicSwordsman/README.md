@@ -4,6 +4,8 @@
 설계 기준 문서는 저장소의 `docs/magic-swordsman-spec.md`이다. 검의 기원 이야기는 `docs/magic-sword-research.docx`에서만 가져왔다.
 코드 구조와 새 콘텐츠를 넣는 규칙은 이 폴더의 `FRAMEWORK.md`에 정리돼 있다.
 
+> ⚠️ **저장소를 공개하기 전에 반드시**: `Directory.Build.props`에 사용자 PC 경로(사용자 이름 포함)가 들어 있다. 공개 전에 이 파일을 지우거나 경로를 지우고, `.gitignore`에 `Directory.Build.props`를 다시 추가할 것. (사용자 요청 2026-10-04: 공개 시 꼭 알려 달라고 함)
+
 ## 준비물 (PC)
 - **.NET SDK 9.0 이상**
 - **MegaDot 4.5.1** (megadot.megacrit.com): 게임은 4.5.1보다 새 버전으로 만든 `.pck`를 읽지 못한다
