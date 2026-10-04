@@ -155,7 +155,7 @@
   "MAGICSWORDSMAN-TENMUS_ILLNESS.title": "Tenmu's Illness",
   "MAGICSWORDSMAN-TENMUS_ILLNESS.description": "At the end of your turn, if this is in your hand, receive {Amount} random [gold]Weak[/gold], [gold]Frail[/gold] or [gold]Vulnerable[/gold].",
   "MAGICSWORDSMAN-HEIDREKS_END.title": "Heidrek's End",
-  "MAGICSWORDSMAN-HEIDREKS_END.description": "When you draw this card, lose {HpLoss} HP.",
+  "MAGICSWORDSMAN-HEIDREKS_END.description": "When you draw this card, take {HpLoss} damage.",
   "MAGICSWORDSMAN-IRRECONCILABLE_CURSE.title": "Irreconcilable",
   "MAGICSWORDSMAN-IRRECONCILABLE_CURSE.description": "At the end of your turn, if this is in your hand, it is shuffled into a random position of your draw pile instead of being discarded.",
   "MAGICSWORDSMAN-SVAFRLAMIS_END.title": "Svafrlami's End",

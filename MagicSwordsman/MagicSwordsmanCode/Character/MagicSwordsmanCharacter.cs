@@ -20,7 +20,7 @@ public class MagicSwordsmanCharacter : PlaceholderCharacterModel
     public static readonly Color Color = new("6f7fb8");
 
     public override Color NameColor => Color;
-    public override CharacterGender Gender => CharacterGender.Neutral;
+    public override CharacterGender Gender => CharacterGender.Masculine;
     public override int StartingHp => 68;
 
     public override IEnumerable<CardModel> StartingDeck =>

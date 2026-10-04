@@ -155,7 +155,7 @@
   "MAGICSWORDSMAN-TENMUS_ILLNESS.title": "덴무의 병",
   "MAGICSWORDSMAN-TENMUS_ILLNESS.description": "턴을 마칠 때 손에 있으면 [gold]약화[/gold]·[gold]손상[/gold]·[gold]취약[/gold] 중 무작위 하나를 {Amount} 받습니다.",
   "MAGICSWORDSMAN-HEIDREKS_END.title": "하이드레크의 최후",
-  "MAGICSWORDSMAN-HEIDREKS_END.description": "이 카드를 뽑으면 체력을 {HpLoss} 잃습니다.",
+  "MAGICSWORDSMAN-HEIDREKS_END.description": "이 카드를 뽑으면 피해를 {HpLoss} 받습니다.",
   "MAGICSWORDSMAN-IRRECONCILABLE_CURSE.title": "화해할 수 없음",
   "MAGICSWORDSMAN-IRRECONCILABLE_CURSE.description": "턴을 마칠 때 손에 있으면 버려지지 않고 뽑을 카드 더미의 무작위 위치로 들어갑니다.",
   "MAGICSWORDSMAN-SVAFRLAMIS_END.title": "스바프를라미의 최후",

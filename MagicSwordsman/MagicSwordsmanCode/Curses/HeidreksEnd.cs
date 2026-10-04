@@ -13,7 +13,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Curses;
 /// </summary>
 public sealed class HeidreksEnd : SwordCurseCard
 {
-    public const int HpLoss = 2;
+    public const int HpLoss = 5; // 사용자 결정 2026-10-04: blockable 5 damage
 
     public override SwordId Sword => SwordId.Tyrfing;
 
@@ -25,6 +25,6 @@ public sealed class HeidreksEnd : SwordCurseCard
     public override async Task AfterCardDrawn(PlayerChoiceContext choiceContext, CardModel card, bool fromHandDraw)
     {
         if (card != this) return;
-        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this);
+        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, ValueProp.Unpowered | ValueProp.Move, this);
     }
 }

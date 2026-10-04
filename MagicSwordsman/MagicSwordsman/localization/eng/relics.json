@@ -21,6 +21,6 @@
   "MAGICSWORDSMAN-THREE_HUNDRED_BELLOWS.description": "The second time you summon a magic sword each combat, also gain {Block:diff()} [gold]Block[/gold] and draw {Cards:diff()} card.",
   "MAGICSWORDSMAN-THREE_HUNDRED_BELLOWS.flavor": "Three hundred children worked the bellows, and the swords were finished after three years.",
   "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.title": "Opened Tomb of Ten Thousand Swords",
-  "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.description": "Remembers your magic swords and their upgrade levels. Card rewards and shops only offer common cards and cards of swords you own. Adds [gold]Forge Sword[/gold] to Rest Sites.\nThe first time you summon a magic sword each combat, gain {Block:diff()} [gold]Block[/gold] and draw {Cards:diff()} cards. Each later first summon of another sword gives {LaterSummonBlock:diff()} [gold]Block[/gold].\n{SwordList}",
+  "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.description": "Remembers your magic swords and their upgrade levels. Card rewards and shops only offer common cards and cards of swords you own. Adds [gold]Forge Sword[/gold] to Rest Sites.\nThe first time you summon a magic sword each combat, gain {Block:diff()} [gold]Block[/gold] and draw {Cards:diff()} cards.\n{SwordList}",
   "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.flavor": "The tomb's gate stands wide open. The sleeping swords reach out first."
 }

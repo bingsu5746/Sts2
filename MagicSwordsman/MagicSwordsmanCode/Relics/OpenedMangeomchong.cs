@@ -16,22 +16,19 @@ namespace MagicSwordsman.MagicSwordsmanCode.Relics;
 ///    it derives from <see cref="Mangeomchong"/>, so <c>player.GetRelic&lt;Mangeomchong&gt;()</c> finds it.
 ///  - First sword summon of each combat: Block 6 + draw 2 (Mangeomchong's 3 + 1, doubled like BurningBlood 6 ->
 ///    BlackBlood 12). The base class reads its Block/Cards vars, so only the numbers change here.
-///  - Every later first summon of another sword in the same combat: Block 3.
+///  - Later summons give nothing (사용자 결정 2026-10-04: only the first summon of a combat has the bonus).
 ///  - No extra slot (slot expansions only come from 브란스톡 / 검총의 나무 패).
 /// Replacement: Mangeomchong.GetUpgradeReplacement -> BaseLib StarterUpgradePatches -> TouchOfOrobas.AfterObtained ->
 /// RelicCmd.Replace(old, new). RelicCmd.Replace does not move any state, so <see cref="ReplacePatch"/> copies the run
 /// data from the old relic into the new one right before the swap (both are still mutable then).
 /// </summary>
-public sealed class OpenedMangeomchong : Mangeomchong, ISwordListener
+public sealed class OpenedMangeomchong : Mangeomchong
 {
-    private const string LaterSummonBlockVar = "LaterSummonBlock";
-
     protected override IEnumerable<DynamicVar> CanonicalVars =>
     [
         new BlockVar(6m, ValueProp.Unpowered),
         new CardsVar(2),
         new StringVar("SwordList"),
-        new BlockVar(LaterSummonBlockVar, 3m, ValueProp.Unpowered),
     ];
 
     /// <summary>Copies all saved run data of the original 만검총 (called before RelicCmd.Replace swaps them).</summary>
@@ -43,16 +40,6 @@ public sealed class OpenedMangeomchong : Mangeomchong, ISwordListener
         ExtraSlots = source.ExtraSlots;
         StoredCards = source.StoredCards.ToList();
         RunCounters = source.RunCounters;
-    }
-
-    /// <summary>"그 뒤 다른 검을 처음 소환할 때마다 방어도 3" — the first summon itself is the base class bonus.</summary>
-    public async Task AfterSwordSummoned(Player player, SwordId sword, PlayerChoiceContext choiceContext)
-    {
-        if (player != Owner) return;
-        var state = SwordCombat.Get(player);
-        if (state == null || state.Summoned.Count < 2) return;
-        Flash();
-        await CreatureCmd.GainBlock(Owner.Creature, (BlockVar)DynamicVars[LaterSummonBlockVar], null);
     }
 
     /// <summary>Moves the run data from 만검총 into 열린 만검총 when the Ancient replaces it.</summary>
