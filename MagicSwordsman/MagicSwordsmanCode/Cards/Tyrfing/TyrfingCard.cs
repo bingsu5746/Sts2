@@ -11,7 +11,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace MagicSwordsman.MagicSwordsmanCode.Cards.Tyrfing;
 
 /// <summary>
-/// Base of every 티르빙 card. Spec §7 [확정] cost "세 번의 악행": the first 3 times Tyrfing cards are used in the
+/// Base of every 티르빙 card. Spec §7 [확정] cost "세 번의 악행": once Tyrfing is at level <see cref="TyrfingCurses.CurseStartLevel"/>+, the first 3 times Tyrfing cards are used in the
 /// whole run, each use adds one permanent curse to the deck (after the card's effect). Implement
 /// <see cref="OnTyrfingPlay"/> instead of OnCardPlay.
 /// </summary>
@@ -73,6 +73,10 @@ public static class TyrfingCurses
     public const string RunCounterKey = "tyrfing.curses";
     public const int MaxCurses = 3;
 
+    /// <summary>[임시, 사용자 결정 2026-10-04] curses only start once Tyrfing has been upgraded to this level.
+    /// Uses below this level do not count.</summary>
+    public const int CurseStartLevel = 3;
+
     public static CardModel? CurseFor(int index) => index switch
     {
         0 => ModelDb.Card<SvafrlamisEnd>(),
@@ -85,6 +89,7 @@ public static class TyrfingCurses
     {
         var relic = player.GetRelic<Mangeomchong>();
         if (relic == null) return;
+        if (relic.GetLevel(SwordId.Tyrfing) < CurseStartLevel) return;
         var given = relic.GetRunCounter(RunCounterKey);
         if (given >= MaxCurses || CurseFor(given) is not { } curse) return;
         relic.SetRunCounter(RunCounterKey, given + 1);
