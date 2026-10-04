@@ -13,10 +13,10 @@ namespace MagicSwordsman.MagicSwordsmanCode.Visuals;
 /// from anywhere, any number of times, and never changes gameplay. Every entry point swallows exceptions — a visual
 /// bug must never break a combat.
 ///
-/// Layout (player faces right): Mangeomchong behind the player, idle swords in an arc above/behind, the current
-/// sword in front at hand height. A sword that leaves (Kusanagi going back) flies into the tomb and fades.
-/// Art: drop <c>images/swords/&lt;sword id lowercase&gt;.png</c> (blade pointing up) and <c>images/swords/tomb.png</c>
-/// to replace the drawn placeholder shapes. TODO(art): real art, VFX on summon.
+/// Layout (player faces right, user sketch 2026-10-04): upright swords left of / above / right of the character; the
+/// current sword takes the right slot. New swords fly out of the character; a sword that leaves shrinks back into it.
+/// No tomb object (removed by user decision). Art: drop <c>images/swords/&lt;sword id lowercase&gt;.png</c>
+/// (blade pointing up) to replace the drawn placeholder shapes. TODO(art): real art, VFX on summon.
 /// UNVERIFIED in game: node offsets relative to the creature node, z-ordering against the creature body.
 /// </summary>
 public static class SwordVisuals
@@ -24,19 +24,22 @@ public static class SwordVisuals
     private sealed class Rig
     {
         public required Node2D Root;
-        public required Node2D Tomb;
-        public required Node2D Door;
         public readonly Dictionary<SwordId, Node2D> Swords = new();
         public SwordId? Current;
     }
 
     private static readonly Dictionary<Player, Rig> Rigs = new();
 
-    private static readonly Vector2 TombPos = new(-170, -40);
-    private static readonly Vector2 CurrentPos = new(110, -175);
+    // Layout (사용자 스케치 2026-10-04): swords float upright around the character — left, above the head, right.
+    // The current sword always takes the right slot (in front, toward the enemy). The character only gestures.
+    private static readonly Vector2 SpawnPos = new(0, -220);      // swords appear from / vanish into the character
+    private static readonly Vector2 CurrentPos = new(150, -200);  // right of the character
     private static readonly Vector2[] IdleSlots =
     {
-        new(-120, -330), new(-30, -380), new(60, -360), new(-200, -260), new(140, -300),
+        new(-150, -200),  // left of the character
+        new(0, -400),     // above the head
+        new(-110, -360),  // extra slots (sword cap raised by relics)
+        new(110, -360),
     };
 
     // ------------------------------------------------------------------ entry points
@@ -48,22 +51,9 @@ public static class SwordVisuals
         catch (Exception e) { MainFile.Logger.Warn($"[SwordVisuals] Sync failed: {e.Message}"); }
     }
 
-    /// <summary>Kusanagi card played while Kusanagi is back in Mangeomchong: the tomb door rattles.</summary>
+    /// <summary>Removed by user decision (2026-10-04): no tomb object / door animation. Kept as a no-op for callers.</summary>
     public static void RattleTomb(Player player)
     {
-        try
-        {
-            var rig = GetRig(player, create: true);
-            if (rig == null) return;
-            var door = rig.Door;
-            var t = door.CreateTween();
-            for (var i = 0; i < 4; i++)
-            {
-                t.TweenProperty(door, "rotation", i % 2 == 0 ? 0.12f : -0.12f, 0.06);
-            }
-            t.TweenProperty(door, "rotation", 0f, 0.08);
-        }
-        catch (Exception e) { MainFile.Logger.Warn($"[SwordVisuals] Rattle failed: {e.Message}"); }
     }
 
     /// <summary>Combat over: forget the rig (its nodes die with the combat room).</summary>
@@ -78,26 +68,25 @@ public static class SwordVisuals
         var rig = GetRig(player, create: state.Present.Count > 0 || state.ReturnedToVault.Count > 0);
         if (rig == null) return;
 
-        // swords that left -> into the tomb
+        // swords that left -> shrink back into the character
         foreach (var gone in rig.Swords.Keys.Where(s => !state.Present.Contains(s)).ToList())
         {
             var node = rig.Swords[gone];
             rig.Swords.Remove(gone);
             var t = node.CreateTween().SetParallel();
-            t.TweenProperty(node, "position", TombPos + new Vector2(0, -40), 0.4).SetTrans(Tween.TransitionType.Quad);
+            t.TweenProperty(node, "position", SpawnPos, 0.4).SetTrans(Tween.TransitionType.Quad);
             t.TweenProperty(node, "modulate:a", 0f, 0.4);
             t.Chain().TweenCallback(Callable.From(node.QueueFree));
         }
 
-        // new swords -> out of the tomb
+        // new swords -> fly out of the character
         foreach (var sword in state.Present.Where(s => !rig.Swords.ContainsKey(s)))
         {
             var node = CreateSword(sword);
             rig.Root.AddChild(node);
-            node.Position = TombPos + new Vector2(0, -40);
+            node.Position = SpawnPos;
             node.Scale = new Vector2(0.3f, 0.3f);
             rig.Swords[sword] = node;
-            OpenDoor(rig);
         }
 
         rig.Current = state.Current;
@@ -114,7 +103,7 @@ public static class SwordVisuals
             var t = node.CreateTween().SetParallel();
             t.TweenProperty(node, "position", pos, 0.35).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
             t.TweenProperty(node, "scale", isCurrent ? new Vector2(1.15f, 1.15f) : new Vector2(0.8f, 0.8f), 0.3);
-            t.TweenProperty(node, "rotation", isCurrent ? 0.5f : -0.15f, 0.3);
+            t.TweenProperty(node, "rotation", 0f, 0.3);
             t.TweenProperty(node, "modulate", isCurrent ? Colors.White : new Color(0.75f, 0.75f, 0.8f, 0.9f), 0.3);
             node.ZIndex = isCurrent ? 1 : -1;
         }
@@ -132,23 +121,10 @@ public static class SwordVisuals
         var root = new Node2D { Name = "MagicSwordsRig" };
         creatureNode.AddChild(root);
 
-        var (tomb, door) = CreateTomb();
-        tomb.Position = TombPos;
-        tomb.ZIndex = -2;
-        root.AddChild(tomb);
-
-        rig = new Rig { Root = root, Tomb = tomb, Door = door };
+        rig = new Rig { Root = root };
         Rigs[player] = rig;
         HookIdleReturn(creatureNode);
         return rig;
-    }
-
-    private static void OpenDoor(Rig rig)
-    {
-        var t = rig.Door.CreateTween();
-        t.TweenProperty(rig.Door, "scale:x", 0.15f, 0.15);
-        t.TweenInterval(0.35);
-        t.TweenProperty(rig.Door, "scale:x", 1f, 0.2);
     }
 
     /// <summary>
@@ -218,30 +194,6 @@ public static class SwordVisuals
         bob.TweenProperty(blade, "position:y", -8f, period).SetTrans(Tween.TransitionType.Sine);
         bob.TweenProperty(blade, "position:y", 0f, period).SetTrans(Tween.TransitionType.Sine);
         return holder;
-    }
-
-    private static (Node2D Tomb, Node2D Door) CreateTomb()
-    {
-        var tomb = new Node2D { Name = "Mangeomchong" };
-        var texPath = $"{MainFile.ResPath}/images/swords/tomb.png";
-        if (ResourceLoader.Exists(texPath))
-            tomb.AddChild(new Sprite2D { Texture = GD.Load<Texture2D>(texPath), Position = new Vector2(0, -60) });
-        else
-            tomb.AddChild(new Polygon2D
-            {
-                Color = new Color(0.32f, 0.30f, 0.34f),
-                Polygon = new[] { new Vector2(-60, 0), new Vector2(60, 0), new Vector2(50, -100), new Vector2(0, -130), new Vector2(-50, -100) },
-            });
-
-        // the door pivots on its left edge so "scale:x" opens it and "rotation" rattles it
-        var door = new Node2D { Name = "Door", Position = new Vector2(-20, 0) };
-        door.AddChild(new Polygon2D
-        {
-            Color = new Color(0.12f, 0.10f, 0.12f),
-            Polygon = new[] { new Vector2(0, 0), new Vector2(40, 0), new Vector2(40, -70), new Vector2(0, -70) },
-        });
-        tomb.AddChild(door);
-        return (tomb, door);
     }
 
     private static Color ColorOf(SwordId sword) => sword switch

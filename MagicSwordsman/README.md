@@ -86,13 +86,12 @@
 | 파워 | `images/powers/<id>.png`, `images/powers/big/<id>.png` | 64×64 (큰 것은 템플릿 참고) |
 | 캐릭터 몸 | `images/character/magic_swordsman.png` (지금은 임시 실루엣) | 260×400 기준 |
 | 떠 있는 검 | `images/swords/<검 id 소문자>.png` (칼날이 위를 향하게). 예: `gram.png`, `claiomhsolais.png` | 자유 (약 60×130 기준) |
-| 만검총 | `images/swords/tomb.png` | 자유 |
 
 - 카드 id 예: `MAGICSWORDSMAN-BROKEN_BLADE` → `broken_blade.png`
 - 캐릭터 씬: `MagicSwordsman/scenes/magic_swordsman_combat.tscn`(전투), `_rest_site.tscn`(휴식처), `_merchant.tscn`(상점). Spine 없이 Godot `AnimationPlayer`로 움직인다. 애니메이션 이름 `idle`(반복), `Attack`, `Cast`, `Hit`, `Dead`를 BaseLib이 게임 동작에 맞춰 재생한다. 그림을 바꾸거나 MegaDot에서 열어 애니메이션을 다듬으면 된다.
 - 씬 파일을 찾지 못하면 아이언클래드 모습으로 대신 나온다.
 - 상점 화면 멈춤 문제는 BaseLib 3.4.7에 이미 패치가 있어 따로 처리하지 않았다.
-- 떠 있는 검·만검총 코드: `MagicSwordsmanCode/Visuals/SwordVisuals.cs` (연출 전용, 게임 규칙에 영향 없음). 검이 처음 소환되면 만검총 문이 열리며 날아 나오고, 현재 검은 손앞으로 오고 나머지는 뒤쪽에 떠서 흔들린다. 쿠사나기가 만검총으로 돌아가면 날아 들어가고, 그 뒤 쿠사나기 카드를 쓰면 문이 들썩인다.
+- 떠 있는 검 코드: `MagicSwordsmanCode/Visuals/SwordVisuals.cs` (연출 전용). 검은 캐릭터 왼쪽·머리 위·오른쪽에 세워진 채 떠 있고, 현재 검은 오른쪽 자리로 온다. 새 검은 캐릭터에게서 날아 나오고, 떠나는 검(쿠사나기 봉인 등)은 캐릭터 쪽으로 작아지며 사라진다. 만검총 오브젝트·문 연출은 사용자 결정으로 없앰.
 
 ## 데모에서 아직 안 되는 것 / 검증 안 된 것
 - 캐릭터 씬·떠 있는 검 연출은 빌드만 확인. 손으로 쓴 `.tscn`이라 MegaDot에서 한 번 열어 확인 필요. 검·만검총 위치는 화면에서 보고 `SwordVisuals.cs`의 좌표를 조정해야 할 수 있음

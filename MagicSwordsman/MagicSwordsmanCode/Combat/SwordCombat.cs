@@ -215,7 +215,6 @@ public static class SwordCombat
         if (card.Sword is not { } sword || !card.IsMutable) return;
         var owner = card.Owner;
         if (owner?.PlayerCombatState == null) return;
-        if (Get(owner)?.ReturnedToVault.Contains(sword) == true) SwordVisuals.RattleTomb(owner); // 만검총 문이 들썩임
         await SwitchTo(owner, sword, choiceContext, SwitchReason.CardPlayed);
     }
 
