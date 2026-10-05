@@ -10,7 +10,7 @@ using MegaCrit.Sts2.Core.HoverTips;
 
 namespace MagicSwordsman.MagicSwordsmanCode.Cards.Durandal;
 
-// 뒤랑달 — 방어 · 10장 (content doc §2.6). Basic 2 · Common 3 · Uncommon 3 · Rare 2.
+// 뒤랑달 — 방어 · 10장 (content doc §2.6). Basic 2 · Common 4 · Uncommon 2 · Rare 2.
 // The current-sword effect (flat reduction of attack damage taken) and the HP<=30% switch ban are in DurandalBehavior.
 // Lore lines (research doc): 「천사 → 샤를마뉴 → 롤랑」 「'강한 불꽃'」 「성 베드로의 이빨, 성 바실리우스의 피,
 // 성 드니의 머리카락」 「바위를 열 번 내리쳐도 흠집조차 나지 않았다」 「롤랑의 틈」 「자기 몸 밑에 숨기고 죽는다」.
@@ -129,10 +129,10 @@ public sealed class DurandalTenBlows : DurandalCard
     }
 }
 
-/// <summary>롤랑의 틈 (Uncommon): deal damage equal to your Block (+2/L). BodySlam pattern (CalculatedDamage).</summary>
+/// <summary>롤랑의 틈 (Common): deal damage equal to your Block (+2/L). BodySlam pattern (CalculatedDamage).</summary>
 public sealed class DurandalRolandsBreach : DurandalCard
 {
-    public DurandalRolandsBreach() : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy)
+    public DurandalRolandsBreach() : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
     {
         WithCalculatedDamage(0, 1, static (card, _) => card.Owner?.Creature.Block ?? 0);
         WithDamagePerLevel(2);

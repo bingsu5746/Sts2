@@ -124,7 +124,7 @@
   "MAGICSWORDSMAN-CURRENT_SWORD_POWER.CLAIOMHSOLAIS.smartDescription": "End your turn holding this sword to charge 1 [gold]Light[/gold]. End your turn holding another sword and all Light fades. (Level {Level}: more [gold]Draw-cut[/gold] damage per Light.)",
   "MAGICSWORDSMAN-CURRENT_SWORD_POWER.CALADBOLG.title": "Current sword: Caladbolg",
   "MAGICSWORDSMAN-CURRENT_SWORD_POWER.CALADBOLG.description": "Attacks that target one enemy also hit up to 2 other random enemies for the same damage. Attacks deal less damage when there is only one enemy.",
-  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.CALADBOLG.smartDescription": "Attacks that target one enemy also hit up to 2 other random enemies for the same damage. Attacks deal less damage when there is only one enemy (level {Level}: 30% less, 3% less reduction per level).",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.CALADBOLG.smartDescription": "Attacks that target one enemy also hit up to 2 other random enemies for the same damage. Attacks deal less damage when there is only one enemy (level {Level}: 20% less, 2% less reduction per level).",
   "MAGICSWORDSMAN-SWORD_DANCE_POWER.title": "Sword Dance",
   "MAGICSWORDSMAN-SWORD_DANCE_POWER.description": "Whenever your [gold]current sword[/gold] changes, gain {Amount} [gold]Block[/gold].",
   "MAGICSWORDSMAN-SWORD_DANCE_POWER.smartDescription": "Whenever your [gold]current sword[/gold] changes, gain {Amount} [gold]Block[/gold].",

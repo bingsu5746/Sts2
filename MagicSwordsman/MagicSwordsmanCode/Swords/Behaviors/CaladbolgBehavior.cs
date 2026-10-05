@@ -19,7 +19,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 /// 칼라드볼그 (Caladbolg). Spec §7 [확정] / content doc §1.1, §2.10, 0.4 #16:
 ///  - Current effect: an attack that targets ONE enemy (a single-target card attack) also hits up to 2 other random
 ///    enemies (no duplicates) with the same damage — "up to 3 enemies". All-enemy and random attacks are unchanged.
-///  - Cost: when there is only one enemy, the owner's attacks deal less damage: 30/27/24/21/18/15% less at level
+///  - Cost: when there is only one enemy, the owner's attacks deal less damage: 20/18/16/14/12/10% less at level
 ///    0..5 (ModifyDamageMultiplicative). Not inherited.
 ///  - Kusanagi inherits: hits at most 2 enemies (1 extra), no penalty.
 ///  - 울스터의 영웅 (<see cref="CaladbolgUlsterHeroPower"/>): "up to 3" becomes "every enemy" and the penalty is halved
@@ -49,8 +49,8 @@ public sealed class CaladbolgBehavior : SwordBehavior
     /// <summary>치지 못한 왕의 방패 (content doc §3.1).</summary>
     public override CardModel? FailureCurse => ModelDb.Card<UnstruckKingsShield>();
 
-    /// <summary>Single-enemy damage reduction in percent at a level: 30, 27, 24, 21, 18, 15.</summary>
-    public static int PenaltyPercent(int level) => 30 - 3 * Math.Clamp(level, 0, SwordRegistry.MaxLevel);
+    /// <summary>Single-enemy damage reduction in percent at a level: 20, 18, 16, 14, 12, 10.</summary>
+    public static int PenaltyPercent(int level) => 20 - 2 * Math.Clamp(level, 0, SwordRegistry.MaxLevel);
 
     public override Task BeforeAttack(SwordContext ctx, AttackCommand command)
     {

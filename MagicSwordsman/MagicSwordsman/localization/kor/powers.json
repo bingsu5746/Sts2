@@ -124,7 +124,7 @@
   "MAGICSWORDSMAN-CURRENT_SWORD_POWER.CLAIOMHSOLAIS.smartDescription": "이 검을 든 채 턴을 마치면 [gold]빛[/gold]을 1 충전합니다. 다른 검을 든 채 턴을 마치면 빛이 모두 사라집니다. (강화 {Level}단계: [gold]발도[/gold] 빛 1당 피해가 늘어납니다.)",
   "MAGICSWORDSMAN-CURRENT_SWORD_POWER.CALADBOLG.title": "현재 검: 칼라드볼그",
   "MAGICSWORDSMAN-CURRENT_SWORD_POWER.CALADBOLG.description": "적 1명을 고르는 공격이 다른 무작위 적 최대 2명도 같은 피해로 맞힙니다. 적이 1명뿐이면 공격 피해가 줄어듭니다.",
-  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.CALADBOLG.smartDescription": "적 1명을 고르는 공격이 다른 무작위 적 최대 2명도 같은 피해로 맞힙니다. 적이 1명뿐이면 공격 피해가 줄어듭니다(강화 {Level}단계: 30%에서 단계마다 3%씩 덜 줄어듦).",
+  "MAGICSWORDSMAN-CURRENT_SWORD_POWER.CALADBOLG.smartDescription": "적 1명을 고르는 공격이 다른 무작위 적 최대 2명도 같은 피해로 맞힙니다. 적이 1명뿐이면 공격 피해가 줄어듭니다(강화 {Level}단계: 20%에서 단계마다 2%씩 덜 줄어듦).",
   "MAGICSWORDSMAN-SWORD_DANCE_POWER.title": "검무",
   "MAGICSWORDSMAN-SWORD_DANCE_POWER.description": "[gold]현재 검[/gold]이 바뀔 때마다 [gold]방어도[/gold]를 {Amount} 얻습니다.",
   "MAGICSWORDSMAN-SWORD_DANCE_POWER.smartDescription": "[gold]현재 검[/gold]이 바뀔 때마다 [gold]방어도[/gold]를 {Amount} 얻습니다.",

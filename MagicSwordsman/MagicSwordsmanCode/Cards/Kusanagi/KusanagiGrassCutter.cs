@@ -13,12 +13,12 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.Kusanagi;
 
 // 쿠사나기노쓰루기 — 계승 · 정화 · 10장 (content doc §2.3). Basic 2 · Common 3 · Uncommon 3 · Rare 2.
 
-/// <summary>풀 베기 (Basic): 6 damage (+1/L). Choose a status/curse card in hand and exhaust it.</summary>
+/// <summary>풀 베기 (Basic): 7 damage (+1/L). Choose a status/curse card in hand and exhaust it.</summary>
 public sealed class KusanagiGrassCutter : KusanagiCard
 {
     public KusanagiGrassCutter() : base(1, CardType.Attack, CardRarity.Basic, TargetType.AnyEnemy)
     {
-        WithDamage(6);
+        WithDamage(7);
         WithDamagePerLevel(1);
     }
 
