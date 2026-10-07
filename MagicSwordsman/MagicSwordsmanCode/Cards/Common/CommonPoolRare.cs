@@ -1,4 +1,5 @@
 using BaseLib.Utils;
+using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Powers;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Combat.History.Entries;
@@ -30,10 +31,10 @@ public sealed class SwordResonance : MagicSwordCard
     }
 }
 
-/// <summary>검성 — Power, cost 3 (2): the first time your current sword changes each turn, gain 1 energy.</summary>
+/// <summary>검성 — Power, cost 2 (1) (balance 2026-10-07, was 3 (2)): the first time your current sword changes each turn, gain 1 energy.</summary>
 public sealed class SwordSaint : MagicSwordCard
 {
-    public SwordSaint() : base(3, CardType.Power, CardRarity.Rare, TargetType.Self)
+    public SwordSaint() : base(2, CardType.Power, CardRarity.Rare, TargetType.Self)
     {
         WithEnergy(1);
         WithCostUpgradeBy(-1);
@@ -91,6 +92,14 @@ public sealed class FourSwordsOfTheTomb : MagicSwordCard
     protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<FourSwordsOfTheTombPower>(choiceContext, Owner.Creature, 1, Owner.Creature, this);
+
+        // Balance 2026-10-07: milestones already passed this combat pay out now (once), so playing it late is not a loss.
+        var summoned = SwordCombat.Get(Owner)?.Summoned.Count ?? 0;
+        if (summoned >= 2) await PlayerCmd.GainEnergy(FourSwordsOfTheTombPower.EnergyAt2, Owner);
+        if (summoned >= 3) await CardPileCmd.Draw(choiceContext, FourSwordsOfTheTombPower.CardsAt3, Owner);
+        if (summoned >= 4)
+            await PowerCmd.Apply<StrengthPower>(choiceContext, Owner.Creature, FourSwordsOfTheTombPower.StrengthAt4,
+                Owner.Creature, this);
     }
 }
 

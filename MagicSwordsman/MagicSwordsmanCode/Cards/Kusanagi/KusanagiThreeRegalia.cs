@@ -14,6 +14,8 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.Kusanagi;
 /// <summary>
 /// 삼종신기 (Rare power): cost 2 (1 from level 3). Switching from Kusanagi to another sword keeps the inherited effect
 /// until the end of that turn; whenever you switch into Kusanagi from another sword, draw 1 card.
+/// Balance 2026-10-07: playing it also grants 1 extra switch-in to Kusanagi this combat (the 2-per-combat limit made
+/// the draw worth at most 2 cards); if Kusanagi had already gone back to Mangeomchong it comes back out.
 /// </summary>
 public sealed class KusanagiThreeRegalia : KusanagiCard
 {
@@ -28,5 +30,12 @@ public sealed class KusanagiThreeRegalia : KusanagiCard
     {
         await PowerCmd.Apply<KusanagiRegaliaPower>(choiceContext, Owner.Creature,
             DynamicVars["KusanagiRegaliaPower"].BaseValue, Owner.Creature, this);
+
+        if (SwordCombat.Get(Owner) is { } state)
+        {
+            state.KusanagiSwitchIns--;
+            if (state.ReturnedToVault.Remove(SwordId.Kusanagi)) state.Present.Add(SwordId.Kusanagi);
+            Visuals.SwordVisuals.Sync(Owner);
+        }
     }
 }
