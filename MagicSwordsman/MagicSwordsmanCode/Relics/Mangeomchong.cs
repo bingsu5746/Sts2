@@ -521,6 +521,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     {
         if (player != Owner) return;
         SwordVisuals.Sync(Owner); // presentation only (creates the rig once the combat room exists, e.g. Onimaru)
+        MotionDirector.OnTurnStart(Owner);
         foreach (var sword in OwnedSwords)
             await SwordRegistry.Get(sword).OnPlayerTurnStart(SwordCombat.ContextFor(Owner, sword), choiceContext);
     }
@@ -546,10 +547,34 @@ public class Mangeomchong : MagicSwordsmanRelic
         }
     }
 
-    /// <summary>Presentation: a short guard motion whenever the owner gains Block in combat.</summary>
+    // ---- presentation only: which combat motion Ensifer plays (MotionDirector)
+
+    /// <summary>A guard motion whenever the owner gains Block in combat.</summary>
     public override Task AfterBlockGained(Creature creature, decimal amount, ValueProp props, CardModel? cardSource)
     {
-        if (amount > 0 && creature == Owner.Creature) SwordVisuals.PlayMotion(Owner, "Block");
+        if (amount > 0 && creature == Owner.Creature) MotionDirector.OnBlockGained(Owner, amount);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Skills / powers get a casting motion; attacks remember the card for the attack variant.</summary>
+    public override Task BeforeCardPlayed(CardPlay cardPlay)
+    {
+        if (cardPlay.Card.Owner == Owner && cardPlay.IsFirstInSeries) MotionDirector.OnCardPlayed(Owner, cardPlay);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>A hit reaction sized to the damage taken (or a guarded flinch when Block took all of it).</summary>
+    public override Task AfterDamageReceived(PlayerChoiceContext choiceContext, Creature target, DamageResult result,
+        ValueProp props, Creature? dealer, CardModel? cardSource)
+    {
+        if (target == Owner.Creature && dealer != target && !props.HasFlag(ValueProp.SkipHurtAnim))
+            MotionDirector.OnDamageReceived(Owner, result.UnblockedDamage, result.WasFullyBlocked);
+        return Task.CompletedTask;
+    }
+
+    public override Task AfterCombatVictory(CombatRoom room)
+    {
+        if (!Owner.Creature.IsDead) MotionDirector.OnVictory(Owner);
         return Task.CompletedTask;
     }
 

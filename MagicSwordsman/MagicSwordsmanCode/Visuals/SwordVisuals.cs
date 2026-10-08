@@ -60,18 +60,20 @@ public static class SwordVisuals
     }
 
     /// <summary>
-    /// Plays one of the character's own AnimationPlayer clips (e.g. "Summon", "Block") through BaseLib's handler.
-    /// The game only triggers Attack / Cast / Hit / Dead; these extra motions are fired from our own hooks.
+    /// Plays one of the character's own AnimationPlayer clips (e.g. "Summon_Gram", "Block_Cross"); MotionDirector
+    /// decides which. Falls back to the base clip ("Summon_X" -> "Summon") if a variant is missing.
+    /// <paramref name="onlyIfIdle"/>: skip it while another clip (an attack, a cast...) is playing.
     /// Presentation only; silently does nothing if the clip or the creature node is missing.
     /// </summary>
-    public static void PlayMotion(Player player, string clip)
+    public static void PlayMotion(Player player, string clip, bool onlyIfIdle = false)
     {
         try
         {
-            var node = NCombatRoom.Instance?.GetCreatureNode(player.Creature);
-            if (node == null) return;
-            var anim = FindChild<AnimationPlayer>(node.Visuals);
-            if (anim == null || !anim.HasAnimation(clip)) return;
+            var anim = MainAnimationPlayer(player);
+            if (anim == null) return;
+            if (!anim.HasAnimation(clip) && clip.Contains('_')) clip = clip[..clip.IndexOf('_')];
+            if (!anim.HasAnimation(clip)) return;
+            if (onlyIfIdle && anim.IsPlaying() && anim.CurrentAnimation != "idle") return;
             anim.Stop();
             anim.Play(clip);
         }
@@ -81,8 +83,26 @@ public static class SwordVisuals
         }
     }
 
+    /// <summary>
+    /// The character scene's main AnimationPlayer (a direct child named "AnimationPlayer"; the scene also has a
+    /// "HandSpin" player that only spins the palm circles). Hooks MotionDirector on first use.
+    /// </summary>
+    private static AnimationPlayer? MainAnimationPlayer(Player player)
+    {
+        var node = NCombatRoom.Instance?.GetCreatureNode(player.Creature);
+        var visuals = node?.Visuals;
+        if (visuals == null) return null;
+        var anim = visuals.GetNodeOrNull<AnimationPlayer>("AnimationPlayer") ?? FindChild<AnimationPlayer>(visuals);
+        if (anim != null) MotionDirector.Hook(player, anim);
+        return anim;
+    }
+
     /// <summary>Combat over: forget the rig (its nodes die with the combat room).</summary>
-    public static void Clear(Player player) => Rigs.Remove(player);
+    public static void Clear(Player player)
+    {
+        Rigs.Remove(player);
+        MotionDirector.Clear(player);
+    }
 
     // ------------------------------------------------------------------ internals
 
@@ -148,23 +168,8 @@ public static class SwordVisuals
 
         rig = new Rig { Root = root };
         Rigs[player] = rig;
-        HookIdleReturn(creatureNode);
+        MainAnimationPlayer(player);
         return rig;
-    }
-
-    /// <summary>
-    /// BaseLib plays our AnimationPlayer clips by name but does not go back to "idle" after one-shot clips
-    /// (Attack / Cast / Hit). Queue idle when a non-looping clip finishes. Dead stays on its last frame.
-    /// </summary>
-    private static void HookIdleReturn(NCreature creatureNode)
-    {
-        var player = FindChild<AnimationPlayer>(creatureNode.Visuals);
-        if (player == null || player.HasMeta("ms_idle_hook") || !player.HasAnimation("idle")) return;
-        player.SetMeta("ms_idle_hook", true);
-        player.AnimationFinished += name =>
-        {
-            if (name != "idle" && name != "Dead" && GodotObject.IsInstanceValid(player)) player.Play("idle");
-        };
     }
 
     private static T? FindChild<T>(Node? node) where T : Node

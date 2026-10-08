@@ -262,6 +262,7 @@ public static class SwordCombat
         state.SwitchesInLastSwitchTurn++;
         if (sword == SwordId.Kusanagi && old != null) state.KusanagiSwitchIns++;
         SwordVisuals.Sync(player);
+        MotionDirector.OnSwitched(player);
 
         await EnsureCurrentSwordPower(player, choiceContext);
 
@@ -294,7 +295,7 @@ public static class SwordCombat
         state.Present.Add(sword);
         state.Summoned.Add(sword);
         SwordVisuals.Sync(player);
-        SwordVisuals.PlayMotion(player, "Summon");
+        MotionDirector.OnSummoned(player, sword);
         await SwordRegistry.Get(sword).OnSummoned(ContextFor(player, sword), choiceContext);
 
         if (!state.FirstSummonBonusUsed)

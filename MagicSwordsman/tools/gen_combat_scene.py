@@ -1,120 +1,224 @@
-"""Generates MagicSwordsman/scenes/magic_swordsman_combat.tscn (character body + motion clips).
-Clips: idle (loop), Attack, Cast, Summon, Block, Hit, Dead. Attack/Cast/Hit/Dead are triggered by the game
-through BaseLib; Summon/Block by SwordVisuals.PlayMotion. Re-run after changing timings:  python3 tools/gen_combat_scene.py
+"""Generates MagicSwordsman/scenes/magic_swordsman_combat.tscn: the split Ensifer rig + the motion library.
+
+Rig (Visuals/Rig, shown at 0.5 scale): Body, Head, CoatL, CoatR, UpperL > ForeL > HandL, UpperR > ForeR > HandR, Sigil.
+HandL/HandR: the palm magic circles he steers his swords with (no object in his hands; user request 2026-10-08):
+a hexagram core + a rune ring facing the camera + two tilted orbit rings (gyroscope / 'higher-dimension' look).
+The clips drive each hand group's scale + color; a second AnimationPlayer (HandSpin) spins the layers forever.
+Joints: head, ul, fl, ur, fr, cl, cr (radians, + = clockwise on screen), plus root x/y/rot/scale and tint.
+Sign guide (front view, enemies to the right): ur/fr negative = right arm swings out to the right / up;
+ul/fl positive = left arm swings out to the left / up; cl positive / cr negative = coat flaps flare outward.
+Clips: see MOTIONS below. The game triggers Attack / Cast / Hit / Dead; MotionDirector (C#) swaps those for a
+variant from this library (by current sword, card type, damage...) and fires the extra ones (Summon_*, Swap_*,
+Block_*, Power_*, Victory...). Re-run after editing:  python3 tools/gen_combat_scene.py
 """
-import os,json
-OUT=os.path.join(os.path.dirname(__file__),'..','MagicSwordsman','scenes','magic_swordsman_combat.tscn')
-PARTS=json.load(open(os.path.join(os.path.dirname(__file__),'..','MagicSwordsman','images','character','parts','parts.json')))
-CW,CH=PARTS['_size']; CX,CY=CW/2,CH/2   # Visuals origin = centre of the 800 px art (shown at 0.5 scale)
-CHEST=(175-CX,200-CY)                    # glowing pendant, in part space
-def V(x,y): return f'Vector2({x}, {y})'
-def C(r,g,b,a=1): return f'Color({r}, {g}, {b}, {a})'
-def track(i,path,keys,interp=2):
-    t=', '.join(str(k[0]) for k in keys); v=', '.join(k[1] for k in keys)
-    return f'''tracks/{i}/type = "value"
+import os,json,math
+HERE=os.path.dirname(__file__)
+OUT=os.path.join(HERE,'..','MagicSwordsman','scenes','magic_swordsman_combat.tscn')
+PARTS=json.load(open(os.path.join(HERE,'..','MagicSwordsman','images','character','parts','parts.json')))
+CW,CH=PARTS['_size']; CX,CY=CW/2,CH/2
+CHEST=(175-CX,200-CY)
+REST_Y=-200
+JOINTS={'head':'Visuals/Rig/Head','ul':'Visuals/Rig/UpperL','fl':'Visuals/Rig/UpperL/ForeL',
+        'ur':'Visuals/Rig/UpperR','fr':'Visuals/Rig/UpperR/ForeR','cl':'Visuals/Rig/CoatL','cr':'Visuals/Rig/CoatR'}
+SWORD_COL={'Gram':(0.95,0.78,0.30),'Ganjiang':(0.45,0.55,0.75),'Moye':(0.90,0.75,0.82),'Kusanagi':(0.45,0.80,0.55),'Tyrfing':(1.0,0.55,0.20),
+ 'Dainsleif':(0.75,0.15,0.20),'Durandal':(0.98,0.95,0.85),'Skofnung':(0.65,0.85,1.0),'Onimaru':(0.92,0.92,0.95),'ClaiomhSolais':(1.0,1.0,0.75),'Caladbolg':(0.40,0.90,0.95)}
+PURPLE=(0.85,0.65,1.0)
+HAND={'L':'Visuals/Rig/UpperL/ForeL/HandL','R':'Visuals/Rig/UpperR/ForeR/HandR'}
+HAND_REST=(0.34,0.55)  # (scale, alpha) while idle: a small circle hovering over each palm
+def V(x,y): return f'Vector2({x:.3f}, {y:.3f})'
+def C(r,g,b,a=1.0): return f'Color({r:.3f}, {g:.3f}, {b:.3f}, {a:.3f})'
+
+# ---------------------------------------------------------------- clip builder
+class Clip:
+    def __init__(s,name,length,loop=False): s.name=name; s.length=length; s.loop=loop; s.tr={}
+    def key(s,track,t,val): s.tr.setdefault(track,[]).append((round(t,3),val)); return s
+    def pose(s,t,**j):
+        """Keyframe joints at time t. Keys: x,y (root offset), rot, sx, sy, tint=(r,g,b), and joint names."""
+        for k,v in j.items():
+            if k in JOINTS: s.key(JOINTS[k]+':rotation',t,f'{v:.4f}')
+            elif k=='rot': s.key('Visuals:rotation',t,f'{v:.4f}')
+        if 'x' in j or 'y' in j: s.key('Visuals:position',t,V(j.get('x',0),REST_Y+j.get('y',0)))
+        if 'sx' in j or 'sy' in j: s.key('Visuals:scale',t,V(j.get('sx',1),j.get('sy',1)))
+        if 'tint' in j: s.key('Visuals:modulate',t,C(*j['tint']))
+        return s
+    def fx(s,node,t,a,col=PURPLE,**kw):
+        s.key(node+':modulate',t,C(*col,a))
+        if 'scale' in kw: s.key(node+':scale',t,V(*kw['scale']))
+        if 'rotation' in kw: s.key(node+':rotation',t,f'{kw["rotation"]:.4f}')
+        if 'pos' in kw: s.key(node+':position',t,V(*kw['pos']))
+        return s
+    def hand(s,side,t,scale,a,col=PURPLE):
+        """Palm magic circle(s): side 'L', 'R' or 'LR'."""
+        for h in side: s.key(HAND[h]+':scale',t,V(scale,scale)); s.key(HAND[h]+':modulate',t,C(*col,a))
+        return s
+REST={**{JOINTS[j]+':rotation':'0.0000' for j in JOINTS},'Visuals:position':V(0,REST_Y),'Visuals:rotation':'0.0000',
+      'Visuals:scale':V(1,1),'Visuals:modulate':C(1,1,1),'Circle:modulate':C(*PURPLE,0),'Slash:modulate':C(*PURPLE,0),
+      'Shield:modulate':C(1,1,1,0),'Visuals/Rig/Sigil:modulate':C(1,1,1,0.4),'Visuals/Rig/Sigil:scale':V(1,1),
+      **{HAND[h]+':scale':V(HAND_REST[0],HAND_REST[0]) for h in HAND},**{HAND[h]+':modulate':C(*PURPLE,HAND_REST[1]) for h in HAND}}
+def emit(clip,aid):
+    tracks=dict(clip.tr)
+    for k,v in REST.items():  # every clip resets what it does not animate
+        if k not in tracks: tracks[k]=[(0.0,v)]
+    out=[f'[sub_resource type="Animation" id="{aid}"]',f'resource_name = "{clip.name}"',f'length = {clip.length}']
+    if clip.loop: out.append('loop_mode = 1')
+    for i,(path,keys) in enumerate(tracks.items()):
+        keys=sorted(dict(keys).items())
+        out.append(f'''tracks/{i}/type = "value"
 tracks/{i}/imported = false
 tracks/{i}/enabled = true
 tracks/{i}/path = NodePath("{path}")
-tracks/{i}/interp = {interp}
+tracks/{i}/interp = 2
 tracks/{i}/loop_wrap = true
 tracks/{i}/keys = {{
-"times": PackedFloat32Array({t}),
+"times": PackedFloat32Array({', '.join(str(t) for t,_ in keys)}),
 "transitions": PackedFloat32Array({', '.join('1' for _ in keys)}),
 "update": 0,
-"values": [{v}]
-}}'''
-R=['Visuals/Rig/ArmL:rotation','Visuals/Rig/ArmR:rotation','Visuals/Rig/CoatL:rotation','Visuals/Rig/CoatR:rotation']
-BASE=[('Visuals:position',V(0,-200)),('Visuals:rotation','0.0'),('Visuals:scale',V(1,1)),('Visuals:modulate',C(1,1,1))]+[(r,'0.0') for r in R]+[
-      ('Circle:modulate',C(1,1,1,0)),('Slash:modulate',C(1,1,1,0)),('Shield:modulate',C(1,1,1,0))]
-def anim(aid,name,length,tracks,loop=False):
-    # every clip resets the tracks it does not animate, so clips never leave leftovers
-    used={p for p,_ in tracks}; allt=list(tracks)+[(p,[(0.0,v)]) for p,v in BASE if p not in used]
-    body='\n'.join(track(i,p,k) for i,(p,k) in enumerate(allt))
-    return f'[sub_resource type="Animation" id="{aid}"]\nresource_name = "{name}"\nlength = {length}\n'+('loop_mode = 1\n' if loop else '')+body+'\n'
-def rot(path,keys): return (path,[(t,str(v)) for t,v in keys])
-A=[]
-A.append(anim('a_idle','idle',3.0,[
- ('Visuals:position',[(0.0,V(0,-200)),(1.5,V(0,-204)),(3.0,V(0,-200))]),
- ('Visuals:scale',[(0.0,V(1,1)),(1.5,V(1.006,1.014)),(3.0,V(1,1))]),
- rot('Visuals/Rig/ArmL:rotation',[(0.0,0.0),(1.5,0.035),(3.0,0.0)]),
- rot('Visuals/Rig/ArmR:rotation',[(0.0,0.0),(1.5,-0.035),(3.0,0.0)]),
- rot('Visuals/Rig/CoatL:rotation',[(0.0,0.0),(0.9,0.03),(2.1,-0.012),(3.0,0.0)]),
- rot('Visuals/Rig/CoatR:rotation',[(0.0,0.0),(1.2,-0.035),(2.4,0.01),(3.0,0.0)]),
- ('Visuals/Rig/Sigil:modulate',[(0.0,C(1,1,1,0.35)),(1.5,C(1,1,1,0.9)),(3.0,C(1,1,1,0.35))]),
-],loop=True))
-A.append(anim('a_attack','Attack',0.6,[
- ('Visuals:position',[(0.0,V(0,-200)),(0.1,V(-14,-198)),(0.22,V(55,-202)),(0.6,V(0,-200))]),
- rot('Visuals/Rig/ArmR:rotation',[(0.0,0.0),(0.1,0.18),(0.22,-1.0),(0.38,-0.85),(0.6,0.0)]),
- rot('Visuals/Rig/ArmL:rotation',[(0.0,0.0),(0.12,-0.1),(0.25,0.2),(0.6,0.0)]),
- rot('Visuals/Rig/CoatL:rotation',[(0.0,0.0),(0.22,0.05),(0.6,0.0)]),
- rot('Visuals/Rig/CoatR:rotation',[(0.0,0.0),(0.22,0.07),(0.6,0.0)]),
- ('Slash:modulate',[(0.0,C(1,1,1,0)),(0.18,C(1,1,1,0)),(0.24,C(1,1,1,1)),(0.46,C(1,1,1,0))]),
- ('Slash:scale',[(0.18,V(0.5,0.5)),(0.32,V(1.1,1.1)),(0.46,V(1.25,1.25))]),
-]))
-A.append(anim('a_cast','Cast',0.7,[
- ('Visuals:position',[(0.0,V(0,-200)),(0.25,V(0,-212)),(0.7,V(0,-200))]),
- ('Visuals:modulate',[(0.0,C(1,1,1)),(0.25,C(1.3,1.18,1.55)),(0.7,C(1,1,1))]),
- rot('Visuals/Rig/ArmL:rotation',[(0.0,0.0),(0.25,0.4),(0.7,0.0)]),
- rot('Visuals/Rig/ArmR:rotation',[(0.0,0.0),(0.25,-0.4),(0.7,0.0)]),
- rot('Visuals/Rig/CoatL:rotation',[(0.0,0.0),(0.25,0.04),(0.7,0.0)]),
- rot('Visuals/Rig/CoatR:rotation',[(0.0,0.0),(0.25,-0.04),(0.7,0.0)]),
- ('Visuals/Rig/Sigil:modulate',[(0.0,C(1,1,1,0.4)),(0.25,C(1,1,1,1)),(0.7,C(1,1,1,0.4))]),
- ('Circle:modulate',[(0.0,C(1,1,1,0)),(0.12,C(1,1,1,0.9)),(0.7,C(1,1,1,0))]),
- ('Circle:scale',[(0.0,V(0.25,0.09)),(0.7,V(0.75,0.26))]),
-]))
-A.append(anim('a_summon','Summon',0.95,[
- ('Visuals:position',[(0.0,V(0,-200)),(0.3,V(0,-220)),(0.95,V(0,-200))]),
- ('Visuals:modulate',[(0.0,C(1,1,1)),(0.3,C(1.45,1.22,1.85)),(0.95,C(1,1,1))]),
- rot('Visuals/Rig/ArmL:rotation',[(0.0,0.0),(0.3,0.6),(0.6,0.55),(0.95,0.0)]),
- rot('Visuals/Rig/ArmR:rotation',[(0.0,0.0),(0.3,-0.6),(0.6,-0.55),(0.95,0.0)]),
- rot('Visuals/Rig/CoatL:rotation',[(0.0,0.0),(0.3,0.05),(0.95,0.0)]),
- rot('Visuals/Rig/CoatR:rotation',[(0.0,0.0),(0.3,-0.05),(0.95,0.0)]),
- ('Visuals/Rig/Sigil:modulate',[(0.0,C(1,1,1,0.4)),(0.3,C(1.5,1.5,1.5,1)),(0.95,C(1,1,1,0.4))]),
- ('Visuals/Rig/Sigil:scale',[(0.0,V(1,1)),(0.3,V(1.5,1.5)),(0.95,V(1,1))]),
- ('Circle:modulate',[(0.0,C(1,1,1,0)),(0.15,C(1,1,1,1)),(0.95,C(1,1,1,0))]),
- ('Circle:scale',[(0.0,V(0.3,0.1)),(0.95,V(1.0,0.34))]),
- ('Circle:rotation',[(0.0,'0.0'),(0.95,'1.2')]),
-]))
-A.append(anim('a_block','Block',0.55,[
- ('Visuals:position',[(0.0,V(0,-200)),(0.12,V(-10,-200)),(0.55,V(0,-200))]),
- rot('Visuals/Rig/ArmR:rotation',[(0.0,0.0),(0.12,-0.55),(0.55,0.0)]),
- rot('Visuals/Rig/ArmL:rotation',[(0.0,0.0),(0.12,0.2),(0.55,0.0)]),
- rot('Visuals/Rig/CoatL:rotation',[(0.0,0.0),(0.12,0.05),(0.55,0.0)]),
- rot('Visuals/Rig/CoatR:rotation',[(0.0,0.0),(0.12,0.05),(0.55,0.0)]),
- ('Shield:modulate',[(0.0,C(1,1,1,0)),(0.1,C(1,1,1,0.55)),(0.55,C(1,1,1,0))]),
- ('Shield:scale',[(0.0,V(0.55,0.55)),(0.15,V(0.7,0.7)),(0.55,V(0.74,0.74))]),
-]))
-A.append(anim('a_hit','Hit',0.45,[
- ('Visuals:position',[(0.0,V(0,-200)),(0.06,V(-28,-200)),(0.12,V(-18,-200)),(0.18,V(-26,-200)),(0.45,V(0,-200))]),
- ('Visuals:modulate',[(0.0,C(1,1,1)),(0.05,C(1.8,0.75,0.75)),(0.25,C(1,1,1))]),
- ('Visuals:rotation',[(0.0,'0.0'),(0.06,'-0.05'),(0.45,'0.0')]),
- rot('Visuals/Rig/ArmL:rotation',[(0.0,0.0),(0.06,0.18),(0.45,0.0)]),
- rot('Visuals/Rig/ArmR:rotation',[(0.0,0.0),(0.06,-0.12),(0.45,0.0)]),
- rot('Visuals/Rig/CoatL:rotation',[(0.0,0.0),(0.08,0.045),(0.45,0.0)]),
- rot('Visuals/Rig/CoatR:rotation',[(0.0,0.0),(0.08,0.06),(0.45,0.0)]),
-]))
-A.append(anim('a_dead','Dead',1.2,[
- ('Visuals:position',[(0.0,V(0,-200)),(0.6,V(-10,-170)),(1.2,V(-14,-160))]),
- ('Visuals:rotation',[(0.0,'0.0'),(0.6,'-0.25'),(1.2,'-0.3')]),
- ('Visuals:modulate',[(0.0,C(1,1,1)),(0.3,C(1.4,0.8,1.4)),(1.2,C(0.6,0.5,0.7,0.35))]),
- rot('Visuals/Rig/ArmL:rotation',[(0.0,0.0),(0.6,-0.12),(1.2,-0.15)]),
- rot('Visuals/Rig/ArmR:rotation',[(0.0,0.0),(0.6,0.12),(1.2,0.15)]),
-]))
-names=['idle','Attack','Cast','Summon','Block','Hit','Dead']; ids=['a_idle','a_attack','a_cast','a_summon','a_block','a_hit','a_dead']
-lib='[sub_resource type="AnimationLibrary" id="lib"]\n_data = {\n'+',\n'.join(f'&"{n}": SubResource("{i}")' for n,i in zip(names,ids))+'\n}\n'
+"values": [{', '.join(v for _,v in keys)}]
+}}''')
+    return '\n'.join(out)+'\n'
+R0=dict(x=0,y=0,rot=0,head=0,ul=0,fl=0,ur=0,fr=0,cl=0,cr=0)
+def rest(c,t): c.hand('LR',t,*HAND_REST); return c.pose(t,**R0,sx=1,sy=1,tint=(1,1,1))
+M=[]
+
+# ---------------------------------------------------------------- idle family (looping / fidgets)
+c=Clip('idle',3.0,loop=True)
+for t,b in ((0,0),(1.5,1),(3.0,0)):
+    c.pose(t,y=-4*b,sx=1+0.006*b,sy=1+0.014*b,head=0.02*b,ul=0.035*b,ur=-0.035*b,fl=0.02*b,fr=-0.02*b)
+    c.hand('LR',t,HAND_REST[0]*(1+0.12*b),HAND_REST[1]+0.2*b)
+c.pose(0.9,cl=0.03,cr=-0.012); c.pose(2.1,cl=-0.012,cr=-0.035); c.pose(0,cl=0,cr=0); c.pose(3.0,cl=0,cr=0)
+c.fx('Visuals/Rig/Sigil',0,0.35,(1,1,1)).fx('Visuals/Rig/Sigil',1.5,0.9,(1,1,1)).fx('Visuals/Rig/Sigil',3.0,0.35,(1,1,1)); M.append(c)
+c=Clip('Idle_Look',2.4); rest(c,0); c.pose(0.5,head=0.12,y=-2); c.pose(1.3,head=0.12,y=-2); c.pose(1.8,head=-0.05); rest(c,2.4); M.append(c)
+c=Clip('Idle_Flex',2.2); rest(c,0); c.pose(0.5,fr=-0.5,ur=-0.15); c.pose(0.8,fr=-0.42,ur=-0.15); c.pose(1.1,fr=-0.5,ur=-0.15); rest(c,2.2)
+c.fx('Visuals/Rig/Sigil',0.8,0.9,(1,1,1)); M.append(c)
+# Idle_Weave: raises the left palm and turns the circle over like a dial, the right hand adjusting it
+c=Clip('Idle_Weave',2.6); rest(c,0); c.pose(0.5,ul=0.25,fl=0.9,ur=-0.15,fr=-0.7,head=0.08); c.hand('L',0.5,0.55,0.9); c.hand('R',0.5,0.3,0.6)
+c.pose(1.1,ul=0.3,fl=1.0,ur=-0.2,fr=-0.95); c.hand('L',1.1,0.65,1.0); c.hand('R',1.1,0.42,0.9)
+c.pose(1.7,ul=0.25,fl=0.85,ur=-0.12,fr=-0.6); c.hand('L',1.7,0.5,0.85); rest(c,2.6); M.append(c)
+c=Clip('Idle_Breath',3.0); rest(c,0); c.pose(1.2,y=-8,sy=1.03,ul=0.07,ur=-0.07,head=-0.04,cl=0.03,cr=-0.03); rest(c,3.0); M.append(c)
+
+# ---------------------------------------------------------------- attacks
+def attack(name,col,wind,strike,dur=0.6,lunge=55,slash_rot=0.35,slash_scale=1.1,arm=('ur','fr'),both=False,heavy=False,hits=1):
+    c=Clip(name,dur); rest(c,0)
+    a,f=arm
+    side=('LR' if both else ('R' if a=='ur' else 'L'))
+    c.hand(side,0.1*dur/0.6*(1.4 if heavy else 1),0.6 if not heavy else 0.75,0.85,col)
+    w={a:wind[0],f:wind[1],'x':-14 if not heavy else -24,'rot':-0.05 if not heavy else -0.09,'cl':0.02,'cr':0.02}
+    if both: w.update(ul=-wind[0]*0.8,fl=-wind[1]*0.8)
+    c.pose(0.1*dur/0.6*(1.4 if heavy else 1),**w)
+    hit_t=0.22*dur/0.6*(1.3 if heavy else 1)
+    for h in range(hits):
+        t=hit_t+h*0.12
+        s={a:strike[0],f:strike[1],'x':lunge,'rot':0.08 if not heavy else 0.12,'cl':0.06,'cr':0.06,'head':0.05}
+        if both: s.update(ul=-strike[0]*0.8,fl=-strike[1]*0.8)
+        if heavy: s.update(y=6,sy=0.97)
+        c.pose(t,**s)
+        if hits>1 and h<hits-1: c.pose(t+0.06,**{a:strike[0]*0.6,f:strike[1]*0.6,'x':lunge*0.8})
+        c.hand(side,t-0.04,0.75,0.9,col); c.hand(side,t+0.03,1.0*min(slash_scale,1.4),1.0,col); c.hand(side,t+0.18,0.55,0.75,col)
+        c.fx('Slash',t-0.04,0,col,scale=(0.5*slash_scale,0.5*slash_scale),rotation=slash_rot+h*0.5)
+        c.fx('Slash',t+0.02,1,col,scale=(1.0*slash_scale,1.0*slash_scale))
+        c.fx('Slash',t+0.2,0,col,scale=(1.2*slash_scale,1.2*slash_scale))
+    rest(c,dur); return c
+M.append(attack('Attack',PURPLE,(0.18,0.1),(-1.0,-0.2)))
+M.append(attack('Attack_Thrust',PURPLE,(0.25,0.4),(-1.45,-0.05),lunge=70,slash_rot=0.0,slash_scale=0.8))
+M.append(attack('Attack_Overhead',PURPLE,(-2.2,-0.6),(-0.6,-0.1),dur=0.7,slash_rot=1.3,heavy=True))
+M.append(attack('Attack_Backhand',PURPLE,(-1.3,-0.5),(0.15,0.1),lunge=40,slash_rot=-0.6))
+M.append(attack('Attack_Double',PURPLE,(0.18,0.1),(-1.0,-0.25),dur=0.75,hits=2))
+M.append(attack('Attack_Flurry',PURPLE,(0.1,0.1),(-0.9,-0.3),dur=0.9,hits=3,lunge=40))
+M.append(attack('Attack_Heavy',PURPLE,(-1.9,-0.4),(-0.4,0.0),dur=0.85,lunge=75,slash_rot=1.0,slash_scale=1.5,heavy=True))
+M.append(attack('Attack_Sweep',PURPLE,(0.5,0.2),(-1.7,-0.3),dur=0.75,lunge=30,slash_rot=-0.2,slash_scale=1.8,both=True))
+M.append(attack('Attack_Left',PURPLE,(-0.3,-0.2),(1.1,0.3),lunge=35,slash_rot=2.6,arm=('ul','fl')))
+M.append(attack('Attack_Command',PURPLE,(0.1,0.0),(-1.3,-0.1),lunge=10,slash_rot=0.2))
+STYLE={'Gram':dict(wind=(-2.0,-0.5),strike=(-0.5,-0.1),heavy=True,dur=0.75,slash_scale=1.3,slash_rot=1.2),
+ 'Ganjiang':dict(wind=(0.2,0.1),strike=(-1.0,-0.25),hits=2,dur=0.75,both=True),
+ 'Moye':dict(wind=(0.2,0.1),strike=(-0.9,-0.3),hits=2,dur=0.75,both=True,lunge=35),
+ 'Kusanagi':dict(wind=(0.4,0.2),strike=(-1.6,-0.2),slash_scale=1.6,slash_rot=-0.1,lunge=45),
+ 'Tyrfing':dict(wind=(-1.6,-0.6),strike=(-0.8,0.0),slash_rot=0.9,slash_scale=1.3,lunge=65),
+ 'Dainsleif':dict(wind=(0.15,0.1),strike=(-1.1,-0.3),hits=3,dur=0.9,lunge=45),
+ 'Durandal':dict(wind=(-1.2,-0.3),strike=(-0.7,-0.1),heavy=True,dur=0.8,slash_rot=0.8),
+ 'Skofnung':dict(wind=(0.3,0.3),strike=(-1.35,-0.15),lunge=60,slash_rot=0.1),
+ 'Onimaru':dict(wind=(0.0,0.0),strike=(-1.2,-0.1),lunge=8,slash_rot=0.3,slash_scale=1.2),
+ 'ClaiomhSolais':dict(wind=(0.6,0.5),strike=(-1.5,-0.05),lunge=50,slash_rot=0.0,slash_scale=1.6),
+ 'Caladbolg':dict(wind=(-2.4,-0.4),strike=(-0.3,0.1),heavy=True,dur=0.9,lunge=40,slash_rot=1.4,slash_scale=2.0)}
+for sw,st in STYLE.items(): M.append(attack('Attack_'+sw,SWORD_COL[sw],**st))
+
+# ---------------------------------------------------------------- skills / powers
+def cast(name,dur,peak,col=PURPLE,circle=0.75,sigil=1.0,y=-12,glow=(1.3,1.18,1.55)):
+    c=Clip(name,dur); rest(c,0); t=dur*0.35
+    c.pose(t,y=y,tint=glow,**peak); c.pose(dur*0.6,y=y*0.6,**{k:v*0.8 for k,v in peak.items()})
+    hs=0.55+0.35*max(circle,0.4); c.hand('LR',t*0.6,hs*0.8,0.85,col); c.hand('LR',t,hs,1.0,col); c.hand('LR',dur*0.75,hs*0.7,0.8,col)
+    c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1)).fx('Visuals/Rig/Sigil',t,sigil,(1,1,1)).fx('Visuals/Rig/Sigil',dur,0.4,(1,1,1))
+    if circle: c.fx('Circle',0,0,col,scale=(circle*0.33,circle*0.12)).fx('Circle',t*0.5,0.9,col).fx('Circle',dur,0,col,scale=(circle,circle*0.34))
+    rest(c,dur); return c
+M.append(cast('Cast',0.7,dict(ul=0.4,ur=-0.4,cl=0.04,cr=-0.04,fl=0.1,fr=-0.1)))
+M.append(cast('Cast_Point',0.6,dict(ur=-1.4,fr=-0.05,head=0.06),circle=0.5))
+M.append(cast('Cast_LeftHand',0.65,dict(ul=1.2,fl=0.3,head=-0.06),circle=0.5))
+M.append(cast('Cast_Chest',0.7,dict(fr=-1.6,ur=-0.1,fl=1.4,ul=0.1,head=0.08),circle=0.4,sigil=1.4))
+M.append(cast('Cast_Wide',0.75,dict(ul=0.9,ur=-0.9,fl=0.2,fr=-0.2,cl=0.06,cr=-0.06,head=-0.08),circle=0.9))
+M.append(cast('Cast_Draw',0.55,dict(ur=-0.6,fr=-1.2,head=0.1),circle=0.0,y=-6))
+M.append(cast('Cast_Ward',0.7,dict(ul=0.5,fl=1.2,ur=-0.5,fr=-1.2),circle=0.6))
+M.append(cast('Cast_Debuff',0.65,dict(ur=-1.2,fr=-0.4,head=0.12,rot=0.04),col=(0.6,0.9,0.4),circle=0.5,glow=(1.1,1.3,1.0)))
+M.append(cast('Power_Rise',1.0,dict(ul=1.4,ur=-1.4,fl=0.3,fr=-0.3,head=-0.12,cl=0.07,cr=-0.07),circle=1.1,sigil=1.6,y=-24,glow=(1.5,1.25,1.9)))
+M.append(cast('Power_Focus',0.95,dict(ul=0.3,fl=1.5,ur=-0.3,fr=-1.5,head=0.2),circle=0.8,sigil=1.5,y=4,glow=(1.35,1.2,1.7)))
+M.append(cast('Power_Burst',0.9,dict(ul=0.8,ur=-0.8,cl=0.08,cr=-0.08,head=-0.05),circle=1.2,sigil=1.8,y=-16,glow=(1.7,1.4,2.1)))
+M.append(cast('Heal',0.9,dict(ul=0.5,fl=1.0,ur=-0.5,fr=-1.0,head=0.1),col=(0.5,1.0,0.6),circle=0.7,glow=(1.1,1.4,1.1)))
+M.append(cast('Buff',0.7,dict(ur=-0.3,fr=-1.4,head=-0.05),col=(1.0,0.85,0.4),circle=0.6,glow=(1.4,1.3,1.0)))
+
+# ---------------------------------------------------------------- summons (one per sword) / swaps
+for sw,col in SWORD_COL.items():
+    c=Clip('Summon_'+sw,0.95); rest(c,0)
+    c.pose(0.3,y=-20,ul=0.6,ur=-0.6,fl=0.15,fr=-0.15,cl=0.05,cr=-0.05,head=-0.1,tint=(1.45,1.22,1.85))
+    c.pose(0.6,y=-16,ul=0.55,ur=-0.55,head=-0.06)
+    c.hand('LR',0.15,0.6,0.9,col); c.hand('LR',0.3,1.15,1.0,col); c.hand('LR',0.6,0.9,1.0,col); c.hand('LR',0.85,0.5,0.8,col)
+    c.fx('Circle',0,0,col,scale=(0.3,0.1),rotation=0).fx('Circle',0.15,1,col).fx('Circle',0.95,0,col,scale=(1.0,0.34),rotation=1.2)
+    c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1),scale=(1,1)).fx('Visuals/Rig/Sigil',0.3,1,col,scale=(1.5,1.5)).fx('Visuals/Rig/Sigil',0.95,0.4,(1,1,1),scale=(1,1))
+    rest(c,0.95); M.append(c)
+c=Clip('Summon',0.95); [c.tr.update({k:list(v)}) for k,v in M[-1].tr.items()]; M.append(c)  # generic = last sword's
+for i,(peak,dur) in enumerate(((dict(ur=-1.1,fr=-0.3,ul=0.3),0.5),(dict(ul=1.1,fl=0.3,ur=-0.3),0.5),(dict(ur=-0.4,fr=-1.5,ul=0.4,fl=1.5,head=0.1),0.55)),1):
+    c=Clip(f'Swap_{i}',dur); rest(c,0); c.pose(dur*0.4,y=-6,**peak); c.hand('R' if i==1 else 'L' if i==2 else 'LR',dur*0.4,0.85,1.0); c.fx('Visuals/Rig/Sigil',dur*0.4,1,(1,1,1)); rest(c,dur); M.append(c)
+
+# ---------------------------------------------------------------- block / hit / death / victory
+def block(name,peak,dur=0.55,back=-10,shield=0.55):
+    c=Clip(name,dur); rest(c,0); c.pose(0.12,x=back,**peak); c.pose(dur*0.6,x=back*0.5,**{k:v*0.6 for k,v in peak.items()})
+    c.hand('LR',0.1,0.8,1.0,(0.8,0.85,1.0)); c.hand('LR',dur*0.7,0.5,0.75)
+    c.fx('Shield',0,0,(1,1,1),scale=(0.55,0.55)).fx('Shield',0.1,shield,(1,1,1),scale=(0.7,0.7)).fx('Shield',dur,0,(1,1,1),scale=(0.74,0.74))
+    rest(c,dur); return c
+M.append(block('Block',dict(ur=-0.55,ul=0.2,cl=0.05,cr=0.05)))
+M.append(block('Block_Cross',dict(ur=-0.3,fr=-1.3,ul=0.3,fl=1.3,head=0.08),shield=0.65))
+M.append(block('Block_Brace',dict(ur=-0.2,ul=0.2,head=0.1,sy=0.97,y=6),back=-16))
+M.append(block('Block_Palm',dict(ur=-1.35,fr=-0.2),shield=0.7))
+M.append(block('Block_Big',dict(ul=0.7,ur=-0.7,fl=0.4,fr=-0.4,cl=0.06,cr=-0.06),dur=0.7,shield=0.85))
+def hit(name,dur,back,spin,arms,red=(1.8,0.75,0.75)):
+    c=Clip(name,dur); rest(c,0)
+    c.hand('LR',0.06,HAND_REST[0]*0.7,0.15); c.hand('LR',0.18,HAND_REST[0]*0.9,0.4)
+    c.pose(0.06,x=back,rot=spin,tint=red,**arms); c.pose(0.12,x=back*0.65,rot=spin*0.5); c.pose(0.18,x=back*0.9,rot=spin*0.8,tint=(1.2,1,1))
+    rest(c,dur); return c
+M.append(hit('Hit',0.45,-28,-0.05,dict(ul=0.18,ur=-0.12,cl=0.045,cr=0.045,head=-0.08)))
+M.append(hit('Hit_Light',0.3,-14,-0.02,dict(head=-0.06,ul=0.08,ur=-0.06)))
+M.append(hit('Hit_Heavy',0.7,-48,-0.12,dict(ul=0.5,ur=-0.4,fl=0.3,fr=-0.3,cl=0.07,cr=0.07,head=-0.18,y=8)))
+M.append(hit('Hit_Stagger',0.6,-36,0.08,dict(ul=-0.2,ur=-0.5,head=0.15,y=4)))
+M.append(hit('Hit_Guarded',0.4,-18,-0.03,dict(ur=-0.5,fr=-0.6,head=0.05),red=(1.3,1.1,1.4)))
+c=Clip('Dead',1.2); rest(c,0); c.pose(0.3,tint=(1.4,0.8,1.4),head=-0.1,ul=-0.1,ur=0.1); c.pose(0.6,x=-10,y=30,rot=-0.25,ul=-0.12,ur=0.12,head=-0.25)
+c.hand('LR',0,*HAND_REST); c.hand('LR',0.5,0.2,0.0)
+c.pose(1.2,x=-14,y=40,rot=-0.3,ul=-0.15,ur=0.15,head=-0.3,tint=(0.6,0.5,0.7)); c.key('Visuals:modulate',1.2,C(0.6,0.5,0.7,0.35)); M.append(c)
+c=Clip('Dead_Kneel',1.4); rest(c,0); c.hand('LR',0.6,0.2,0.0); c.pose(0.4,y=60,sy=0.9,head=0.3,ul=0.05,ur=-0.05,tint=(1.2,0.9,1.2)); c.pose(1.4,y=80,sy=0.85,head=0.45,rot=0.06,tint=(0.6,0.5,0.7))
+c.key('Visuals:modulate',1.4,C(0.6,0.5,0.7,0.35)); M.append(c)
+c=Clip('Victory',1.4); rest(c,0); c.pose(0.4,y=-10,ur=-2.3,fr=-0.2,head=-0.1,cl=0.04,cr=-0.04); c.pose(1.0,y=-8,ur=-2.2,fr=-0.25)
+c.fx('Visuals/Rig/Sigil',0.4,1,(1,1,1),scale=(1.4,1.4)); c.hand('R',0.4,1.2,1.0); c.hand('R',1.0,1.1,1.0); rest(c,1.4); M.append(c)
+c=Clip('TurnStart',0.6); rest(c,0); c.pose(0.25,y=-6,head=-0.05,ul=0.1,ur=-0.1); c.hand('LR',0.25,0.6,1.0); rest(c,0.6); M.append(c)
+
+assert len({c.name for c in M})==len(M), 'duplicate clip names'
+# ---------------------------------------------------------------- scene text
 P='res://MagicSwordsman/images/'
-head=f'''[gd_scene load_steps={len(A)+7} format=3]
-
-{{PART_RES}}
-[ext_resource type="Texture2D" path="{P}vfx/magic_circle.png" id="2_circle"]
-[ext_resource type="Texture2D" path="{P}vfx/slash.png" id="3_slash"]
-[ext_resource type="Texture2D" path="{P}vfx/shield.png" id="4_shield"]
-[ext_resource type="Texture2D" path="{P}charselect/glow.png" id="5_glow"]
-
-[sub_resource type="CanvasItemMaterial" id="add"]
-blend_mode = 1
-'''
-nodes=f'''[node name="MagicSwordsman" type="Node2D"]
+ORDER=[('Body','body',None),('Head','head',None),('CoatL','coat_l',None),('CoatR','coat_r',None),
+       ('UpperL','upper_l',None),('ForeL','fore_l','UpperL'),('UpperR','upper_r',None),('ForeR','fore_r','UpperR')]
+PARENT_PART={'ForeL':'upper_l','ForeR':'upper_r'}
+PALM={'L':('fore_l',(68,428)),'R':('fore_r',(298,436))}  # canvas px of each palm (tools/split_body.py canvas)
+# layers of one hand circle: (name, texture, tilt rotation, tilt y-squash, spin turns per 6 s)
+LAYERS=[('Orbit1','h_orbit',0.55,0.30,2),('Orbit2','h_orbit',-0.95,0.34,-1),('Ring','h_ring',0.0,0.92,1),('Glyph','h_glyph',0.0,0.92,-1),('Core','h_core',0.0,1.0,0)]
+res='\n'.join(f'[ext_resource type="Texture2D" path="{P}character/parts/{f}.png" id="p_{f}"]' for _,f,_ in ORDER)
+anims='\n'.join(emit(c,f'a{i}') for i,c in enumerate(M))
+lib='[sub_resource type="AnimationLibrary" id="lib"]\n_data = {\n'+',\n'.join(f'&"{c.name}": SubResource("a{i}")' for i,c in enumerate(M))+'\n}\n'
+nodes='''[node name="MagicSwordsman" type="Node2D"]
 
 [node name="Bounds" type="Control" parent="."]
 layout_mode = 3
@@ -137,8 +241,37 @@ position = Vector2(0, -200)
 [node name="Rig" type="Node2D" parent="Visuals"]
 scale = Vector2(0.5, 0.5)
 
-{{PART_NODES}}
-[node name="Sigil" type="Sprite2D" parent="Visuals/Rig"]
+'''
+for n,f,par in ORDER:
+    m=PARTS[f]; px,py=m['pivot']; bx,by=m['bbox'][:2]
+    if par is None: pos=(px-CX,py-CY); parent='Visuals/Rig'
+    else:
+        pp=PARTS[PARENT_PART[n]]['pivot']; pos=(px-pp[0],py-pp[1]); parent='Visuals/Rig/'+par
+    nodes+=f'[node name="{n}" type="Sprite2D" parent="{parent}"]\nposition = Vector2({pos[0]}, {pos[1]})\ncentered = false\noffset = Vector2({bx-px}, {by-py})\ntexture = ExtResource("p_{f}")\n\n'
+spin=[]
+for h,(part,(hx,hy)) in PALM.items():
+    piv=PARTS[part]['pivot']; par=HAND[h]; fore=par.rsplit('/',1)[0]
+    nodes+=f'[node name="Hand{h}" type="Node2D" parent="{fore}"]\nmodulate = {C(*PURPLE,HAND_REST[1])}\nposition = {V(hx-piv[0],hy-piv[1])}\nscale = {V(HAND_REST[0],HAND_REST[0])}\n\n'
+    for ln,tex,tilt,sq,turns in LAYERS:
+        nodes+=f'[node name="{ln}Tilt" type="Node2D" parent="{par}"]\nrotation = {tilt}\nscale = {V(1,sq)}\n\n'
+        sc=0.45 if ln=='Core' else 0.62 if ln=='Glyph' else 1.0
+        nodes+=f'[node name="{ln}" type="Sprite2D" parent="{par}/{ln}Tilt"]\nmaterial = SubResource("add")\nscale = {V(sc,sc)}\ntexture = ExtResource("{tex}")\n\n'
+        if turns: spin.append((f'{par}/{ln}Tilt/{ln}',turns if h=='R' else -turns))  # the two hands spin mirrored
+spin_tracks=[]
+for i,(path,turns) in enumerate(spin):
+    spin_tracks.append(f'''tracks/{i}/type = "value"
+tracks/{i}/imported = false
+tracks/{i}/enabled = true
+tracks/{i}/path = NodePath("{path}:rotation")
+tracks/{i}/interp = 1
+tracks/{i}/loop_wrap = true
+tracks/{i}/keys = {{
+"times": PackedFloat32Array(0, 6),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, {turns*2*math.pi:.5f}]
+}}''')
+nodes+=f'''[node name="Sigil" type="Sprite2D" parent="Visuals/Rig"]
 material = SubResource("add")
 modulate = Color(1, 1, 1, 0.4)
 position = Vector2({CHEST[0]}, {CHEST[1]})
@@ -163,14 +296,30 @@ libraries = {{
 &"": SubResource("lib")
 }}
 autoplay = "idle"
+
+[node name="HandSpin" type="AnimationPlayer" parent="."]
+libraries = {{
+&"": SubResource("spinlib")
+}}
+autoplay = "spin"
 '''
-order=[('Body','body'),('CoatL','coat_l'),('CoatR','coat_r'),('ArmL','arm_l'),('ArmR','arm_r')]
-res='\n'.join(f'[ext_resource type="Texture2D" path="{P}character/parts/{f}.png" id="p_{f}"]' for _,f in order)
-pn=''
-for n,f in order:
-    m=PARTS[f]; px,py=m['pivot']; bx,by=m['bbox'][:2]
-    pn+=f'[node name="{n}" type="Sprite2D" parent="Visuals/Rig"]\nposition = Vector2({px-CX}, {py-CY})\ncentered = false\noffset = Vector2({bx-px}, {by-py})\ntexture = ExtResource("p_{f}")\n\n'
-head=head.replace('{PART_RES}',res).replace(f'load_steps={len(A)+7}',f'load_steps={len(A)+12}')
-nodes=nodes.replace('{PART_NODES}',pn)
-open(OUT,'w').write(head+'\n'+'\n'.join(A)+'\n'+lib+'\n'+nodes)
-print('written',OUT)
+spin_res='[sub_resource type="Animation" id="spin"]\nresource_name = "spin"\nlength = 6.0\nloop_mode = 1\n'+'\n'.join(spin_tracks)+'\n\n[sub_resource type="AnimationLibrary" id="spinlib"]\n_data = {\n&"spin": SubResource("spin")\n}\n'
+head=f'''[gd_scene load_steps={len(M)+len(ORDER)+13} format=3]
+
+{res}
+[ext_resource type="Texture2D" path="{P}vfx/magic_circle.png" id="2_circle"]
+[ext_resource type="Texture2D" path="{P}vfx/slash.png" id="3_slash"]
+[ext_resource type="Texture2D" path="{P}vfx/shield.png" id="4_shield"]
+[ext_resource type="Texture2D" path="{P}charselect/glow.png" id="5_glow"]
+[ext_resource type="Texture2D" path="{P}vfx/hand_ring.png" id="h_ring"]
+[ext_resource type="Texture2D" path="{P}vfx/hand_glyph.png" id="h_glyph"]
+[ext_resource type="Texture2D" path="{P}vfx/hand_orbit.png" id="h_orbit"]
+[ext_resource type="Texture2D" path="{P}vfx/hand_core.png" id="h_core"]
+
+[sub_resource type="CanvasItemMaterial" id="add"]
+blend_mode = 1
+
+'''
+open(OUT,'w').write(head+anims+'\n'+spin_res+'\n'+lib+'\n'+nodes)
+open(os.path.join(HERE,'motion_list.txt'),'w').write('\n'.join(f'{c.name}\t{c.length}s' for c in M)+'\n')
+print(len(M),'clips ->',OUT)
