@@ -335,3 +335,22 @@
 | `tyrfing_token.jpg` | a single cursed norse sword with golden hilt and flaming blade displayed |
 | `unstruck_kings_shield.jpg` | a king shield screaming when struck, sickly purple curse aura |
 | `wall_of_swords.jpg` | a wall of swords stuck in the ground forming a barrier |
+
+## 3차 생성 (2026-10-08): 검 디자인 통일
+
+검 카드 97장은 검마다 정한 외형 묘사를 모든 프롬프트에 넣어 다시 만들었습니다 (같은 검은 같은 모양·색이 나오도록). 제외: 해방된 혼(백광)·눈부심(검 색이 빨갛게 나옴), 스코프눙 돌(저주).
+
+| 검 | 외형 묘사 |
+|---|---|
+| GRAM | a broad norse longsword whose blade has a glowing golden crack seam across its middle where it was reforged, plain iron crossguard, worn leather grip |
+| GANJIANG | a black bronze chinese jian straight sword with a red tassel |
+| MOYE | a white silver chinese jian straight sword with a pale blue tassel |
+| TWIN | a pair of chinese jian swords, one black bronze with a red tassel and one white silver with a pale blue tassel |
+| KUSANAGI | an ancient double-edged bronze japanese tsurugi straight sword with green patina, storm clouds swirling around the blade |
+| TYRFING | a norse sword with an ornate golden hilt and a blade that glows orange like flame, dark runes along the blade |
+| DAINSLEIF | a black norse sword with a blood-red edge that drips blood, red runes |
+| DURANDAL | a holy knight sword with a golden cross-shaped hilt holding a small crystal relic window, radiant white-gold blade |
+| SKOFNUNG | a pale frost-white norse king sword with a blue spectral glow and ghostly faces etched along the blade |
+| ONIMARU | a curved japanese tachi with a black lacquered scabbard and red cord, an oni demon face on its round guard, floating by itself |
+| SOLAIS | a sword made of pure blinding white light with a black obsidian sheath |
+| CALADBOLG | an enormous very long celtic sword with an iridescent rainbow-colored blade and a simple bronze hilt |
