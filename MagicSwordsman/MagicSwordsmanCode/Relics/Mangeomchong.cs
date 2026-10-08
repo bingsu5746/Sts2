@@ -546,6 +546,13 @@ public class Mangeomchong : MagicSwordsmanRelic
         }
     }
 
+    /// <summary>Presentation: a short guard motion whenever the owner gains Block in combat.</summary>
+    public override Task AfterBlockGained(Creature creature, decimal amount, ValueProp props, CardModel? cardSource)
+    {
+        if (amount > 0 && creature == Owner.Creature) SwordVisuals.PlayMotion(Owner, "Block");
+        return Task.CompletedTask;
+    }
+
     public override bool TryModifyKeywordsInCombat(CardModel card, ISet<CardKeyword> keywords)
     {
         if (card is not MagicSwordCard { Sword: { } sword } msc || !card.IsMutable || card.Owner != Owner)

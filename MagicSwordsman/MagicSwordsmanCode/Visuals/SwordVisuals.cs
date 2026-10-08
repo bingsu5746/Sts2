@@ -59,6 +59,28 @@ public static class SwordVisuals
     {
     }
 
+    /// <summary>
+    /// Plays one of the character's own AnimationPlayer clips (e.g. "Summon", "Block") through BaseLib's handler.
+    /// The game only triggers Attack / Cast / Hit / Dead; these extra motions are fired from our own hooks.
+    /// Presentation only; silently does nothing if the clip or the creature node is missing.
+    /// </summary>
+    public static void PlayMotion(Player player, string clip)
+    {
+        try
+        {
+            var node = NCombatRoom.Instance?.GetCreatureNode(player.Creature);
+            if (node == null) return;
+            var anim = FindChild<AnimationPlayer>(node.Visuals);
+            if (anim == null || !anim.HasAnimation(clip)) return;
+            anim.Stop();
+            anim.Play(clip);
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordVisuals] PlayMotion {clip} failed: {e.Message}");
+        }
+    }
+
     /// <summary>Combat over: forget the rig (its nodes die with the combat room).</summary>
     public static void Clear(Player player) => Rigs.Remove(player);
 

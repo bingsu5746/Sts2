@@ -294,6 +294,7 @@ public static class SwordCombat
         state.Present.Add(sword);
         state.Summoned.Add(sword);
         SwordVisuals.Sync(player);
+        SwordVisuals.PlayMotion(player, "Summon");
         await SwordRegistry.Get(sword).OnSummoned(ContextFor(player, sword), choiceContext);
 
         if (!state.FirstSummonBonusUsed)
