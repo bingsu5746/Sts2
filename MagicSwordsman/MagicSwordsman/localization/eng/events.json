@@ -217,5 +217,9 @@
   "MAGICSWORDSMAN-SWORD_LORE.POPUP_COST": "Cost",
   "MAGICSWORDSMAN-SWORD_LORE.POPUP_STYLE": "Card style",
   "MAGICSWORDSMAN-SWORD_LORE.POPUP_CONTINUE": "Click to continue",
-  "MAGICSWORDSMAN-SWORD_LORE.POPUP_CARDS": "Cards you receive"
+  "MAGICSWORDSMAN-SWORD_LORE.POPUP_CARDS": "Cards you receive",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.RELEASE.description": "Mangeomchong is full. Taking [gold]{Sword}[/gold] needs {Slots} slot(s).\nWhich sword will you set free?\nIts cards are stored in Mangeomchong and return if you get it again. Its level resets to 0.",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.RELEASE.options.SWORD.description": "Set it free. ({Stage}, level {Level} · {Slots} slot(s))",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.RELEASE.options.BACK.title": "Go back",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.RELEASE.options.BACK.description": "Keep your swords and pick another."
 }

@@ -51,8 +51,12 @@ public static class SwordAcquiredPopup
             ContentMarginLeft = 28, ContentMarginRight = 28, ContentMarginTop = 24, ContentMarginBottom = 24,
         });
         panel.CustomMinimumSize = new Vector2(1060, 0);
-        panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.Center, Control.LayoutPresetMode.KeepSize);
-        root.AddChild(panel);
+        // A full-screen CenterContainer keeps the panel centred whatever its final size (anchoring the panel itself at
+        // the centre grew it towards the bottom-right and cut it off — bug report 2026-10-08).
+        var center = new CenterContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        center.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        root.AddChild(center);
+        center.AddChild(panel);
 
         var row = new HBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
         row.AddThemeConstantOverride("separation", 28);
@@ -115,13 +119,10 @@ public static class SwordAcquiredPopup
 
         tree.Root.AddChild(layer);
 
-        // ---- appear: fade + slight scale
-        panel.PivotOffset = panel.Size / 2;
+        // appear: fade in (no scale tween: the container owns the panel's transform)
         root.Modulate = new Color(1, 1, 1, 0);
-        panel.Scale = new Vector2(0.92f, 0.92f);
-        var t = root.CreateTween().SetParallel();
+        var t = root.CreateTween();
         t.TweenProperty(root, "modulate:a", 1f, 0.25);
-        t.TweenProperty(panel, "scale", Vector2.One, 0.3).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
 
         var closing = false;
         void Close()

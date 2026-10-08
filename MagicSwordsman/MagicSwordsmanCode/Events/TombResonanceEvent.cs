@@ -161,6 +161,13 @@ public sealed class TombResonanceEvent : CustomEventModel
             return;
         }
 
+        // Mangeomchong full: an event page asks which owned sword to set free (user request 2026-10-08).
+        if (!tomb.CanAcquire(sword))
+        {
+            ShowRelease(sword, []);
+            return;
+        }
+
         var firstTime = !tomb.EverOwned(sword);
         if (!await SwordEventHelper.Acquire(Owner!, sword, new BlockingPlayerChoiceContext()))
         {
@@ -170,6 +177,63 @@ public sealed class TombResonanceEvent : CustomEventModel
 
         MarkDone();
         SetEventFinished(IsStart ? SwordEventHelper.StartAcquiredText(sword) : SwordEventHelper.AcquiredText(sword, firstTime));
+    }
+
+    /// <summary>
+    /// "만검총이 가득 찼다" page: one option per owned sword that can be released (Gram cannot), plus BACK.
+    /// Picks are only reserved; once they free enough room they are released and the new sword is acquired.
+    /// </summary>
+    private void ShowRelease(SwordId newSword, List<SwordId> pending)
+    {
+        var tomb = SwordEventHelper.Tomb(Owner!);
+        if (tomb == null)
+        {
+            ShowStart();
+            return;
+        }
+
+        var desc = L10NLookup($"{PageKey("RELEASE")}.description");
+        desc.Add("Sword", SwordLore.Name(newSword));
+        desc.Add("Slots", SwordRegistry.GroupSlotCost(newSword));
+
+        var options = new List<EventOption>();
+        foreach (var owned in tomb.OwnedSwords.Select(SwordRegistry.GroupLeader).Distinct())
+        {
+            if (!SwordRegistry.GetDefinition(owned).CanBeLost || pending.Contains(owned)) continue;
+            var o = owned;
+            var title = SwordLore.Name(o);
+            var body = L10NLookup($"{PageKey("RELEASE")}.options.SWORD.description");
+            body.Add("Level", tomb.GetLevel(o));
+            body.Add("Stage", SwordLore.StageName(o, tomb.GetLevel(o)));
+            body.Add("Slots", SwordRegistry.GroupSlotCost(o));
+            options.Add(new EventOption(this, () => PickRelease(newSword, pending, o), title, body,
+                $"{PageKey("RELEASE")}.options.SWORD_{SwordLore.SwordKey(o)}",
+                [HoverTipFactory.FromCard(SwordTokenCard.CanonicalFor(o))]));
+        }
+
+        options.Add(new EventOption(this, BackToStart, $"{PageKey("RELEASE")}.options.BACK"));
+        SetEventState(desc, options);
+    }
+
+    private async Task PickRelease(SwordId newSword, List<SwordId> pending, SwordId release)
+    {
+        var tomb = SwordEventHelper.Tomb(Owner!);
+        if (tomb == null)
+        {
+            ShowStart();
+            return;
+        }
+
+        var picks = pending.Append(release).ToList();
+        var room = tomb.FreeSlots + picks.Sum(SwordRegistry.GroupSlotCost);
+        if (room < SwordRegistry.GroupSlotCost(newSword))
+        {
+            ShowRelease(newSword, picks); // still not enough room (간장·막야 needs 2): pick another
+            return;
+        }
+
+        foreach (var r in picks) await tomb.LoseSword(r);
+        await AcquireAndFinish(newSword);
     }
 
     private async Task Pass()

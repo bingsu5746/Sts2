@@ -217,5 +217,9 @@
   "MAGICSWORDSMAN-SWORD_LORE.POPUP_COST": "대가",
   "MAGICSWORDSMAN-SWORD_LORE.POPUP_STYLE": "카드 성향",
   "MAGICSWORDSMAN-SWORD_LORE.POPUP_CONTINUE": "클릭해서 계속",
-  "MAGICSWORDSMAN-SWORD_LORE.POPUP_CARDS": "이 검과 함께 받는 카드"
+  "MAGICSWORDSMAN-SWORD_LORE.POPUP_CARDS": "이 검과 함께 받는 카드",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.RELEASE.description": "만검총이 가득 찼다. [gold]{Sword}[/gold]을(를) 들이려면 자리 {Slots}칸이 필요하다.\n어느 검을 풀어 줄 것인가?\n풀려난 검의 카드는 만검총에 보관되고, 다시 얻으면 돌아온다. 강화 단계는 0이 된다.",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.RELEASE.options.SWORD.description": "풀어 준다. ({Stage}, {Level}단계 · {Slots}칸)",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.RELEASE.options.BACK.title": "돌아간다",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.RELEASE.options.BACK.description": "풀어 주지 않고 다른 검을 고른다."
 }
