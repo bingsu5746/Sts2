@@ -1,36 +1,41 @@
-"""Splits the full-body Ensifer art into animation parts (body, arm_l, arm_r, coat_l, coat_r) with Godot pivots.
-Input: a background-removed full-body PNG (coords below are for that image, 499x980). Output: MagicSwordsman/images/character/parts/*.png
-and parts.json (pivot + offset per part, in output pixels). The base 'body' has the moving parts inpainted out so
-no hole shows when an arm or coat flap swings. Usage: python3 tools/split_body.py body_cut.png
+"""Splits the full-body Ensifer art into animation parts with Godot pivots.
+Input: the background-removed full-body PNG of the game-style Ensifer (side-on, facing right; 776x1216 — source:
+AI Horde body_137 of round 2, mirrored, see docs/card-art-credits.md). Output: MagicSwordsman/images/character/parts/*.png
+and parts.json (pivot + offset per part, in output pixels). The base 'body' has the moving parts inpainted out so no
+hole shows when an arm or coat flap swings. The painted magic swirls of the source are removed (the rig draws its
+own palm circles). Usage: python3 tools/split_body.py body_cut.png
 """
 import sys,os,json
 import numpy as np,cv2
 from PIL import Image,ImageDraw
 SRC=sys.argv[1]; OUT=os.path.join(os.path.dirname(__file__),'..','MagicSwordsman','images','character','parts')
 os.makedirs(OUT,exist_ok=True)
-S=800/980  # output scale (parts are 800 px tall; the scene shows them at 0.5)
+S=800/1216  # output scale (parts are 800 px tall; the scene shows them at 0.5)
+# R = the arm toward the enemy (screen right), L = the back arm (screen left)
 PARTS={  # name: (polygon in source px, pivot = joint the part rotates around)
- 'head':([(168,0),(298,0),(298,118),(268,148),(232,166),(200,150),(170,112)],(230,150)),
- 'upper_r':([(335,200),(405,188),(419,262),(413,360),(348,362),(337,282)],(372,215)),
- 'fore_r':([(348,350),(415,350),(419,470),(393,548),(340,548),(338,470)],(382,358)),
- 'upper_l':([(84,212),(162,198),(160,300),(141,394),(78,394),(83,300)],(128,215)),
- 'fore_l':([(58,384),(143,384),(131,470),(119,522),(113,548),(48,548),(52,470)],(100,388)),
- 'amulet':([(24,540),(116,540),(110,728),(26,728)],(80,546)),
- 'coat_l':([(70,470),(168,470),(162,850),(100,852),(64,785)],(118,470)),
- 'coat_r':([(292,458),(412,458),(446,780),(422,834),(300,832)],(352,460)),
+ 'head':([(298,80),(450,80),(452,200),(420,248),(372,262),(330,248),(298,212)],(372,258)),
+ 'upper_r':([(428,268),(486,268),(540,360),(596,452),(560,500),(510,470),(452,380),(430,330)],(452,292)),
+ 'fore_r':([(548,440),(630,470),(700,505),(752,540),(752,690),(640,690),(600,600),(560,530),(530,490)],(566,470)),
+ 'upper_l':([(232,272),(312,272),(300,360),(258,470),(226,540),(170,530),(196,440)],(276,296)),
+ 'fore_l':([(160,500),(232,520),(210,600),(170,690),(150,780),(30,780),(30,620),(100,560)],(206,516)),
+ 'coat_l':([(176,610),(292,560),(318,700),(296,990),(160,995),(140,820)],(292,580)),
+ 'coat_r':([(424,560),(540,610),(668,860),(650,890),(520,860),(432,770)],(430,575)),
 }
-ARMS=('upper_l','fore_l','amulet','upper_r','fore_r')
-# cut out but not exported: the pendant that hung from his left hand looked like a held blade; his palms now carry
-# magic circles instead (tools/gen_combat_scene.py HandL/HandR, user request 2026-10-08)
-DISCARD=('amulet',)
+ARMS=('upper_l','fore_l','upper_r','fore_r')
+DISCARD=()
+HANDS=[(30,600,170,790),(590,500,752,700)]  # glowing hands: keep their magenta glow
 im=Image.open(SRC).convert('RGBA'); W,H=im.size
-# drop the glowing ground circle below the boots
 a=np.array(im); yy,xx=np.mgrid[0:H,0:W]
-boots=((xx>140)&(xx<208))|((xx>292)&(xx<366))
-a[(yy>922)&~boots,3]=0
-a[yy>952,3]=0
-purple=(a[:,:,2].astype(int)-a[:,:,1].astype(int)>35)&(a[:,:,2]>70)
-a[(yy>895)&purple,3]=0
+# painted magic swirls / wisps: magenta strokes outside the hands, and faint semi-transparent smoke
+mag=(a[...,0].astype(int)>140)&(a[...,2].astype(int)>140)&(a[...,1].astype(int)<130)
+inhand=np.zeros((H,W),bool)
+for x0,y0,x1,y1 in HANDS: inhand[y0:y1,x0:x1]=True
+a[mag&~inhand,3]=0
+a[a[...,3]<90,3]=0
+# ground shadow under the boots
+a[(yy>1170)&((xx<330)|(xx>440)),3]=0
+n,lab,st,_=cv2.connectedComponentsWithStats((a[...,3]>0).astype(np.uint8),8)
+a[lab!=1+np.argmax(st[1:,4])]=0
 im=Image.fromarray(a)
 def mask(poly):
     m=Image.new('L',(W,H),0); ImageDraw.Draw(m).polygon(poly,fill=255); return m
@@ -41,12 +46,9 @@ for n in ARMS: ImageDraw.Draw(armmask).polygon(PARTS[n][0],fill=255)
 for name,(poly,piv) in PARTS.items():
     m=mask(poly)
     if name in ('upper_l','upper_r'):  # forearm/amulet own their pixels; the upper arm stops at the elbow
-        own={'upper_l':('fore_l','amulet'),'upper_r':('fore_r',)}[name]
+        own={'upper_l':('fore_l',),'upper_r':('fore_r',)}[name]
         sub=Image.new('L',(W,H),0)
         for o in own: ImageDraw.Draw(sub).polygon(PARTS[o][0],fill=255)
-        m=Image.fromarray(np.where(np.array(sub)>0,0,np.array(m)).astype('uint8'))
-    if name=='fore_l':
-        sub=Image.new('L',(W,H),0); ImageDraw.Draw(sub).polygon(PARTS['amulet'][0],fill=255)
         m=Image.fromarray(np.where(np.array(sub)>0,0,np.array(m)).astype('uint8'))
     if name.startswith('coat'):  # arms are drawn over the coat: never copy arm pixels into a coat flap
         m=Image.fromarray(np.where(np.array(armmask)>0,0,np.array(m)).astype('uint8'))
@@ -68,7 +70,7 @@ alpha=np.array(im.getchannel('A')).copy()
 # pixels of an arm that hang outside the torso belong to the arm only (no copy left in the base)
 arms=np.zeros((H,W),bool)
 for n in ARMS: arms|=np.array(mask(PARTS[n][0]))>0
-outside=arms&(((xx<150)|(xx>345))&(yy<740))
+outside=arms&((xx<230)|(xx>470))
 alpha[outside]=0
 base.putalpha(Image.fromarray(alpha))
 bb=(0,0,W,H)
