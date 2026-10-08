@@ -265,6 +265,7 @@ public static class SwordCombat
         MotionDirector.OnSwitched(player);
 
         await EnsureCurrentSwordPower(player, choiceContext);
+        player.Creature.GetPower<CurrentSwordPower>()?.RefreshIcon();
 
         await behavior.OnBecomeCurrent(ContextFor(player, sword), old, choiceContext);
 

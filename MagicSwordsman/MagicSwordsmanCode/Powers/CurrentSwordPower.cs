@@ -1,3 +1,4 @@
+using MagicSwordsman.MagicSwordsmanCode.Extensions;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MegaCrit.Sts2.Core.Commands.Builders;
@@ -46,6 +47,46 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
     private Player? OwnerPlayer => IsMutable ? Owner?.Player : null;
 
     private SwordId? CurrentSword => OwnerPlayer is { } p ? SwordCombat.CurrentSword(p) : null;
+
+    /// <summary>Icon = the current sword's own art (images/powers/current_sword_&lt;sword&gt;.png, tools/gen_power_icons.py).</summary>
+    public override string CustomPackedIconPath => IconFile().PowerImagePath();
+
+    public override string CustomBigIconPath => IconFile().BigPowerImagePath();
+
+    private string IconFile() =>
+        CurrentSword is { } s ? $"current_sword_{s.ToString().ToLowerInvariant()}.png" : "current_sword_power.png";
+
+    private static readonly System.Reflection.FieldInfo? ResolvedBigIcon =
+        HarmonyLib.AccessTools.Field(typeof(PowerModel), "_resolvedBigIconPath");
+    private static readonly System.Reflection.MethodInfo? NodeReload =
+        HarmonyLib.AccessTools.Method(typeof(MegaCrit.Sts2.Core.Nodes.Combat.NPower), "Reload");
+    private static readonly System.Reflection.FieldInfo? NodeModel =
+        HarmonyLib.AccessTools.Field(typeof(MegaCrit.Sts2.Core.Nodes.Combat.NPower), "_model");
+
+    /// <summary>
+    /// The power node loads its icon once; after a sword switch, reload it so the icon shows the new sword.
+    /// Presentation only, called by SwordCombat.SwitchTo.
+    /// </summary>
+    public void RefreshIcon()
+    {
+        try
+        {
+            ResolvedBigIcon?.SetValue(this, null);
+            if (Godot.Engine.GetMainLoop() is not Godot.SceneTree tree || NodeReload == null || NodeModel == null) return;
+            var stack = new Stack<Godot.Node>([tree.Root]);
+            while (stack.Count > 0)
+            {
+                var n = stack.Pop();
+                if (n is MegaCrit.Sts2.Core.Nodes.Combat.NPower np && ReferenceEquals(NodeModel.GetValue(np), this))
+                    NodeReload.Invoke(np, null);
+                foreach (var c in n.GetChildren()) stack.Push(c);
+            }
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[CurrentSwordPower] icon refresh failed: {e.Message}");
+        }
+    }
 
     /// <summary>The number on the icon is the current sword's upgrade level.</summary>
     public override int DisplayAmount =>

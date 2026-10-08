@@ -48,14 +48,16 @@ public abstract class MagicSwordCard : ConstructedCardModel
 
     /// <summary>
     /// Per-sword card frame color (user decision 2026-10-04): the game's HSV frame shader tinted with the sword's
-    /// color (same palette as the floating swords). Common cards keep the pool frame. UNVERIFIED: the exact shader
+    /// color (same palette as the floating swords). Common cards use the colourless frame. UNVERIFIED: the exact shader
     /// math (H/S/V are passed like the pool's H/S/V, 1/1/1 = default red) — tune the numbers after an in-game look.
     /// </summary>
     public override Godot.Material? CreateCustomFrameMaterial
     {
         get
         {
-            if (Sword is not { } sword) return null;
+            // shared (non-sword) cards use the game's colourless frame; only sword cards are coloured (user request
+            // 2026-10-08)
+            if (Sword is not { } sword) return ModelDb.CardPool<MegaCrit.Sts2.Core.Models.CardPools.ColorlessCardPool>().FrameMaterial;
             var c = MagicSwordsman.MagicSwordsmanCode.Visuals.SwordVisuals.ColorOf(sword);
             return ShaderUtils.GenerateHsv(c.H <= 0.001f ? 1f : c.H, Math.Max(c.S, 0.15f) / 0.75f, Math.Max(c.V, 0.4f));
         }
