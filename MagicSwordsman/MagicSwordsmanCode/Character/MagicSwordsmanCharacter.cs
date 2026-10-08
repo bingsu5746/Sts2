@@ -65,6 +65,13 @@ public class MagicSwordsmanCharacter : PlaceholderCharacterModel
     public override string CustomMerchantAnimPath =>
         SceneOrPlaceholder("magic_swordsman_merchant.tscn", base.CustomMerchantAnimPath);
 
+    // Character select background (user request 2026-10-08: no more Ironclad picture).
+    public override string CustomCharacterSelectBg =>
+        SceneOrPlaceholder("magic_swordsman_char_select_bg.tscn", base.CustomCharacterSelectBg);
+
+    // Top-panel icon outline: the placeholder points at Ironclad's outline; use our own icon for both.
+    public override string? CustomIconOutlineTexturePath => CustomIconTexturePath;
+
     private static string SceneOrPlaceholder(string file, string? fallback)
     {
         var path = $"{MainFile.ResPath}/scenes/{file}";
