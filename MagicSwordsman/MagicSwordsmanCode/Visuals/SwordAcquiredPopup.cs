@@ -50,7 +50,7 @@ public static class SwordAcquiredPopup
             CornerRadiusBottomRight = 14, ShadowColor = new Color(accent, 0.35f), ShadowSize = 24,
             ContentMarginLeft = 28, ContentMarginRight = 28, ContentMarginTop = 24, ContentMarginBottom = 24,
         });
-        panel.CustomMinimumSize = new Vector2(980, 0);
+        panel.CustomMinimumSize = new Vector2(1060, 0);
         panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.Center, Control.LayoutPresetMode.KeepSize);
         root.AddChild(panel);
 
@@ -79,17 +79,20 @@ public static class SwordAcquiredPopup
         }
 
         // ---- text column
-        var col = new VBoxContainer { CustomMinimumSize = new Vector2(440, 0), MouseFilter = Control.MouseFilterEnum.Ignore };
+        var col = new VBoxContainer { CustomMinimumSize = new Vector2(520, 0), MouseFilter = Control.MouseFilterEnum.Ignore };
         col.AddThemeConstantOverride("separation", 8);
         row.AddChild(col);
 
         col.AddChild(MakeLabel(Lore("POPUP_HEADER"), 18, accent));
         col.AddChild(MakeLabel(SwordLore.NameText(sword), 46, Colors.White, bold: true));
         col.AddChild(MakeLabel(Text(SwordLore.Line(sword, "TAGLINE")), 20, Muted));
+        var origin = MakeLabel(Text(SwordLore.Line(sword, "ORIGIN")), 18, new Color(0.85f, 0.82f, 0.75f));
+        col.AddChild(origin);
         col.AddChild(new HSeparator { MouseFilter = Control.MouseFilterEnum.Ignore });
         AddEntry(col, Lore("POPUP_EFFECT"), Text(SwordLore.Line(sword, "EFFECT")), accent);
         AddEntry(col, Lore("POPUP_COST"), Text(SwordLore.Line(sword, "COST")), new Color(0.9f, 0.4f, 0.4f));
         AddEntry(col, Lore("POPUP_STYLE"), Text(SwordLore.Line(sword, "STYLE")), accent);
+        AddEntry(col, Lore("POPUP_CARDS"), StarterCardNames(sword), accent);
         var hint = MakeLabel(Lore("POPUP_CONTINUE"), 16, new Color(Muted, 0.7f));
         hint.HorizontalAlignment = HorizontalAlignment.Right;
         col.AddChild(hint);
@@ -156,6 +159,22 @@ public static class SwordAcquiredPopup
         catch (Exception)
         {
             return null;
+        }
+    }
+
+    /// <summary>The cards granted on the first acquisition (SwordBehavior.StarterCards of the sword and its partner).</summary>
+    private static string StarterCardNames(SwordId sword)
+    {
+        try
+        {
+            var names = SwordRegistry.WithPartners(sword)
+                .SelectMany(s => SwordRegistry.Get(s).StarterCards)
+                .Select(c => c.Title);
+            return string.Join(" · ", names);
+        }
+        catch (Exception)
+        {
+            return "";
         }
     }
 
