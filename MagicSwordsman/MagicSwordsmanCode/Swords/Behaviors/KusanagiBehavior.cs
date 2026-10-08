@@ -18,7 +18,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 ///  - Cards: "정화" (exhaust Status/Curse cards, reduce own debuffs) — Cards/Kusanagi/ (KusanagiPurify helpers).
 ///  - Cost: lose a little HP at the end of every combat while Kusanagi is OWNED (content doc 0.4 #7: 2 at levels
 ///    0-2, 1 at levels 3-5) + other sword -> Kusanagi at most 2 times per combat. After the
-///    2nd switch-in is used up it goes back into Mangeomchong when it leaves: its cards get Exhaust + Ethereal(휘발성)
+///    2nd switch-in is used up it goes back into Mangeomchong when it leaves: its cards get Unplayable + Ethereal(휘발성) (user decision 2026-10-08: Unplayable instead of Exhaust)
 ///    and playing them no longer switches (SwordCombat.CanSwitchTo refuses swords in ReturnedToVault).
 /// FRAMEWORK PARTS (keep when adding content): GetInheritedSword, CanBecomeCurrent, OnLeaveCurrent, ModifyCardKeywords.
 /// </summary>
@@ -76,7 +76,7 @@ public sealed class KusanagiBehavior : SwordBehavior
     public override bool ModifyCardKeywords(SwordContext ctx, MagicSwordCard card, ISet<CardKeyword> keywords)
     {
         if (ctx.Combat?.ReturnedToVault.Contains(SwordId.Kusanagi) != true) return false;
-        var changed = keywords.Add(CardKeyword.Exhaust);
+        var changed = keywords.Add(CardKeyword.Unplayable);
         changed |= keywords.Add(CardKeyword.Ethereal);
         return changed;
     }
