@@ -69,7 +69,8 @@ internal static class TombResonanceTrigger
 
     /// <summary>
     /// Run start (사용자 결정 2026-10-04): when the starting Ancient event ends and its PROCEED would open the map,
-    /// open the start sword pick (TombResonanceEvent in act 0) first. Its own PROCEED then finds the pick done and
+    /// open the start sword pick (TombResonanceEvent in act 0) first. Same for acts 2 and 3 when the pick pushed at
+    /// the act start was lost (see <see cref="ShouldStartAtRunStart"/>). Its own PROCEED then finds the pick done and
     /// opens the map normally. UNTESTED IN GAME.
     /// </summary>
     [HarmonyPatch(typeof(NEventRoom), nameof(NEventRoom.Proceed))]
@@ -97,12 +98,19 @@ internal static class TombResonanceTrigger
         }
     }
 
+    /// <summary>
+    /// Also the safety net for acts 2 and 3 (bug report 2026-10-08): the pick pushed by <see cref="AfterEnterAct"/>
+    /// sits on top of the act map, and clicking the Ancient node before it shows up exits every stacked room, so the
+    /// pick was lost for good. Now any event PROCEED in an act whose pick is still not done (normally the Ancient's)
+    /// opens it.
+    /// </summary>
     private static bool ShouldStartAtRunStart(IRunState? runState)
     {
-        if (runState == null || runState.CurrentActIndex != 0) return false;
+        if (runState == null || runState.CurrentActIndex is not (0 or 1 or 2)) return false;
+        var act = runState.CurrentActIndex;
         return runState.Players.Any(p =>
             p.GetRelic<Mangeomchong>() is { } tomb &&
-            tomb.GetRunCounter(TombResonanceEvent.DoneKey(0)) == 0);
+            tomb.GetRunCounter(TombResonanceEvent.DoneKey(act)) == 0);
     }
 
     private static bool ShouldStart(IRunState? runState, int actIndex)

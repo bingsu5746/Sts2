@@ -1,5 +1,6 @@
 using BaseLib.Abstracts;
 using MagicSwordsman.MagicSwordsmanCode.Cards.Tokens;
+using MagicSwordsman.MagicSwordsmanCode.Events;
 using MagicSwordsman.MagicSwordsmanCode.Events.Forge;
 using MagicSwordsman.MagicSwordsmanCode.Relics;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
@@ -45,17 +46,24 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
 
         var choiceContext = new BlockingPlayerChoiceContext();
 
-        // 1) sword
-        var sword = await PickSword(choiceContext, candidates);
-        if (sword == null) return false;
+        // 1) sword -> 2) method. "돌아가기" on the method screen goes back to the sword list; on the sword list it
+        // closes the option (rest site stays open). The sword's story intro is the method screen's subtitle (it used
+        // to be a screen of its own showing the same sword card again — bug report 2026-10-08).
+        SwordId? sword;
+        ForgeMode? mode;
+        while (true)
+        {
+            using (ChooseScreenText.Use(Ui("PICK_SWORD"), skip: Ui("BACK")))
+                sword = await PickSword(choiceContext, candidates);
+            if (sword == null) return false;
 
-        // 2) the sword's story intro (Events/Forge/ForgeStory.cs, spec §4 "검마다 강화 이벤트가 다름"); skip = cancel
-        var level = relic.GetLevel(sword.Value);
-        if (!await ForgeStory.ShowIntro(Owner, sword.Value, level, choiceContext)) return false;
-
-        // 3) mode (story phrases + odds after relic modifiers)
-        var mode = await ForgeStory.PickMode(Owner, sword.Value, level, choiceContext);
-        if (mode == null) return false;
+            var lvl = relic.GetLevel(sword.Value);
+            var header = Ui("PICK_METHOD").Replace("{Sword}", SwordLore.NameText(sword.Value));
+            var subtitle = $"{Text(SwordLore.Line(sword.Value, "FORGE_INTRO"))}\n{lvl}{Ui("LEVEL_SUFFIX")} — {Text(SwordLore.StageName(sword.Value, lvl))}";
+            using (ChooseScreenText.Use(header, subtitle, Ui("BACK")))
+                mode = await ForgeStory.PickMode(Owner, sword.Value, lvl, choiceContext);
+            if (mode != null) break;
+        }
 
         // 4) roll + apply (game RNG, never System.Random). Per-player stream: in multiplayer every client runs each
         // player's OnSelect, in different orders (RestSiteSynchronizer runs remote choices when their message
@@ -64,8 +72,23 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
         relic.Flash();
         MainFile.Logger.Info($"[Forge] {sword} {mode}: {result.Outcome}");
 
-        await ForgeStory.ShowResult(Owner, result, choiceContext);
+        using (ChooseScreenText.Use(Ui("RESULT"), skip: Ui("CONTINUE")))
+            await ForgeStory.ShowResult(Owner, result, choiceContext);
         return true;
+    }
+
+    /// <summary>rest_site_ui.json MAGICSWORDSMAN_FORGE_UI.&lt;part&gt;</summary>
+    private static string Ui(string part)
+    {
+        // raw text: PICK_METHOD's {Sword} is replaced by the caller, not by SmartFormat
+        try { return new LocString("rest_site_ui", $"MAGICSWORDSMAN_FORGE_UI.{part}").GetRawText(); }
+        catch (Exception) { return ""; }
+    }
+
+    private static string Text(LocString loc)
+    {
+        try { return loc.GetFormattedText(); }
+        catch (Exception) { return ""; }
     }
 
     private Task<SwordId?> PickSword(PlayerChoiceContext ctx, IReadOnlyList<SwordId> candidates) =>

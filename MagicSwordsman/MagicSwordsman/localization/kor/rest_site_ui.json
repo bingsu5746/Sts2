@@ -1,4 +1,10 @@
 {
   "OPTION_MAGICSWORDSMAN_FORGE.name": "마검 강화",
-  "OPTION_MAGICSWORDSMAN_FORGE.description": "마검 하나를 강화합니다. 안전하게 1단계, 또는 위험을 걸고 2~3단계."
+  "OPTION_MAGICSWORDSMAN_FORGE.description": "마검 하나를 강화합니다. 안전하게 1단계, 또는 위험을 걸고 2~3단계.",
+  "MAGICSWORDSMAN_FORGE_UI.PICK_SWORD": "강화할 마검 선택",
+  "MAGICSWORDSMAN_FORGE_UI.PICK_METHOD": "{Sword} 강화 — 방법 선택",
+  "MAGICSWORDSMAN_FORGE_UI.RESULT": "강화 결과",
+  "MAGICSWORDSMAN_FORGE_UI.BACK": "돌아가기",
+  "MAGICSWORDSMAN_FORGE_UI.CONTINUE": "계속",
+  "MAGICSWORDSMAN_FORGE_UI.LEVEL_SUFFIX": "단계"
 }

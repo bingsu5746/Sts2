@@ -1,4 +1,10 @@
 {
   "OPTION_MAGICSWORDSMAN_FORGE.name": "Forge Sword",
-  "OPTION_MAGICSWORDSMAN_FORGE.description": "Upgrade one of your magic swords: safely by 1 level, or gamble for 2-3 levels."
+  "OPTION_MAGICSWORDSMAN_FORGE.description": "Upgrade one of your magic swords: safely by 1 level, or gamble for 2-3 levels.",
+  "MAGICSWORDSMAN_FORGE_UI.PICK_SWORD": "Choose a Sword to Forge",
+  "MAGICSWORDSMAN_FORGE_UI.PICK_METHOD": "Forge {Sword} — Choose a Method",
+  "MAGICSWORDSMAN_FORGE_UI.RESULT": "Forge Result",
+  "MAGICSWORDSMAN_FORGE_UI.BACK": "Back",
+  "MAGICSWORDSMAN_FORGE_UI.CONTINUE": "Continue",
+  "MAGICSWORDSMAN_FORGE_UI.LEVEL_SUFFIX": ""
 }

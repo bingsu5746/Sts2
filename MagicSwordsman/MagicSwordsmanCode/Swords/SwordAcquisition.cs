@@ -1,3 +1,4 @@
+using MagicSwordsman.MagicSwordsmanCode.RestSite;
 using MagicSwordsman.MagicSwordsmanCode.Cards.Tokens;
 using MagicSwordsman.MagicSwordsmanCode.Relics;
 using MegaCrit.Sts2.Core.CardSelection;
@@ -98,7 +99,9 @@ public static class SwordAcquisition
             CardModel? picked;
             if (tokens.Count <= 3)
             {
-                picked = await CardSelectCmd.FromChooseACardScreen(choiceContext, tokens, player, canSkip);
+                // the prompt doubles as the screen title (instead of "카드를 선택하세요") unless a caller set one
+                using (ChooseScreenText.IsActive ? null : ChooseScreenText.Use(gridPrompt.GetRawText()))
+                    picked = await CardSelectCmd.FromChooseACardScreen(choiceContext, tokens, player, canSkip);
             }
             else
             {
