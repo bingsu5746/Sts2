@@ -30,6 +30,9 @@ public static class SwordVisuals
 
     private static readonly Dictionary<Player, Rig> Rigs = new();
 
+    /// <summary>On-screen height (px, before the rig's per-sword scale) of a sword drawn from images/swords art.</summary>
+    private const float SwordSpriteHeight = 190f;
+
     // Layout (사용자 스케치 2026-10-04): swords float upright around the character — left, above the head, right.
     // The current sword always takes the right slot (in front, toward the enemy). The character only gestures.
     private static readonly Vector2 SpawnPos = new(0, -220);      // swords appear from / vanish into the character
@@ -163,7 +166,12 @@ public static class SwordVisuals
         var texPath = $"{MainFile.ResPath}/images/swords/{sword.ToString().ToLowerInvariant()}.png";
         if (ResourceLoader.Exists(texPath))
         {
-            blade = new Sprite2D { Texture = GD.Load<Texture2D>(texPath) };
+            var tex = GD.Load<Texture2D>(texPath);
+            var sprite = new Sprite2D { Texture = tex, TextureFilter = CanvasItem.TextureFilterEnum.Linear };
+            // Art is high-res (about 1000 px tall); show every sword at the same on-screen height as the placeholder.
+            var scale = SwordSpriteHeight / Math.Max(1f, tex.GetHeight());
+            sprite.Scale = new Vector2(scale, scale);
+            blade = sprite;
         }
         else
         {
