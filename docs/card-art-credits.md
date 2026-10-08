@@ -376,3 +376,4 @@
 - 프로필 아이콘 `images/charui/character_icon_*.png`, 지도 표시: 같은 전투 모델 그림에서 얼굴만 잘라냄(둥근 테두리 없음).
 - 휴식 장소 선택지 아이콘 `images/ui/rest_option_forge.png`: 텍스트→이미지(opt_25) 후 rembg.
 - 파워 아이콘 `images/powers/*`: 검 스프라이트로 만든 그림(`tools/gen_power_icons.py`), 외부 이미지 없음.
+- 휴식 장소 `images/character/magic_swordsman_rest.png`: 텍스트→이미지 후보(rest_333)를 좌우 반전해 모닥불(오른쪽)을 보게 한 뒤, 엔시페르 디자인으로 img2img(강도 0.5, p_50_4), rembg로 배경 제거.
