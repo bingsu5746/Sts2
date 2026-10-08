@@ -69,10 +69,26 @@ public static class SwordAcquiredPopup
                 BorderWidthTop = 2, BorderWidthBottom = 2, CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8,
                 CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8,
             });
+            var isSprite = artPath.Contains("/images/swords/");
+            if (isSprite)
+            {
+                // the sword itself (same art as the floating combat sword) on a soft glow in its color
+                frame.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+                {
+                    BgColor = new Color(accent.Darkened(0.85f), 1f), BorderColor = new Color(accent, 0.8f),
+                    BorderWidthLeft = 2, BorderWidthRight = 2, BorderWidthTop = 2, BorderWidthBottom = 2,
+                    CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8, CornerRadiusBottomLeft = 8,
+                    CornerRadiusBottomRight = 8, ShadowColor = new Color(accent, 0.25f), ShadowSize = 40,
+                });
+            }
+
             frame.AddChild(new TextureRect
             {
                 Texture = GD.Load<Texture2D>(artPath), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-                StretchMode = TextureRect.StretchModeEnum.KeepAspectCovered, CustomMinimumSize = new Vector2(420, 320),
+                StretchMode = isSprite
+                    ? TextureRect.StretchModeEnum.KeepAspectCentered
+                    : TextureRect.StretchModeEnum.KeepAspectCovered,
+                CustomMinimumSize = isSprite ? new Vector2(300, 460) : new Vector2(420, 320),
                 MouseFilter = Control.MouseFilterEnum.Ignore,
             });
             row.AddChild(frame);
@@ -186,9 +202,13 @@ public static class SwordAcquiredPopup
         catch (Exception) { return ""; }
     }
 
-    /// <summary>The sword token's big card art (images/card_portraits/big/&lt;sword&gt;_token.*); the pair uses 한 쌍.</summary>
+    /// <summary>The sword sprite if present, else the token's big card art (the pair uses 한 쌍).</summary>
     private static string? ArtPath(SwordId sword)
     {
+        // Preferred: the sword itself (images/swords/<sword>.png, also used for the floating combat swords).
+        var spritePath = $"{MainFile.ResPath}/images/swords/{sword.ToString().ToLowerInvariant()}.png";
+        if (ResourceLoader.Exists(spritePath)) return spritePath;
+
         var id = sword == SwordId.Ganjiang
             ? "twin_mated_pair"
             : Regex.Replace(sword.ToString(), "(?<!^)([A-Z])", "_$1").ToLowerInvariant() + "_token";
