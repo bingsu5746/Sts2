@@ -358,3 +358,11 @@
 ## 전투 중 떠 있는 검 (2026-10-08)
 
 `MagicSwordsman/MagicSwordsman/images/swords/<검>.png` 11장. AI Horde(AlbedoBase XL, 512×1024, 30 steps)로 검 하나씩 세로로 생성 → `rembg`(isnet-general-use)로 배경 제거 → 칼끝이 위로 가게 180° 회전 → 높이 1000px로 맞춤. 검 토큰 카드 11장은 이 검 그림을 어두운 배경 + 검 색 빛 위에 얹어 만든 것(전투 검·획득 화면·토큰 카드가 같은 그림).
+
+### 오니마루 다시 그림 (2026-10-08)
+
+사용자 요청("일본 사무라이 검처럼, 흰색과 검은색만")으로 `swords/onimaru.png`와 `onimaru_token.jpg`(작은 것·큰 것)를 교체. AI Horde(AlbedoBase XL, 1024×512)로 카타나를 가로로 12장 생성해 그중 한 장(k2__3)을 골랐다. 프롬프트: "hand-painted 2D fantasy game weapon icon, a complete japanese samurai katana lying horizontally …, round silver tsuba, black cord-wrapped hilt …, monochrome black and white". `rembg`로 배경 제거 → 주축 기준으로 세로 회전(칼끝 위) → 높이 1000px. 토큰 카드는 이 그림을 무채색 어두운 배경 + 흰 빛 위에 얹은 것. 오니마루 일반 카드 10장의 그림은 그대로다.
+
+### 엔시페르 손 마법진 (2026-10-08)
+
+`images/vfx/hand_ring.png`, `hand_glyph.png`, `hand_orbit.png`, `hand_core.png`는 PIL로 직접 그린 도형(룬 고리, 육망성 + 검 문양, 기울어진 궤도 고리, 빛 덩어리)이다. 외부 이미지는 쓰지 않았다.
