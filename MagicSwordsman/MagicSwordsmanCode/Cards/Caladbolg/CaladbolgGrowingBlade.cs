@@ -13,7 +13,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.Caladbolg;
 
 /// <summary>
 /// 공중에서 커지는 칼 (Uncommon power): this combat, whenever one of your attacks hits 2+ enemies, gain 2 Block
-/// (+⌊L/2⌋). Source: 「내리치려 하면 공중에서 무지개만큼 커졌다」.
+/// (+⌊L/2⌋). Source: 「내리치려 하면 공중에서 거대하게 커졌다」.
 /// </summary>
 public sealed class CaladbolgGrowingBlade : CaladbolgCard
 {

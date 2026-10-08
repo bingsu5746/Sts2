@@ -11,7 +11,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace MagicSwordsman.MagicSwordsmanCode.Cards.Caladbolg;
 
-/// <summary>무지개 베기 (Common): 11 damage (+2/L). Source: 「내리치려 하면 공중에서 무지개만큼 커졌다」.</summary>
+/// <summary>하늘 가르기 (Common): 11 damage (+2/L). Source: 「내리치려 하면 공중에서 거대하게 커졌다」.</summary>
 public sealed class CaladbolgRainbowArc : CaladbolgCard
 {
     public CaladbolgRainbowArc() : base(2, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)

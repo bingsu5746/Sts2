@@ -256,7 +256,7 @@
   "MAGICSWORDSMAN-CALADBOLG_HARD_BLADE.description": "Deal {Damage:diff()} damage.\n[gold]Caladbolg[/gold] level {SwordLevel} (+1 damage per level).",
   "MAGICSWORDSMAN-CALADBOLG_FAIRY_MOUND.title": "Earthwork",
   "MAGICSWORDSMAN-CALADBOLG_FAIRY_MOUND.description": "Gain {Block:diff()} [gold]Block[/gold]. If there are 2 or more enemies, gain {ExtraBlock} more.\n[gold]Caladbolg[/gold] level {SwordLevel} (+1 Block per level).",
-  "MAGICSWORDSMAN-CALADBOLG_RAINBOW_ARC.title": "Rainbow Slash",
+  "MAGICSWORDSMAN-CALADBOLG_RAINBOW_ARC.title": "Skysplitter",
   "MAGICSWORDSMAN-CALADBOLG_RAINBOW_ARC.description": "Deal {Damage:diff()} damage.\n[gold]Caladbolg[/gold] level {SwordLevel} (+2 damage per level).",
   "MAGICSWORDSMAN-CALADBOLG_CATTLE_RAID.title": "Raid",
   "MAGICSWORDSMAN-CALADBOLG_CATTLE_RAID.description": "Deal {Damage:diff()} damage.\nIf this hits 2 or more enemies, draw {Cards:diff()} card.\n[gold]Caladbolg[/gold] level {SwordLevel} (+1 damage per level).",

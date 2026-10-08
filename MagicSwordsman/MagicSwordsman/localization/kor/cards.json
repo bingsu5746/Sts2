@@ -256,7 +256,7 @@
   "MAGICSWORDSMAN-CALADBOLG_HARD_BLADE.description": "피해를 {Damage:diff()} 줍니다.\n[gold]칼라드볼그[/gold] {SwordLevel}단계 (단계마다 피해 +1).",
   "MAGICSWORDSMAN-CALADBOLG_FAIRY_MOUND.title": "흙벽",
   "MAGICSWORDSMAN-CALADBOLG_FAIRY_MOUND.description": "[gold]방어도[/gold]를 {Block:diff()} 얻습니다. 적이 2명 이상이면 {ExtraBlock} 더 얻습니다.\n[gold]칼라드볼그[/gold] {SwordLevel}단계 (단계마다 방어도 +1).",
-  "MAGICSWORDSMAN-CALADBOLG_RAINBOW_ARC.title": "무지개 베기",
+  "MAGICSWORDSMAN-CALADBOLG_RAINBOW_ARC.title": "하늘 가르기",
   "MAGICSWORDSMAN-CALADBOLG_RAINBOW_ARC.description": "피해를 {Damage:diff()} 줍니다.\n[gold]칼라드볼그[/gold] {SwordLevel}단계 (단계마다 피해 +2).",
   "MAGICSWORDSMAN-CALADBOLG_CATTLE_RAID.title": "약탈",
   "MAGICSWORDSMAN-CALADBOLG_CATTLE_RAID.description": "피해를 {Damage:diff()} 줍니다.\n적을 2명 이상 맞히면 카드를 {Cards:diff()}장 뽑습니다.\n[gold]칼라드볼그[/gold] {SwordLevel}단계 (단계마다 피해 +1).",
