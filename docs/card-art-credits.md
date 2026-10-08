@@ -354,3 +354,7 @@
 | ONIMARU | a curved japanese tachi with a black lacquered scabbard and red cord, an oni demon face on its round guard, floating by itself |
 | SOLAIS | a sword made of pure blinding white light with a black obsidian sheath |
 | CALADBOLG | an enormous very long celtic sword with an iridescent rainbow-colored blade and a simple bronze hilt |
+
+## 전투 중 떠 있는 검 (2026-10-08)
+
+`MagicSwordsman/MagicSwordsman/images/swords/<검>.png` 11장. AI Horde(AlbedoBase XL, 512×1024, 30 steps)로 검 하나씩 세로로 생성 → `rembg`(isnet-general-use)로 배경 제거 → 칼끝이 위로 가게 180° 회전 → 높이 1000px로 맞춤. 검 토큰 카드 11장은 이 검 그림을 어두운 배경 + 검 색 빛 위에 얹어 만든 것(전투 검·획득 화면·토큰 카드가 같은 그림).
