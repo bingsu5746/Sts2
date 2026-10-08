@@ -69,8 +69,8 @@ public class MagicSwordsmanCharacter : PlaceholderCharacterModel
     public override string CustomCharacterSelectBg =>
         SceneOrPlaceholder("magic_swordsman_char_select_bg.tscn", base.CustomCharacterSelectBg);
 
-    // Top-panel icon outline: the placeholder points at Ironclad's outline; use our own icon for both.
-    public override string? CustomIconOutlineTexturePath => CustomIconTexturePath;
+    // Top-panel icon outline: the placeholder points at Ironclad's outline; use our own (a plain circle).
+    public override string? CustomIconOutlineTexturePath => "character_icon_outline.png".CharacterUiPath();
 
     private static string SceneOrPlaceholder(string file, string? fallback)
     {
