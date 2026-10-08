@@ -207,12 +207,11 @@ public static class SwordAcquiredPopup
     private static string? ArtPath(SwordId sword)
     {
         // Preferred: the sword itself (images/swords/<sword>.png, also used for the floating combat swords).
+        // (간장·막야 come as a pair: their token art shows both swords crossed, so use that instead.)
         var spritePath = $"{MainFile.ResPath}/images/swords/{sword.ToString().ToLowerInvariant()}.png";
-        if (ResourceLoader.Exists(spritePath)) return spritePath;
+        if (sword != SwordId.Ganjiang && ResourceLoader.Exists(spritePath)) return spritePath;
 
-        var id = sword == SwordId.Ganjiang
-            ? "twin_mated_pair"
-            : Regex.Replace(sword.ToString(), "(?<!^)([A-Z])", "_$1").ToLowerInvariant() + "_token";
+        var id = Regex.Replace(sword.ToString(), "(?<!^)([A-Z])", "_$1").ToLowerInvariant() + "_token";
         foreach (var ext in new[] { ".png", ".jpg" })
         {
             var path = $"{MainFile.ResPath}/images/card_portraits/big/{id}{ext}";
