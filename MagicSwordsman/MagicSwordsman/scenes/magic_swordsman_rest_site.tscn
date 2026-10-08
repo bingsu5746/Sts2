@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Texture2D" path="res://MagicSwordsman/images/character/magic_swordsman.png" id="1_tex"]
+[ext_resource type="Texture2D" path="res://MagicSwordsman/images/character/magic_swordsman_rest.png" id="1_tex"]
 
 [sub_resource type="Animation" id="a_idle"]
 resource_name = "idle"
