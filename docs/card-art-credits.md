@@ -366,3 +366,13 @@
 ### 엔시페르 손 마법진 (2026-10-08)
 
 `images/vfx/hand_ring.png`, `hand_glyph.png`, `hand_orbit.png`, `hand_core.png`는 PIL로 직접 그린 도형(룬 고리, 육망성 + 검 문양, 기울어진 궤도 고리, 빛 덩어리)이다. 외부 이미지는 쓰지 않았다.
+
+## 게임 화풍으로 다시 그림 (2026-10-08)
+
+사용자 요청("다른 캐릭터들과 어울리게, AI 티 나지 않게, 상대를 보는 옆모습")으로 캐릭터 그림을 슬레이 더 스파이어 2의 손그림(구아슈) 느낌으로 바꿨다. 모두 AI Horde(AlbedoBase XL)로 생성했고, 공통 프롬프트는 "Slay the Spire 2 character art style, hand-painted gouache illustration, thick visible dry brush strokes and rough paper grain, bold simplified graphic shapes, loose sketchy dark outlines, limited palette of deep violet…"이다.
+
+- 캐릭터 선택 화면 `images/character/char_select_bg.jpg`: 텍스트→이미지 후보(sel_0_202) 위에 마검 스프라이트를 보랏빛으로 얹고, img2img(강도 0.42)로 다시 칠함(csel_42_8). 1216×704를 1920×1080으로 확대.
+- 전투 모델 `images/character/parts/*`: 전신 후보(body_137)를 좌우 반전해 적 쪽(오른쪽)을 보게 하고, rembg로 배경 제거, 손 주변의 마법 소용돌이와 구멍을 정리한 뒤 `tools/split_body.py`로 부위를 나눔.
+- 프로필 아이콘 `images/charui/character_icon_*.png`, 지도 표시: 같은 전투 모델 그림에서 얼굴만 잘라냄(둥근 테두리 없음).
+- 휴식 장소 선택지 아이콘 `images/ui/rest_option_forge.png`: 텍스트→이미지(opt_25) 후 rembg.
+- 파워 아이콘 `images/powers/*`: 검 스프라이트로 만든 그림(`tools/gen_power_icons.py`), 외부 이미지 없음.

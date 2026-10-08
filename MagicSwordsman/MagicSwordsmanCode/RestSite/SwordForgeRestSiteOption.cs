@@ -1,3 +1,4 @@
+using MagicSwordsman.MagicSwordsmanCode.Extensions;
 using BaseLib.Abstracts;
 using MagicSwordsman.MagicSwordsmanCode.Cards.Tokens;
 using MagicSwordsman.MagicSwordsmanCode.Events;
@@ -30,8 +31,8 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
 
     public override string OptionId => Id;
 
-    // TODO(art): dedicated icon. Reuses the game's Smith icon (path verified in SmithRestSiteOption).
-    public override string? CustomIconPath => ImageHelper.GetImagePath("ui/rest_site/option_smith.png");
+    // Own painted icon (a sword plunged into a glowing forge ring, AI Horde, see docs/card-art-credits.md).
+    public override string? CustomIconPath => "ui/rest_option_forge.png".ImagePath();
 
     private Mangeomchong? Relic => Owner.GetRelic<Mangeomchong>();
 
