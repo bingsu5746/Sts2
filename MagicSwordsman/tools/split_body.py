@@ -28,9 +28,11 @@ im=Image.open(SRC).convert('RGBA'); W,H=im.size
 a=np.array(im); yy,xx=np.mgrid[0:H,0:W]
 # painted magic swirls / wisps: magenta strokes outside the hands, and faint semi-transparent smoke
 mag=(a[...,0].astype(int)>140)&(a[...,2].astype(int)>140)&(a[...,1].astype(int)<130)
-inhand=np.zeros((H,W),bool)
-for x0,y0,x1,y1 in HANDS: inhand[y0:y1,x0:x1]=True
-a[mag&~inhand,3]=0
+keep=np.zeros((H,W),bool)
+for x0,y0,x1,y1 in HANDS: keep[y0:y1,x0:x1]=True
+# the face (pink make-up) and the chest gem are magenta too: keep them; every other magenta stroke is painted magic
+for x0,y0,x1,y1 in ((285,70,465,275),(320,260,460,380)): keep[y0:y1,x0:x1]=True
+a[mag&~keep,3]=0
 a[a[...,3]<90,3]=0
 # ground shadow under the boots
 a[(yy>1170)&((xx<330)|(xx>440)),3]=0
