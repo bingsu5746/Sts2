@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Context;
 using MagicSwordsman.MagicSwordsmanCode.Visuals;
 using System.Runtime.CompilerServices;
 using MagicSwordsman.MagicSwordsmanCode.Cards;
@@ -224,6 +225,8 @@ public class Mangeomchong : MagicSwordsmanRelic
         foreach (var s in group) await SwordRegistry.Get(s).OnAcquired(Owner, firstTime[s]);
 
         Flash();
+        // First acquisition in the run: a short "new sword" card (presentation only, local player only).
+        if (firstTime.Values.Any(f => f) && LocalContext.IsMe(Owner)) SwordAcquiredPopup.Show(sword);
         MainFile.Logger.Info($"[Mangeomchong] acquired {string.Join(",", group)}");
         return true;
     }

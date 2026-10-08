@@ -1,0 +1,184 @@
+using System.Text.RegularExpressions;
+using Godot;
+using MagicSwordsman.MagicSwordsmanCode.Events;
+using MagicSwordsman.MagicSwordsmanCode.Swords;
+using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Localization.Fonts;
+using MegaCrit.Sts2.Core.Nodes;
+
+namespace MagicSwordsman.MagicSwordsmanCode.Visuals;
+
+/// <summary>
+/// Presentation only: a short "new sword" card shown the first time a sword is acquired in a run
+/// (user request 2026-10-08). Art on the left (the sword token's card art), name / tagline / effect / cost / card style
+/// on the right, framed in the sword's color. Click anywhere (or press a key) to close. Never blocks game logic:
+/// it is a plain overlay added to the scene root, and every failure is swallowed.
+/// Texts: events table, MAGICSWORDSMAN-SWORD_LORE.&lt;SWORD&gt;.{NAME,TAGLINE,EFFECT,COST,STYLE} and .POPUP_*.
+/// UNVERIFIED in game: layout at non-1080p resolutions, font substitution for Korean.
+/// </summary>
+public static class SwordAcquiredPopup
+{
+    private static readonly Color Panel = new(0.07f, 0.075f, 0.095f, 0.97f);
+    private static readonly Color Muted = new(0.72f, 0.72f, 0.76f);
+
+    public static void Show(SwordId sword)
+    {
+        try { ShowInner(SwordRegistry.GroupLeader(sword)); }
+        catch (Exception e) { MainFile.Logger.Warn($"[SwordAcquiredPopup] failed: {e.Message}"); }
+    }
+
+    private static void ShowInner(SwordId sword)
+    {
+        if (Engine.GetMainLoop() is not SceneTree tree) return;
+        var accent = SwordVisuals.ColorOf(sword == SwordId.Ganjiang ? SwordId.Moye : sword);
+
+        var layer = new CanvasLayer { Layer = 120, Name = "MagicSwordAcquiredPopup" };
+        var root = new Control { MouseFilter = Control.MouseFilterEnum.Stop };
+        root.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        layer.AddChild(root);
+
+        var dim = new ColorRect { Color = new Color(0, 0, 0, 0.72f), MouseFilter = Control.MouseFilterEnum.Ignore };
+        dim.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        root.AddChild(dim);
+
+        // ---- framed panel
+        var panel = new PanelContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        panel.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+        {
+            BgColor = Panel, BorderColor = accent, BorderWidthLeft = 3, BorderWidthRight = 3, BorderWidthTop = 3,
+            BorderWidthBottom = 3, CornerRadiusTopLeft = 14, CornerRadiusTopRight = 14, CornerRadiusBottomLeft = 14,
+            CornerRadiusBottomRight = 14, ShadowColor = new Color(accent, 0.35f), ShadowSize = 24,
+            ContentMarginLeft = 28, ContentMarginRight = 28, ContentMarginTop = 24, ContentMarginBottom = 24,
+        });
+        panel.CustomMinimumSize = new Vector2(980, 0);
+        panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.Center, Control.LayoutPresetMode.KeepSize);
+        root.AddChild(panel);
+
+        var row = new HBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        row.AddThemeConstantOverride("separation", 28);
+        panel.AddChild(row);
+
+        // ---- art
+        var artPath = ArtPath(sword);
+        if (artPath != null)
+        {
+            var frame = new PanelContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+            frame.AddThemeStyleboxOverride("panel", new StyleBoxFlat
+            {
+                BgColor = Colors.Black, BorderColor = new Color(accent, 0.8f), BorderWidthLeft = 2, BorderWidthRight = 2,
+                BorderWidthTop = 2, BorderWidthBottom = 2, CornerRadiusTopLeft = 8, CornerRadiusTopRight = 8,
+                CornerRadiusBottomLeft = 8, CornerRadiusBottomRight = 8,
+            });
+            frame.AddChild(new TextureRect
+            {
+                Texture = GD.Load<Texture2D>(artPath), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCovered, CustomMinimumSize = new Vector2(420, 320),
+                MouseFilter = Control.MouseFilterEnum.Ignore,
+            });
+            row.AddChild(frame);
+        }
+
+        // ---- text column
+        var col = new VBoxContainer { CustomMinimumSize = new Vector2(440, 0), MouseFilter = Control.MouseFilterEnum.Ignore };
+        col.AddThemeConstantOverride("separation", 8);
+        row.AddChild(col);
+
+        col.AddChild(MakeLabel(Lore("POPUP_HEADER"), 18, accent));
+        col.AddChild(MakeLabel(SwordLore.NameText(sword), 46, Colors.White, bold: true));
+        col.AddChild(MakeLabel(Text(SwordLore.Line(sword, "TAGLINE")), 20, Muted));
+        col.AddChild(new HSeparator { MouseFilter = Control.MouseFilterEnum.Ignore });
+        AddEntry(col, Lore("POPUP_EFFECT"), Text(SwordLore.Line(sword, "EFFECT")), accent);
+        AddEntry(col, Lore("POPUP_COST"), Text(SwordLore.Line(sword, "COST")), new Color(0.9f, 0.4f, 0.4f));
+        AddEntry(col, Lore("POPUP_STYLE"), Text(SwordLore.Line(sword, "STYLE")), accent);
+        var hint = MakeLabel(Lore("POPUP_CONTINUE"), 16, new Color(Muted, 0.7f));
+        hint.HorizontalAlignment = HorizontalAlignment.Right;
+        col.AddChild(hint);
+
+        tree.Root.AddChild(layer);
+
+        // ---- appear: fade + slight scale
+        panel.PivotOffset = panel.Size / 2;
+        root.Modulate = new Color(1, 1, 1, 0);
+        panel.Scale = new Vector2(0.92f, 0.92f);
+        var t = root.CreateTween().SetParallel();
+        t.TweenProperty(root, "modulate:a", 1f, 0.25);
+        t.TweenProperty(panel, "scale", Vector2.One, 0.3).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+
+        var closing = false;
+        void Close()
+        {
+            if (closing || !GodotObject.IsInstanceValid(layer)) return;
+            closing = true;
+            var o = root.CreateTween();
+            o.TweenProperty(root, "modulate:a", 0f, 0.18);
+            o.TweenCallback(Callable.From(layer.QueueFree));
+        }
+
+        var openedAt = Time.GetTicksMsec();
+        root.GuiInput += ev =>
+        {
+            // ignore the click that triggered the acquisition itself
+            if (Time.GetTicksMsec() - openedAt < 350) return;
+            if (ev is InputEventMouseButton { Pressed: true } or InputEventKey { Pressed: true }) Close();
+        };
+    }
+
+    private static void AddEntry(VBoxContainer col, string title, string body, Color titleColor)
+    {
+        if (string.IsNullOrWhiteSpace(body)) return;
+        col.AddChild(MakeLabel(title, 17, titleColor, bold: true));
+        col.AddChild(MakeLabel(body, 21, Colors.White));
+    }
+
+    private static Label MakeLabel(string text, int size, Color color, bool bold = false)
+    {
+        var label = new Label
+        {
+            Text = text, AutowrapMode = TextServer.AutowrapMode.WordSmart, MouseFilter = Control.MouseFilterEnum.Ignore,
+        };
+        label.AddThemeFontSizeOverride("font_size", size);
+        label.AddThemeColorOverride("font_color", color);
+        label.AddThemeColorOverride("font_outline_color", Colors.Black);
+        label.AddThemeConstantOverride("outline_size", bold ? 6 : 3);
+        var font = GameFont(bold);
+        if (font != null) label.AddThemeFontOverride("font", font);
+        return label;
+    }
+
+    private static Font? GameFont(bool bold)
+    {
+        try
+        {
+            var lang = LocManager.Instance?.Language ?? "eng";
+            return FontManager.GetSubstituteFont(lang, bold ? FontType.Bold : FontType.Regular)
+                   ?? NGame.Instance?.GetThemeDefaultFont();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    private static string Lore(string part) => Text(SwordLore.Generic(part));
+
+    private static string Text(LocString loc)
+    {
+        try { return loc.GetFormattedText(); }
+        catch (Exception) { return ""; }
+    }
+
+    /// <summary>The sword token's big card art (images/card_portraits/big/&lt;sword&gt;_token.*); the pair uses 한 쌍.</summary>
+    private static string? ArtPath(SwordId sword)
+    {
+        var id = sword == SwordId.Ganjiang
+            ? "twin_mated_pair"
+            : Regex.Replace(sword.ToString(), "(?<!^)([A-Z])", "_$1").ToLowerInvariant() + "_token";
+        foreach (var ext in new[] { ".png", ".jpg" })
+        {
+            var path = $"{MainFile.ResPath}/images/card_portraits/big/{id}{ext}";
+            if (ResourceLoader.Exists(path)) return path;
+        }
+
+        return null;
+    }
+}
