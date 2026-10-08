@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 namespace MagicSwordsman.MagicSwordsmanCode.Extensions;
 
@@ -14,6 +14,9 @@ public static class StringExtensions
     {
         path = Path.Join(MainFile.ResPath, "images", "card_portraits", path);
         if (ResourceLoader.Exists(path)) return path;
+        // Card art may also be a .jpg (photos of museum artworks are much smaller as JPEG).
+        var jpg = Path.ChangeExtension(path, ".jpg");
+        if (ResourceLoader.Exists(jpg)) return jpg;
         
         MainFile.Logger.Info("Could not find card image path: " + path);
         return Path.Join(MainFile.ResPath, "images", "card_portraits", "card.png");
@@ -23,6 +26,9 @@ public static class StringExtensions
     {
         path = Path.Join(MainFile.ResPath, "images", "card_portraits", "big", path);
         if (ResourceLoader.Exists(path)) return path;
+        // Card art may also be a .jpg (photos of museum artworks are much smaller as JPEG).
+        var jpg = Path.ChangeExtension(path, ".jpg");
+        if (ResourceLoader.Exists(jpg)) return jpg;
         
         MainFile.Logger.Info("Could not find big card image path: " + path);
         return Path.Join(MainFile.ResPath, "images", "card_portraits", "big", "card.png");
