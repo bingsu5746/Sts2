@@ -153,3 +153,185 @@
 | `tyrfing_one_life_per_draw.jpg` | One Life — cursed norse sword with golden hilt and blade burning like flame |
 | `tyrfing_rustless.jpg` | Untarnished — cursed norse sword with golden hilt and blade burning like flame |
 | `wall_of_swords.jpg` | Wall of Blades — a cloaked swordsman surrounded by floating magic swords |
+
+## 2차 생성 (2026-10-08): 장면 프롬프트
+
+저주·토큰 카드 35장과, 1차보다 카드 내용에 더 맞게 나온 카드 55장은 아래 장면 프롬프트로 다시 만든 그림입니다 (같은 모델·설정).
+
+| 파일 | 장면 프롬프트 |
+|---|---|
+| `afterimage_cut.jpg` | a hooded swordsman in a dark cloak leaving afterimages while cutting |
+| `angantyrs_death.jpg` | a berserker dying in a duel on a battlefield, sickly purple curse aura |
+| `arc_slash.jpg` | a hooded swordsman in a dark cloak sweeping a wide circular slash |
+| `blade_gale.jpg` | a gale of flying blades |
+| `broken_blade.jpg` | a broken norse sword lying in two pieces on stone, faint golden glow |
+| `caladbolg_cattle_raid.jpg` | a celtic warband raiding cattle, a giant sword |
+| `caladbolg_fairy_mound.jpg` | a glowing fairy mound hill with an earth wall |
+| `caladbolg_growing_blade.jpg` | a sword growing huge in midair |
+| `caladbolg_hard_blade.jpg` | a warrior with an enormous celtic sword, rainbow sky |
+| `caladbolg_hard_cleft.jpg` | a small quick nick from a huge blade, rocks split |
+| `caladbolg_lethe_blade.jpg` | a sword blade extending to impossible length |
+| `caladbolg_rainbow_arc.jpg` | a rainbow-colored sword arc sweeping across a valley |
+| `caladbolg_spared_king.jpg` | a giant sword stopping above a kneeling king, mercy |
+| `caladbolg_three_hilltops.jpg` | a giant sword slicing off the tops of three hills |
+| `caladbolg_token.jpg` | a single enormous celtic sword, rainbow sky displayed |
+| `caladbolg_ulster_hero.jpg` | a celtic giant hero towering with an enormous sword |
+| `call_sword.jpg` | a sword rising out of a glowing magic circle portal |
+| `claiomh_solais_token.jpg` | a single sword of pure white light displayed |
+| `counter_stance.jpg` | a hooded swordsman in a dark cloak in a counter stance, waiting |
+| `dainsleif_endless_battle.jpg` | an endless battlefield of warriors under a red sky |
+| `dainsleif_hjadningavig.jpg` | two armies fighting forever on an island, witch reviving the dead |
+| `dainsleif_hogni.jpg` | a norse king rallying his warriors, red banners |
+| `dainsleif_hognis_flurry.jpg` | a king hacking wildly with a dark norse sword dripping blood, red sky |
+| `dainsleif_legacy.jpg` | a dark norse sword dripping blood, red sky resting on a king throne |
+| `dainsleif_must_slay.jpg` | a dark norse sword dripping blood, red sky thirsting, blood dripping from its edge |
+| `dainsleif_never_misses.jpg` | a dark norse sword dripping blood, red sky flying straight into an enemy heart |
+| `dainsleif_recurrence.jpg` | fallen warriors rising again to fight at night |
+| `dainsleif_token.jpg` | a single dark norse sword dripping blood, red sky displayed |
+| `dainsleif_unhealing_scratch.jpg` | a bleeding wound that never heals, red mist |
+| `dainsleif_unsheathe.jpg` | a dark norse sword dripping blood, red sky drawn from its sheath, first drop of blood |
+| `deflection.jpg` | a sword deflecting an arrow aside |
+| `double_slash.jpg` | two slash marks crossing |
+| `double_swap.jpg` | a hooded swordsman in a dark cloak juggling two floating swords |
+| `durandal_angels_blade.jpg` | an angel handing a holy golden knight sword, radiant light to a knight |
+| `durandal_hidden_beneath.jpg` | a dying knight lying on his holy golden knight sword, radiant light to hide it, mountain pass |
+| `durandal_relic_hilt.jpg` | a golden sword hilt containing holy relics, glowing |
+| `durandal_rolands_breach.jpg` | a giant breach cut in a mountain cliff by a sword |
+| `durandal_strong_flame.jpg` | a knight bashing with a shield and holy golden knight sword, radiant light |
+| `durandal_st_basils_blood.jpg` | a vial of holy blood glowing in a golden reliquary |
+| `durandal_st_deniss_hair.jpg` | a holy lock of hair in a golden reliquary, soft light |
+| `durandal_st_peters_tooth.jpg` | a knight enduring a rain of arrows behind a holy golden knight sword, radiant light |
+| `durandal_ten_blows.jpg` | a knight striking a boulder ten times with a holy golden knight sword, radiant light |
+| `durandal_token.jpg` | a single holy golden knight sword, radiant light displayed |
+| `durandal_unscathed.jpg` | a holy golden knight sword, radiant light unscathed after striking a rock |
+| `echo_of_the_tomb.jpg` | a vast prison tomb of ten thousand sealed swords echoing |
+| `flip_grip.jpg` | a hand flipping a sword grip, reverse hold |
+| `flying_swap.jpg` | a hooded swordsman in a dark cloak throwing a sword that flies into an enemy |
+| `forge_gamble2_token.jpg` | a blacksmith striking a sword hard, risky sparks |
+| `forge_gamble3_token.jpg` | a blacksmith striking a sword with lightning, very risky |
+| `forge_result_token.jpg` | a freshly forged sword glowing on an anvil |
+| `forge_safe_token.jpg` | a careful blacksmith gently honing a sword |
+| `forge_story_gamble2_token.jpg` | a blacksmith striking a sword hard, risky sparks |
+| `forge_story_gamble3_token.jpg` | a blacksmith striking a sword with lightning, very risky |
+| `forge_story_intro_token.jpg` | an anvil and forge in a dark sword tomb |
+| `forge_story_result_token.jpg` | a freshly forged sword glowing on an anvil |
+| `forge_story_safe_token.jpg` | a careful blacksmith gently honing a sword |
+| `four_swords_of_the_tomb.jpg` | four legendary swords floating out of a tomb portal |
+| `furnace_offering.jpg` | a cursed offering burning in a bronze furnace, sickly purple curse aura |
+| `ganjiang_assassin.jpg` | an assassin leaping from shadows with a black chinese sword |
+| `ganjiang_chis_vengeance.jpg` | a young avenger with a black chinese sword, severed rope, burning palace |
+| `ganjiang_hidden_blade.jpg` | a black chinese sword hidden inside a pillar of a house |
+| `ganjiang_slash.jpg` | a swordsman slashing with the black sword of chinese twin swords, one black one white |
+| `ganjiang_token.jpg` | a single black chinese jian sword displayed |
+| `gather_qi.jpg` | a hooded swordsman in a dark cloak meditating, energy gathering |
+| `gram_anvil_splitter.jpg` | a golden norse longsword cleaving an iron anvil in half, sparks |
+| `gram_balmung_nothung.jpg` | a hero raising a golden norse longsword wreathed in golden wrath aura |
+| `gram_branstock_draw.jpg` | a golden norse longsword stuck in a giant oak tree inside a mead hall, a hand pulling it out |
+| `gram_fafnir_slayer.jpg` | a warrior stabbing a huge dragon from below with a golden norse longsword |
+| `gram_fleece_cutter.jpg` | a tuft of wool drifting down a river and splitting on the edge of a golden norse longsword |
+| `gram_reforged.jpg` | a blacksmith hammering a golden norse longsword on an anvil, forge fire |
+| `gram_regins_reforging.jpg` | a dwarf smith quenching a golden norse longsword in water, steam |
+| `gram_token.jpg` | a single golden norse longsword displayed, reforged seam glowing |
+| `gram_two_shards.jpg` | two glowing shards of a golden norse longsword crossed, striking twice |
+| `guard_swap.jpg` | a hooded swordsman in a dark cloak switching swords while blocking |
+| `heavy_chop.jpg` | a heavy overhead chop splitting the ground |
+| `heidreks_end.jpg` | a king murdered in his sleep by slaves, cursed sword, sickly purple curse aura |
+| `hjalmars_death.jpg` | a dying warrior with many wounds on an island, sickly purple curse aura |
+| `hone.jpg` | a sword being sharpened on a whetstone, sparks |
+| `hovering_blades.jpg` | a hooded swordsman in a dark cloak surrounded by hovering swords |
+| `irreconcilable_curse.jpg` | two kings who can never reconcile, broken peace, sickly purple curse aura |
+| `issen.jpg` | a single flash cut, a line of light |
+| `kusanagi_atsuta.jpg` | a sword enshrined in a shinto shrine, sacred rope, purifying light |
+| `kusanagi_eight_heads.jpg` | an eight-headed serpent Yamata no Orochi rearing in a storm |
+| `kusanagi_gathering_clouds.jpg` | dark clouds spiraling around a raised ancient japanese straight sword, storm clouds |
+| `kusanagi_grass_cutter.jpg` | a warrior mowing a burning grass field with a ancient japanese straight sword, storm clouds |
+| `kusanagi_magatama.jpg` | glowing curved jade magatama jewels on a cord, purifying light |
+| `kusanagi_mirror.jpg` | a sacred bronze mirror reflecting a sword |
+| `kusanagi_orochis_tail.jpg` | a sword emerging from the cut tail of a giant serpent |
+| `kusanagi_susanoos_strike.jpg` | a storm god striking down with a sword amid lightning |
+| `kusanagi_three_regalia.jpg` | a sword, a mirror and a jewel arranged on an altar, imperial regalia |
+| `kusanagi_token.jpg` | a single ancient japanese straight sword, storm clouds displayed |
+| `kusanagi_wildfire.jpg` | a warrior cutting a firebreak through a wildfire with a japanese sword |
+| `linked_strike.jpg` | a hooded swordsman in a dark cloak chaining two strikes, afterimages |
+| `masterless_blade.jpg` | an abandoned katana with no master, rust, sickly purple curse aura |
+| `moyes_sacrifice.jpg` | a woman leaping into a blazing furnace, molten metal glow |
+| `moye_bellows.jpg` | children pumping bellows of a giant ancient chinese furnace, sparks |
+| `moye_guard.jpg` | a swordswoman blocking with the white sword of chinese twin swords, one black one white |
+| `moye_hair_and_nails.jpg` | hair and fingernails thrown into a roaring bronze furnace |
+| `moye_token.jpg` | a single white chinese jian sword displayed |
+| `nibelung_treasure.jpg` | a cursed hoard of gold, dragon treasure, greed, sickly purple curse aura |
+| `nuadas_lost_arm.jpg` | a severed arm of a king on a battlefield, sickly purple curse aura |
+| `odins_broken_blade.jpg` | a one-eyed god breaking a sword with his spear, curse, sickly purple curse aura |
+| `one_blade_focus.jpg` | a hooded swordsman in a dark cloak focusing on a single sword |
+| `onimaru_first_among_five.jpg` | five legendary japanese swords displayed, one glowing brightest |
+| `onimaru_giri.jpg` | a floating tachi sweeping horizontally through many oni |
+| `onimaru_goei.jpg` | a floating japanese sword guarding a sleeping samurai |
+| `onimaru_iai.jpg` | a quick iaido draw, flash of a floating katana |
+| `onimaru_oni_hunt.jpg` | a samurai hunting oni in a dark forest with a floating sword |
+| `onimaru_oni_slash.jpg` | a floating japanese tachi with oni demon slashing an oni on its own |
+| `onimaru_ranbu.jpg` | a floating katana whirling wildly among demons |
+| `onimaru_self_moving_blade.jpg` | a katana moving by itself out of its sheath at night |
+| `onimaru_taiheiki.jpg` | a medieval japanese war chronicle scroll with a sword |
+| `onimaru_taima.jpg` | an exorcist sword glowing with talismans, banishing oni |
+| `onimaru_token.jpg` | a single japanese tachi floating, oni mask |
+| `parry_cut.jpg` | a parry turning into a cut, sparks |
+| `pommel_bash.jpg` | a sword pommel smashing a face |
+| `quick_thrust.jpg` | a quick sword thrust, motion lines |
+| `read_the_edge.jpg` | a hooded swordsman in a dark cloak studying an enemy blade edge |
+| `rolands_rock.jpg` | a huge rock with a sword scar, sickly purple curse aura |
+| `sheathed_sword_card.jpg` | a mysterious sword in a wrapped sheath on a merchant table |
+| `skofnung_barrow_robbing.jpg` | a grave robber taking a pale blue ghostly norse sword from a burial mound |
+| `skofnung_berserker_soul.jpg` | a berserker spirit screaming out of a pale blue ghostly norse sword |
+| `skofnung_finest_in_north.jpg` | a pale blue ghostly norse sword on a northern snowy throne, aurora |
+| `skofnung_hrolfs_blade.jpg` | a norse king with a pale blue ghostly norse sword, twelve ghosts behind |
+| `skofnung_keep_the_taboo.jpg` | a pale blue ghostly norse sword hidden from the sun under a cloak |
+| `skofnung_kings_guard.jpg` | ghostly warriors guarding a sleeping king |
+| `skofnung_open_wounds.jpg` | deep wounds glowing blue on a monster |
+| `skofnung_shaded_hilt.jpg` | a pale blue ghostly norse sword hilt kept in shadow away from sunlight |
+| `skofnung_stone.jpg` | a healing stone of a sword, broken, sickly purple curse aura |
+| `skofnung_token.jpg` | a single pale blue ghostly norse sword displayed |
+| `skofnung_twelve_berserkers.jpg` | twelve ghostly berserkers charging |
+| `skofnung_twelve_souls.jpg` | twelve blue souls released from a pale blue ghostly norse sword |
+| `solais_four_treasures.jpg` | four celtic treasures: a sword, a spear, a cauldron and a stone |
+| `solais_from_findias.jpg` | a sword of light arriving at dawn over a celtic city |
+| `solais_hand_on_sheath.jpg` | a hand resting on a sheath, light leaking out |
+| `solais_inescapable.jpg` | a white light blast engulfing many enemies |
+| `solais_irresistible.jpg` | a dazzling burst of light blinding a monster |
+| `solais_light_flash.jpg` | a flash of white light cutting an enemy |
+| `solais_mag_tuired.jpg` | a celtic king with a sword of light in a great battle, judgment |
+| `solais_nuadas_torch.jpg` | a sword of pure white light burning like a torch in darkness |
+| `solais_sheath_of_death.jpg` | a sword of pure white light being drawn from a black sheath, blinding |
+| `solais_silver_arm.jpg` | a celtic king with a shining silver mechanical arm holding a sword of light |
+| `summoning_stance.jpg` | a hooded swordsman in a dark cloak summoning a sword from a portal magic circle |
+| `svafrlamis_end.jpg` | a king slain by his own cursed sword, sickly purple curse aura |
+| `swordless.jpg` | a hooded swordsman in a dark cloak with empty hands, swords floating behind unused |
+| `swordsman_defend.jpg` | a hooded swordsman in a dark cloak raising a sword to block, sparks |
+| `swordsman_strike.jpg` | a hooded swordsman in a dark cloak slashing forward with a plain sword, motion arc |
+| `sword_dance.jpg` | a hooded swordsman in a dark cloak dancing with floating swords |
+| `sword_echo.jpg` | a sword strike echoing twice, ghostly duplicate |
+| `sword_formation.jpg` | floating swords in a circular formation |
+| `sword_heart.jpg` | a glowing heart made of swords |
+| `sword_memory.jpg` | ghostly memories of swords in fog |
+| `sword_resonance.jpg` | many swords vibrating and resonating, sound waves |
+| `sword_saint.jpg` | a legendary sword saint master standing calm among blades |
+| `sword_screen.jpg` | many floating swords forming a screen wall |
+| `sword_swap.jpg` | a hooded swordsman in a dark cloak swapping between two floating swords in midair |
+| `take_aim.jpg` | a sword tip pointed at the viewer, aim |
+| `tenmus_illness.jpg` | a sick emperor in bed, cursed sword glowing, sickly purple curse aura |
+| `thousand_swords_return.jpg` | a thousand swords flying back into a portal |
+| `triple_thrust.jpg` | three rapid sword thrusts |
+| `twin_mated_pair.jpg` | chinese twin swords, one black one white crossed in a yin yang circle |
+| `twin_sword_dance.jpg` | a whirling sword dance with chinese twin swords, one black one white, flowing ribbons |
+| `tyrfing_always_victorious.jpg` | a warrior executing a kneeling foe with a cursed norse sword with golden hilt and flaming blade |
+| `tyrfing_berserker_arngrim.jpg` | a frenzied berserker with a cursed norse sword with golden hilt and flaming blade, foaming rage |
+| `tyrfing_dvalin_and_durin.jpg` | two dwarves cursing a glowing sword in a dark forge |
+| `tyrfing_dwarven_curse.jpg` | dark runes and curses swirling around a golden sword |
+| `tyrfing_dwarven_ransom.jpg` | a captured dwarf forging a sword at sword point, ransom |
+| `tyrfing_flame_blade.jpg` | a warrior swinging a cursed norse sword with golden hilt and flaming blade |
+| `tyrfing_golden_hilt.jpg` | close-up of the golden hilt of a cursed norse sword with golden hilt and flaming blade |
+| `tyrfing_iron_like_cloth.jpg` | a cursed norse sword with golden hilt and flaming blade slicing through an iron shield like cloth |
+| `tyrfing_one_life_per_draw.jpg` | a cursed norse sword with golden hilt and flaming blade being drawn, a ghost of a slain man rising |
+| `tyrfing_rustless.jpg` | a gleaming untarnished cursed norse sword with golden hilt and flaming blade in a rusted armory |
+| `tyrfing_token.jpg` | a single cursed norse sword with golden hilt and flaming blade displayed |
+| `unstruck_kings_shield.jpg` | a king shield screaming when struck, sickly purple curse aura |
+| `wall_of_swords.jpg` | a wall of swords stuck in the ground forming a barrier |
