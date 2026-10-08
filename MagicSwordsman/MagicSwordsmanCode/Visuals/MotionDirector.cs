@@ -36,6 +36,9 @@ public static class MotionDirector
     /// <summary>Last card this player played (to pick the attack variant when the game fires "Attack").</summary>
     private static readonly Dictionary<ulong, CardModel> LastCard = new();
 
+    /// <summary>Target of the last card played (where the sword flies when the game fires "Attack").</summary>
+    private static readonly Dictionary<ulong, Creature?> LastTarget = new();
+
     private const string HookMeta = "ms_motion_hook";
 
     // ------------------------------------------------------------------ hooks called by Mangeomchong / SwordCombat
@@ -45,6 +48,7 @@ public static class MotionDirector
         try
         {
             LastCard[player.NetId] = play.Card;
+            LastTarget[player.NetId] = play.Target;
             switch (play.Card.Type)
             {
                 case CardType.Power:
@@ -131,6 +135,8 @@ public static class MotionDirector
             switch (started.ToString())
             {
                 case "Attack":
+                    LastTarget.TryGetValue(player.NetId, out var target);
+                    SwordVisuals.Strike(player, target);
                     return AttackVariant(player);
                 case "Dead":
                     return Pick(Deaths);
@@ -165,5 +171,12 @@ public static class MotionDirector
         SwordVisuals.PlayMotion(player, clip, onlyIfIdle);
 
     /// <summary>Combat over: forget per-combat state.</summary>
-    public static void Clear(Player player) => LastCard.Remove(player.NetId);
+    public static void Clear(Player player)
+    {
+        LastCard.Remove(player.NetId);
+        LastTarget.Remove(player.NetId);
+    }
+
+    /// <summary>Our hit landed on an enemy (later hits of multi-hit / random-target attacks): the sword flies there.</summary>
+    public static void OnDealtDamage(Player player, Creature target) => SwordVisuals.Strike(player, target);
 }

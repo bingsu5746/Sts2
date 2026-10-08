@@ -127,7 +127,7 @@ public static class SwordVisuals
         // new swords -> fly out of the character
         foreach (var sword in state.Present.Where(s => !rig.Swords.ContainsKey(s)))
         {
-            var node = CreateSword(sword);
+            var node = CreateSword(sword, player);
             rig.Root.AddChild(node);
             node.Position = SpawnPos;
             node.Scale = new Vector2(0.3f, 0.3f);
@@ -186,49 +186,142 @@ public static class SwordVisuals
 
     // ------------------------------------------------------------------ placeholder art
 
-    private static Node2D CreateSword(SwordId sword)
+    private static readonly Color AuraColor = new(0.62f, 0.4f, 1f);
+
+    private static Node2D CreateSword(SwordId sword, Player player)
     {
         var holder = new Node2D { Name = $"Sword_{sword}" };
-        Node2D blade;
-        var texPath = $"{MainFile.ResPath}/images/swords/{sword.ToString().ToLowerInvariant()}.png";
+        var blade = new Node2D { Name = "Blade" };
+        var id = sword.ToString().ToLowerInvariant();
+        var texPath = $"{MainFile.ResPath}/images/swords/{id}.png";
+        var size = new Vector2(40, 120);
         if (ResourceLoader.Exists(texPath))
         {
             var tex = GD.Load<Texture2D>(texPath);
-            var sprite = new Sprite2D { Texture = tex, TextureFilter = CanvasItem.TextureFilterEnum.Linear };
-            // Art is high-res (about 1000 px tall); show every sword at the same on-screen height as the placeholder.
+            // Art is high-res (about 1000 px tall); every sword is shown at the same on-screen height.
             var scale = SwordSpriteHeight / Math.Max(1f, tex.GetHeight());
-            sprite.Scale = new Vector2(scale, scale);
-            blade = sprite;
+
+            // faint violet aura behind the blade (user request 2026-10-08), breathing slowly
+            var auraPath = $"{MainFile.ResPath}/images/swords/aura/{id}.png";
+            if (ResourceLoader.Exists(auraPath))
+            {
+                var aura = new Sprite2D
+                {
+                    Texture = GD.Load<Texture2D>(auraPath), Scale = new Vector2(scale, scale),
+                    Material = new CanvasItemMaterial { BlendMode = CanvasItemMaterial.BlendModeEnum.Add },
+                    Modulate = new Color(AuraColor, 0.22f), Name = "Aura",
+                };
+                blade.AddChild(aura);
+                var breathe = aura.CreateTween().SetLoops();
+                breathe.TweenProperty(aura, "modulate:a", 0.38f, 1.8).SetTrans(Tween.TransitionType.Sine);
+                breathe.TweenProperty(aura, "modulate:a", 0.2f, 1.8).SetTrans(Tween.TransitionType.Sine);
+            }
+
+            blade.AddChild(new Sprite2D { Texture = tex, TextureFilter = CanvasItem.TextureFilterEnum.Linear, Scale = new Vector2(scale, scale) });
+            size = new Vector2(tex.GetWidth(), tex.GetHeight()) * scale;
         }
         else
         {
-            blade = new Node2D();
-            var color = ColorOf(sword);
             blade.AddChild(new Polygon2D
             {
-                Color = color,
-                Polygon = new[] { new Vector2(0, -70), new Vector2(7, -55), new Vector2(6, 18), new Vector2(-6, 18), new Vector2(-7, -55) },
-            });
-            blade.AddChild(new Polygon2D
-            {
-                Color = color.Darkened(0.45f),
-                Polygon = new[] { new Vector2(-18, 18), new Vector2(18, 18), new Vector2(18, 25), new Vector2(-18, 25) },
-            });
-            blade.AddChild(new Polygon2D
-            {
-                Color = new Color(0.25f, 0.18f, 0.12f),
-                Polygon = new[] { new Vector2(-4, 25), new Vector2(4, 25), new Vector2(4, 48), new Vector2(-4, 48) },
+                Color = ColorOf(sword),
+                Polygon = new[] { new Vector2(0, -70), new Vector2(7, -55), new Vector2(6, 48), new Vector2(-6, 48), new Vector2(-7, -55) },
             });
         }
 
+        // hover box exactly over the drawn sword (moves with the bob): name, level and effect in the game's tooltip
+        var hover = new Control
+        {
+            Name = "Hover", Size = size, Position = -size / 2, MouseFilter = Control.MouseFilterEnum.Pass,
+        };
+        hover.MouseEntered += () => ShowTip(hover, sword, player);
+        hover.MouseExited += () => HideTip(hover);
+        blade.AddChild(hover);
+
         holder.AddChild(blade);
 
-        // gentle bob, offset per sword so they don't move in lockstep
-        var period = 1.1 + (int)sword % 4 * 0.15;
+        // float: slow bob + a slight sway, offset per sword so they never move in lockstep
+        var period = 1.4 + (int)sword % 4 * 0.2;
         var bob = blade.CreateTween().SetLoops();
-        bob.TweenProperty(blade, "position:y", -8f, period).SetTrans(Tween.TransitionType.Sine);
-        bob.TweenProperty(blade, "position:y", 0f, period).SetTrans(Tween.TransitionType.Sine);
+        bob.TweenProperty(blade, "position:y", -12f, period).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
+        bob.TweenProperty(blade, "position:y", 0f, period).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
+        var sway = blade.CreateTween().SetLoops();
+        sway.TweenProperty(blade, "rotation", 0.05f, period * 1.3).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
+        sway.TweenProperty(blade, "rotation", -0.05f, period * 1.3).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
         return holder;
+    }
+
+    private static void ShowTip(Control owner, SwordId sword, Player player)
+    {
+        try
+        {
+            var level = SwordCombat.LevelOf(player, sword);
+            var desc = $"{Text(Events.SwordLore.StageName(sword, level))} ({level})\n{Text(Events.SwordLore.Line(sword, "EFFECT"))}";
+            MegaCrit.Sts2.Core.Nodes.HoverTips.NHoverTipSet.CreateAndShow(owner,
+                new MegaCrit.Sts2.Core.HoverTips.HoverTip(Events.SwordLore.Name(sword), desc));
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordVisuals] tooltip: {e.Message}");
+        }
+    }
+
+    private static void HideTip(Control owner)
+    {
+        try { MegaCrit.Sts2.Core.Nodes.HoverTips.NHoverTipSet.Remove(owner); }
+        catch (Exception) { /* presentation only */ }
+    }
+
+    private static string Text(MegaCrit.Sts2.Core.Localization.LocString loc)
+    {
+        try { return loc.GetFormattedText(); }
+        catch (Exception) { return ""; }
+    }
+
+    // ------------------------------------------------------------------ strike: the sword itself flies at the target
+
+    private static readonly Dictionary<Node2D, ulong> LastStrike = new();
+
+    /// <summary>
+    /// The current sword (else any present one) flies to <paramref name="target"/> and back (user request 2026-10-08:
+    /// "공격하면 소환된 칼이 직접 날아가서 공격"). The game deals the damage 0.15 s after the Attack trigger, so the
+    /// flight reaches the target on the hit. A second call within the same flight is ignored.
+    /// </summary>
+    public static void Strike(Player player, MegaCrit.Sts2.Core.Entities.Creatures.Creature? target)
+    {
+        try
+        {
+            var rig = GetRig(player, create: false);
+            if (rig == null || rig.Swords.Count == 0) return;
+            var node = rig.Current is { } c && rig.Swords.TryGetValue(c, out var cur) ? cur : rig.Swords.Values.First();
+            var now = Time.GetTicksMsec();
+            if (LastStrike.TryGetValue(node, out var t0) && now - t0 < 420) return;
+            LastStrike[node] = now;
+
+            var room = NCombatRoom.Instance;
+            var targetNode = target != null ? room?.GetCreatureNode(target) : null;
+            Vector2 aim;
+            if (targetNode != null) aim = rig.Root.ToLocal(targetNode.GlobalPosition + new Vector2(0, -130));
+            else aim = node.Position + new Vector2(520, 40); // no single target: thrust toward the enemy side
+
+            var home = node.Position;
+            var dir = aim - home;
+            var angle = Mathf.Atan2(dir.Y, dir.X) + Mathf.Pi / 2; // art points up
+            // stop a little short so the blade tip, not the hilt, meets the target
+            var hit = aim - dir.Normalized() * 40f;
+
+            var tw = node.CreateTween();
+            tw.TweenProperty(node, "rotation", angle, 0.06).SetTrans(Tween.TransitionType.Quad);
+            tw.TweenProperty(node, "position", hit, 0.11).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
+            tw.TweenInterval(0.06);
+            tw.TweenProperty(node, "position", home, 0.28).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+            tw.Parallel().TweenProperty(node, "rotation", 0f, 0.28);
+            tw.TweenCallback(Callable.From(() => Layout(rig)));
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordVisuals] Strike failed: {e.Message}");
+        }
     }
 
     internal static Color ColorOf(SwordId sword) => sword switch
