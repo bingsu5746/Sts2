@@ -385,3 +385,7 @@
 2. 전설 카드(65장): 마검 스프라이트가 주인공, 다른 인물은 얼굴 없는 실루엣만(강도 0.62).
 3. 프롬프트에 카드의 새 영어 이름("card illustration \"Shard Rend\"" 등)과 마검 색(그람=금색, 다인슬레이프=핏빛 등)을 넣음. 공용 카드는 무채색에 가까운 보라.
 작업 스크립트는 세션 스크래치(ai18: compose.py, prompts.py, batch.py)에 있었고 결과만 저장소에 넣었다.
+
+## v3 redraw (2026-10-09)
+
+All 140 existing card portraits were regenerated with more varied subjects (swords, monsters, objects, places; Ensifer only on cards that are about him), each sword keeping its own palette. Same pipeline as before: AI Horde, model AlbedoBase XL (SDXL), img2img from hand-composed layouts. The v2 set is archived in `art_versions/v2_card_portraits/`.
