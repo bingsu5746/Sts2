@@ -1,0 +1,10 @@
+{
+  "MAGICSWORDSMAN-MOYE_UNMELTING_IRON.title": "녹지 않는 쇠",
+  "MAGICSWORDSMAN-MOYE_UNMELTING_IRON.description": "[gold]방어도[/gold]를 {Block:diff()} 얻습니다.\n[gold]짝[/gold]: [gold]흐릿함[/gold]을 {BlurPower} 얻습니다.\n[gold]간장·막야[/gold] {SwordLevel}단계 (단계마다 방어도 +1).",
+  "MAGICSWORDSMAN-MOYE_RIPPLE_PATTERN.title": "물결무늬",
+  "MAGICSWORDSMAN-MOYE_RIPPLE_PATTERN.description": "[gold]방어도[/gold]를 {Block:diff()} 얻습니다.\n[gold]짝[/gold]: [gold]약화[/gold]를 {WeakPower:diff()} 부여합니다.\n[gold]간장·막야[/gold] {SwordLevel}단계 (단계마다 방어도 +1).",
+  "MAGICSWORDSMAN-GANJIANG_THREE_KINGS_TOMB.title": "삼왕묘",
+  "MAGICSWORDSMAN-GANJIANG_THREE_KINGS_TOMB.description": "모든 적에게 피해를 {Damage:diff()}만큼 {Hits}번 줍니다.\n[gold]짝[/gold]: {PairHits}번 더 때립니다.\n[gold]간장·막야[/gold] {SwordLevel}단계 (2단계마다 타격마다 피해 +1).",
+  "MAGICSWORDSMAN-TWIN_YANPING_DRAGONS.title": "쌍룡",
+  "MAGICSWORDSMAN-TWIN_YANPING_DRAGONS.description": "[gold]쌍검[/gold]. 이번 전투 동안 [gold]짝[/gold]이 발동할 때마다 무작위 적에게 피해를 {DragonDamage} 줍니다.\n[gold]간장·막야[/gold] {SwordLevel}단계 (2단계마다 피해 +1)."
+}

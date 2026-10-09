@@ -1,0 +1,10 @@
+{
+  "MAGICSWORDSMAN-MOYE_UNMELTING_IRON.title": "Unmelting Iron",
+  "MAGICSWORDSMAN-MOYE_UNMELTING_IRON.description": "Gain {Block:diff()} [gold]Block[/gold].\n[gold]Pair[/gold]: Gain {BlurPower} [gold]Blur[/gold].\n[gold]Ganjiang & Moye[/gold] level {SwordLevel} (+1 Block per level).",
+  "MAGICSWORDSMAN-MOYE_RIPPLE_PATTERN.title": "Rippled Steel",
+  "MAGICSWORDSMAN-MOYE_RIPPLE_PATTERN.description": "Gain {Block:diff()} [gold]Block[/gold].\n[gold]Pair[/gold]: Apply {WeakPower:diff()} [gold]Weak[/gold].\n[gold]Ganjiang & Moye[/gold] level {SwordLevel} (+1 Block per level).",
+  "MAGICSWORDSMAN-GANJIANG_THREE_KINGS_TOMB.title": "Three Kings' Tomb",
+  "MAGICSWORDSMAN-GANJIANG_THREE_KINGS_TOMB.description": "Deal {Damage:diff()} damage to ALL enemies {Hits} times.\n[gold]Pair[/gold]: Hit {PairHits} more time.\n[gold]Ganjiang & Moye[/gold] level {SwordLevel} (+1 damage per hit every 2 levels).",
+  "MAGICSWORDSMAN-TWIN_YANPING_DRAGONS.title": "Twin Dragons",
+  "MAGICSWORDSMAN-TWIN_YANPING_DRAGONS.description": "[gold]Twin Swords[/gold]. This combat, whenever a [gold]Pair[/gold] effect triggers, deal {DragonDamage} damage to a random enemy.\n[gold]Ganjiang & Moye[/gold] level {SwordLevel} (+1 damage every 2 levels)."
+}
