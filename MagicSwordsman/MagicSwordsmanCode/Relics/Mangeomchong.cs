@@ -321,6 +321,7 @@ public class Mangeomchong : MagicSwordsmanRelic
         UpdateSwordList();
         foreach (var s in SwordRegistry.WithPartners(owner))
             await SwordRegistry.Get(s).OnLevelChanged(Owner, old, level);
+        await SwordMastery.AfterLevelChanged(this, owner, old, level); // level-5 reward (Swords/SwordMastery.cs)
     }
 
     private void WriteLevel(SwordId sword, int level)

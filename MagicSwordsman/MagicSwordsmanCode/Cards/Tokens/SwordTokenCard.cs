@@ -55,6 +55,12 @@ public abstract class ChoiceTokenCard() : ConstructedCardModel(-1, CardType.Skil
 /// <summary>A token that represents one sword.</summary>
 public abstract class SwordTokenCard : ChoiceTokenCard
 {
+    protected SwordTokenCard()
+    {
+        // what level 5 gives ("검의 완성", Swords/SwordMastery.cs) + the legend card itself
+        WithTips(card => SwordMastery.TokenTips(card, ((SwordTokenCard)card).Sword));
+    }
+
     public abstract SwordId Sword { get; }
 
     /// <summary>Canonical token for a sword.</summary>

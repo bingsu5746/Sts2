@@ -55,7 +55,7 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
                 $"{MainFile.ResPath}/images/relics/big/mangeomchong.png", new Godot.Color(0.62f, 0.45f, 0.95f),
                 candidates.Select(c => new EventChoiceScreen.Option(
                     $"{SwordLore.NameText(c)} — {relic.GetLevel(c)}{Ui("LEVEL_SUFFIX")} {Text(SwordLore.StageName(c, relic.GetLevel(c)))}",
-                    Text(SwordLore.Line(c, "EFFECT")))).ToList(),
+                    WithMastery(Text(SwordLore.Line(c, "EFFECT")), SwordMastery.ForgeLine(relic, c)))).ToList(),
                 Ui("BACK"));
             if (swordIdx < 0 || swordIdx >= candidates.Count) return false;
             var sword = candidates[swordIdx];
@@ -66,12 +66,15 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
             if (SwordForge.IsAllowed(ForgeMode.GamblePlus3, lvl)) modes.Add(ForgeMode.GamblePlus3);
             var accent = Visuals.SwordVisuals.ColorOf(sword == SwordId.Ganjiang ? SwordId.Ganjiang : sword);
             var art = $"{MainFile.ResPath}/images/swords/{sword.ToString().ToLowerInvariant()}.png";
-            var story = $"{Text(SwordLore.Line(sword, "FORGE_INTRO"))}\n\n[gold]{lvl}{Ui("LEVEL_SUFFIX")}[/gold] — {Text(SwordLore.StageName(sword, lvl))}";
+            var story = WithMastery(
+                $"{Text(SwordLore.Line(sword, "FORGE_INTRO"))}\n\n[gold]{lvl}{Ui("LEVEL_SUFFIX")}[/gold] — {Text(SwordLore.StageName(sword, lvl))}",
+                SwordMastery.ForgeLine(relic, sword));
             var modeIdx = await EventChoiceScreen.Choose(Owner, choiceContext,
                 Ui("PICK_METHOD").Replace("{Sword}", SwordLore.NameText(sword)), story, art, accent,
                 modes.Select(m => ModeOption(sword, m)).ToList(), Ui("BACK"));
             if (modeIdx < 0 || modeIdx >= modes.Count) continue;
 
+            var masteredBefore = SwordMastery.IsClaimed(relic, sword);
             // roll + apply (game RNG, never System.Random). Per-player stream: in multiplayer every client runs each
             // player's OnSelect, in different orders (RestSiteSynchronizer runs remote choices when their message
             // arrives), so a shared stream like RunState.Rng.Niche would give each client a different result.
@@ -80,6 +83,8 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
             MainFile.Logger.Info($"[Forge] {sword} {modes[modeIdx]}: {result.Outcome}");
 
             var (title, text) = ResultText(result);
+            if (!masteredBefore && SwordMastery.IsClaimed(relic, sword))
+                text += MasteryResultText(sword); // reached level 5: the legend card (popup shown by SwordMastery)
             await EventChoiceScreen.Choose(Owner, choiceContext, title, text, art, accent,
                 [new EventChoiceScreen.Option(Ui("CONTINUE"), "")], null);
             return true;
@@ -133,6 +138,19 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
         var text = Text(SwordLore.Line(o.Sword, storyPart));
         if (r.GotNibelung) text += Text(SwordLore.Line(SwordId.Gram, "NIBELUNG"));
         return (Text(new LocString(Cards, $"{key}.{kind}.title")), $"{text}\n\n{Text(line)}");
+    }
+
+    /// <summary>Appends the "5단계 완성 보상" line (Swords/SwordMastery.cs) to a forge text.</summary>
+    private static string WithMastery(string text, string masteryLine) =>
+        string.IsNullOrEmpty(masteryLine) ? text : $"{text}\n{masteryLine}";
+
+    private static string MasteryResultText(SwordId sword)
+    {
+        if (SwordMastery.LegendCard(sword) is not { } legend) return "";
+        var loc = SwordMastery.Text("FORGE_RESULT");
+        loc.Add("Line", SwordLore.Line(sword, "MASTERY"));
+        loc.Add("Card", legend.Title);
+        return Text(loc);
     }
 
     /// <summary>rest_site_ui.json MAGICSWORDSMAN_FORGE_UI.&lt;part&gt;</summary>
