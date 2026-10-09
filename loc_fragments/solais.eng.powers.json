@@ -1,5 +1,0 @@
-{
-  "MAGICSWORDSMAN-SOLAIS_SWORD_OF_LIGHT_POWER.title": "Sword of Light",
-  "MAGICSWORDSMAN-SOLAIS_SWORD_OF_LIGHT_POWER.description": "When you end your turn with [gold]Claíomh Solais[/gold] current, deal damage per [gold]Light[/gold] to ALL enemies (Light is not consumed).",
-  "MAGICSWORDSMAN-SOLAIS_SWORD_OF_LIGHT_POWER.smartDescription": "When you end your turn with [gold]Claíomh Solais[/gold] current, deal 2 (3 from level 3) x{Amount} damage per [gold]Light[/gold] to ALL enemies (Light is not consumed)."
-}

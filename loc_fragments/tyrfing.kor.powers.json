@@ -1,5 +1,0 @@
-{
-  "MAGICSWORDSMAN-TYRFING_BERSERKERS_POWER.title": "열두 광전사",
-  "MAGICSWORDSMAN-TYRFING_BERSERKERS_POWER.description": "내 턴이 시작될 때마다 체력을 2 잃고([gold]티르빙[/gold] 3단계부터 1), 이번 전투 동안 [gold]티르빙[/gold] 카드의 공격 피해가 증가합니다.",
-  "MAGICSWORDSMAN-TYRFING_BERSERKERS_POWER.smartDescription": "내 턴이 시작될 때마다 체력을 2 잃고([gold]티르빙[/gold] 3단계부터 1), 이번 전투 동안 [gold]티르빙[/gold] 카드의 공격 피해가 {Amount} 증가합니다."
-}

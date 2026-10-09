@@ -1,5 +1,0 @@
-{
-  "MAGICSWORDSMAN-SOLAIS_SWORD_OF_LIGHT_POWER.title": "빛의 검",
-  "MAGICSWORDSMAN-SOLAIS_SWORD_OF_LIGHT_POWER.description": "[gold]클라이브 솔라시[/gold]가 현재 검인 채 턴을 마칠 때 모든 적에게 [gold]빛[/gold] 1당 피해를 줍니다(빛은 소모하지 않음).",
-  "MAGICSWORDSMAN-SOLAIS_SWORD_OF_LIGHT_POWER.smartDescription": "[gold]클라이브 솔라시[/gold]가 현재 검인 채 턴을 마칠 때 모든 적에게 [gold]빛[/gold] 1당 피해를 2(3단계부터 3)×{Amount} 줍니다(빛은 소모하지 않음)."
-}
