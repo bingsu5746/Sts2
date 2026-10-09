@@ -14985,7 +14985,7 @@ tracks/18/keys = {
 
 [sub_resource type="Animation" id="a63"]
 resource_name = "Hit_Guarded"
-length = 0.4
+length = 0.5
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -14993,7 +14993,7 @@ tracks/0/path = NodePath("Visuals/Rig/UpperL/ForeL/HandL:scale")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.4),
+"times": PackedFloat32Array(0, 0.5),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [Vector2(0.450, 0.450), Vector2(0.450, 0.450)]
@@ -15005,7 +15005,7 @@ tracks/1/path = NodePath("Visuals/Rig/UpperL/ForeL/HandL:modulate")
 tracks/1/interp = 2
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.4),
+"times": PackedFloat32Array(0, 0.5),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [Color(0.850, 0.650, 1.000, 0.000), Color(0.850, 0.650, 1.000, 0.000)]
@@ -15017,10 +15017,10 @@ tracks/2/path = NodePath("Visuals/Rig/UpperR/ForeR/HandR:scale")
 tracks/2/interp = 2
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.4),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.05, 0.4, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(0.450, 0.450), Vector2(0.450, 0.450)]
+"values": [Vector2(0.500, 0.500), Vector2(0.850, 0.850), Vector2(0.850, 0.850), Vector2(0.450, 0.450)]
 }
 tracks/3/type = "value"
 tracks/3/imported = false
@@ -15029,10 +15029,10 @@ tracks/3/path = NodePath("Visuals/Rig/UpperR/ForeR/HandR:modulate")
 tracks/3/interp = 2
 tracks/3/loop_wrap = true
 tracks/3/keys = {
-"times": PackedFloat32Array(0, 0.4),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.05, 0.4, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [Color(0.850, 0.650, 1.000, 0.000), Color(0.850, 0.650, 1.000, 0.000)]
+"values": [Color(0.750, 0.850, 1.000, 0.000), Color(0.750, 0.850, 1.000, 1.000), Color(0.750, 0.850, 1.000, 0.000), Color(0.850, 0.650, 1.000, 0.000)]
 }
 tracks/4/type = "value"
 tracks/4/imported = false
@@ -15041,10 +15041,10 @@ tracks/4/path = NodePath("Visuals:rotation")
 tracks/4/interp = 2
 tracks/4/loop_wrap = true
 tracks/4/keys = {
-"times": PackedFloat32Array(0, 0.06, 0.12, 0.18, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [0.0000, -0.0300, -0.0150, -0.0240, 0.0000]
+"values": [0.0000, 0.0000]
 }
 tracks/5/type = "value"
 tracks/5/imported = false
@@ -15053,10 +15053,10 @@ tracks/5/path = NodePath("Visuals/Rig/Head:rotation")
 tracks/5/interp = 2
 tracks/5/loop_wrap = true
 tracks/5/keys = {
-"times": PackedFloat32Array(0, 0.06, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.05, 0.16, 0.32, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, 0.0500, 0.0000]
+"values": [0.0000, 0.0400, 0.0500, 0.0200, 0.0000]
 }
 tracks/6/type = "value"
 tracks/6/imported = false
@@ -15065,10 +15065,10 @@ tracks/6/path = NodePath("Visuals/Rig/UpperL:rotation")
 tracks/6/interp = 2
 tracks/6/loop_wrap = true
 tracks/6/keys = {
-"times": PackedFloat32Array(0, 0.4),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.05, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [0.0000, 0.0000]
+"values": [0.0000, 0.1000, 0.0000]
 }
 tracks/7/type = "value"
 tracks/7/imported = false
@@ -15077,7 +15077,7 @@ tracks/7/path = NodePath("Visuals/Rig/UpperL/ForeL:rotation")
 tracks/7/interp = 2
 tracks/7/loop_wrap = true
 tracks/7/keys = {
-"times": PackedFloat32Array(0, 0.4),
+"times": PackedFloat32Array(0, 0.5),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [0.0000, 0.0000]
@@ -15089,10 +15089,10 @@ tracks/8/path = NodePath("Visuals/Rig/UpperR:rotation")
 tracks/8/interp = 2
 tracks/8/loop_wrap = true
 tracks/8/keys = {
-"times": PackedFloat32Array(0, 0.06, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.05, 0.16, 0.32, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, -0.5000, 0.0000]
+"values": [0.0000, -0.3500, -0.4000, -0.2500, 0.0000]
 }
 tracks/9/type = "value"
 tracks/9/imported = false
@@ -15101,10 +15101,10 @@ tracks/9/path = NodePath("Visuals/Rig/UpperR/ForeR:rotation")
 tracks/9/interp = 2
 tracks/9/loop_wrap = true
 tracks/9/keys = {
-"times": PackedFloat32Array(0, 0.06, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.05, 0.16, 0.32, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, -0.6000, 0.0000]
+"values": [0.0000, -0.5500, -0.6000, -0.3500, 0.0000]
 }
 tracks/10/type = "value"
 tracks/10/imported = false
@@ -15113,10 +15113,10 @@ tracks/10/path = NodePath("Visuals/Rig/CoatL:rotation")
 tracks/10/interp = 2
 tracks/10/loop_wrap = true
 tracks/10/keys = {
-"times": PackedFloat32Array(0, 0.4),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.05, 0.16, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, 0.0000]
+"values": [0.0000, 0.0200, 0.0300, 0.0000]
 }
 tracks/11/type = "value"
 tracks/11/imported = false
@@ -15125,10 +15125,10 @@ tracks/11/path = NodePath("Visuals/Rig/CoatR:rotation")
 tracks/11/interp = 2
 tracks/11/loop_wrap = true
 tracks/11/keys = {
-"times": PackedFloat32Array(0, 0.4),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.05, 0.16, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, 0.0000]
+"values": [0.0000, 0.0400, 0.0600, 0.0000]
 }
 tracks/12/type = "value"
 tracks/12/imported = false
@@ -15137,10 +15137,10 @@ tracks/12/path = NodePath("Visuals:position")
 tracks/12/interp = 2
 tracks/12/loop_wrap = true
 tracks/12/keys = {
-"times": PackedFloat32Array(0, 0.06, 0.12, 0.18, 0.4),
+"times": PackedFloat32Array(0, 0.05, 0.16, 0.32, 0.5),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(0.000, -200.000), Vector2(-18.000, -200.000), Vector2(-11.700, -200.000), Vector2(-16.200, -200.000), Vector2(0.000, -200.000)]
+"values": [Vector2(0.000, -200.000), Vector2(-8.000, -200.000), Vector2(-16.000, -200.000), Vector2(-10.000, -200.000), Vector2(0.000, -200.000)]
 }
 tracks/13/type = "value"
 tracks/13/imported = false
@@ -15149,10 +15149,10 @@ tracks/13/path = NodePath("Visuals:scale")
 tracks/13/interp = 2
 tracks/13/loop_wrap = true
 tracks/13/keys = {
-"times": PackedFloat32Array(0, 0.4),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.05, 0.16, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(1.000, 1.000), Vector2(1.000, 1.000)]
+"values": [Vector2(1.000, 1.000), Vector2(1.000, 0.985), Vector2(1.000, 0.980), Vector2(1.000, 1.000)]
 }
 tracks/14/type = "value"
 tracks/14/imported = false
@@ -15161,54 +15161,66 @@ tracks/14/path = NodePath("Visuals:modulate")
 tracks/14/interp = 2
 tracks/14/loop_wrap = true
 tracks/14/keys = {
-"times": PackedFloat32Array(0, 0.06, 0.18, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.05, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [Color(1.000, 1.000, 1.000, 1.000), Color(1.300, 1.100, 1.400, 1.000), Color(1.200, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000)]
+"values": [Color(1.000, 1.000, 1.000, 1.000), Color(1.150, 1.150, 1.350, 1.000), Color(1.000, 1.000, 1.000, 1.000)]
 }
 tracks/15/type = "value"
 tracks/15/imported = false
 tracks/15/enabled = true
-tracks/15/path = NodePath("Circle:modulate")
+tracks/15/path = NodePath("Shield:modulate")
 tracks/15/interp = 2
 tracks/15/loop_wrap = true
 tracks/15/keys = {
-"times": PackedFloat32Array(0.0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.05, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [Color(0.850, 0.650, 1.000, 0.000)]
+"values": [Color(1.000, 1.000, 1.000, 0.000), Color(0.850, 0.900, 1.000, 0.850), Color(1.000, 1.000, 1.000, 0.000)]
 }
 tracks/16/type = "value"
 tracks/16/imported = false
 tracks/16/enabled = true
-tracks/16/path = NodePath("Shield:modulate")
+tracks/16/path = NodePath("Shield:scale")
 tracks/16/interp = 2
 tracks/16/loop_wrap = true
 tracks/16/keys = {
-"times": PackedFloat32Array(0.0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.05, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [Color(1.000, 1.000, 1.000, 0.000)]
+"values": [Vector2(0.620, 0.620), Vector2(0.720, 0.720), Vector2(0.780, 0.780)]
 }
 tracks/17/type = "value"
 tracks/17/imported = false
 tracks/17/enabled = true
-tracks/17/path = NodePath("Visuals/Rig/Sigil:modulate")
+tracks/17/path = NodePath("Circle:modulate")
 tracks/17/interp = 2
 tracks/17/loop_wrap = true
 tracks/17/keys = {
 "times": PackedFloat32Array(0.0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1.000, 1.000, 1.000, 0.400)]
+"values": [Color(0.850, 0.650, 1.000, 0.000)]
 }
 tracks/18/type = "value"
 tracks/18/imported = false
 tracks/18/enabled = true
-tracks/18/path = NodePath("Visuals/Rig/Sigil:scale")
+tracks/18/path = NodePath("Visuals/Rig/Sigil:modulate")
 tracks/18/interp = 2
 tracks/18/loop_wrap = true
 tracks/18/keys = {
+"times": PackedFloat32Array(0.0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1.000, 1.000, 1.000, 0.400)]
+}
+tracks/19/type = "value"
+tracks/19/imported = false
+tracks/19/enabled = true
+tracks/19/path = NodePath("Visuals/Rig/Sigil:scale")
+tracks/19/interp = 2
+tracks/19/loop_wrap = true
+tracks/19/keys = {
 "times": PackedFloat32Array(0.0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
@@ -15217,7 +15229,7 @@ tracks/18/keys = {
 
 [sub_resource type="Animation" id="a64"]
 resource_name = "Dead"
-length = 1.2
+length = 1.7
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -15273,10 +15285,10 @@ tracks/4/path = NodePath("Visuals:rotation")
 tracks/4/interp = 2
 tracks/4/loop_wrap = true
 tracks/4/keys = {
-"times": PackedFloat32Array(0, 0.6, 1.2),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.45, 0.8, 1.05, 1.2, 1.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, -0.2500, -0.3000]
+"values": [0.0000, -0.1200, -0.8500, -1.5200, -1.4700, -1.5000]
 }
 tracks/5/type = "value"
 tracks/5/imported = false
@@ -15285,10 +15297,10 @@ tracks/5/path = NodePath("Visuals/Rig/Head:rotation")
 tracks/5/interp = 2
 tracks/5/loop_wrap = true
 tracks/5/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 1.2),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.12, 0.45, 0.8, 1.05, 1.2, 1.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, -0.1000, -0.2500, -0.3000]
+"values": [0.0000, -0.1800, 0.2500, 0.1500, 0.0500, 0.1000, 0.1200]
 }
 tracks/6/type = "value"
 tracks/6/imported = false
@@ -15297,10 +15309,10 @@ tracks/6/path = NodePath("Visuals/Rig/UpperL:rotation")
 tracks/6/interp = 2
 tracks/6/loop_wrap = true
 tracks/6/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 1.2),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.12, 0.45, 0.8, 1.05, 1.2, 1.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, -0.1000, -0.1200, -0.1500]
+"values": [0.0000, 0.2500, -0.0800, -0.1500, -0.2500, -0.2200, -0.2400]
 }
 tracks/7/type = "value"
 tracks/7/imported = false
@@ -15309,10 +15321,10 @@ tracks/7/path = NodePath("Visuals/Rig/UpperL/ForeL:rotation")
 tracks/7/interp = 2
 tracks/7/loop_wrap = true
 tracks/7/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.45),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [0.0000]
+"values": [0.0000, 0.1000]
 }
 tracks/8/type = "value"
 tracks/8/imported = false
@@ -15321,10 +15333,10 @@ tracks/8/path = NodePath("Visuals/Rig/UpperR:rotation")
 tracks/8/interp = 2
 tracks/8/loop_wrap = true
 tracks/8/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 1.2),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.12, 0.45, 0.8, 1.05, 1.2, 1.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, 0.1000, 0.1200, 0.1500]
+"values": [0.0000, -0.2000, 0.1000, 0.2000, 0.3500, 0.3000, 0.3200]
 }
 tracks/9/type = "value"
 tracks/9/imported = false
@@ -15333,10 +15345,10 @@ tracks/9/path = NodePath("Visuals/Rig/UpperR/ForeR:rotation")
 tracks/9/interp = 2
 tracks/9/loop_wrap = true
 tracks/9/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.45),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [0.0000]
+"values": [0.0000, -0.1000]
 }
 tracks/10/type = "value"
 tracks/10/imported = false
@@ -15345,10 +15357,10 @@ tracks/10/path = NodePath("Visuals/Rig/CoatL:rotation")
 tracks/10/interp = 2
 tracks/10/loop_wrap = true
 tracks/10/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.12, 0.8, 1.05, 1.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000]
+"values": [0.0000, 0.0600, 0.1200, 0.1800, 0.1600]
 }
 tracks/11/type = "value"
 tracks/11/imported = false
@@ -15357,10 +15369,10 @@ tracks/11/path = NodePath("Visuals/Rig/CoatR:rotation")
 tracks/11/interp = 2
 tracks/11/loop_wrap = true
 tracks/11/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.12, 0.8, 1.05, 1.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000]
+"values": [0.0000, 0.0600, -0.0500, -0.1000, -0.0800]
 }
 tracks/12/type = "value"
 tracks/12/imported = false
@@ -15369,10 +15381,10 @@ tracks/12/path = NodePath("Visuals:position")
 tracks/12/interp = 2
 tracks/12/loop_wrap = true
 tracks/12/keys = {
-"times": PackedFloat32Array(0, 0.6, 1.2),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.12, 0.45, 0.8, 1.05, 1.2, 1.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(0.000, -200.000), Vector2(-10.000, -170.000), Vector2(-14.000, -160.000)]
+"values": [Vector2(0.000, -200.000), Vector2(-14.000, -200.000), Vector2(-18.000, -164.000), Vector2(-30.000, -105.000), Vector2(-38.000, -66.000), Vector2(-40.000, -74.000), Vector2(-40.000, -72.000)]
 }
 tracks/13/type = "value"
 tracks/13/imported = false
@@ -15381,10 +15393,10 @@ tracks/13/path = NodePath("Visuals:scale")
 tracks/13/interp = 2
 tracks/13/loop_wrap = true
 tracks/13/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.45, 0.8, 1.05),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(1.000, 1.000)]
+"values": [Vector2(1.000, 1.000), Vector2(1.000, 0.930), Vector2(1.000, 0.950), Vector2(1.000, 1.000)]
 }
 tracks/14/type = "value"
 tracks/14/imported = false
@@ -15393,46 +15405,46 @@ tracks/14/path = NodePath("Visuals:modulate")
 tracks/14/interp = 2
 tracks/14/loop_wrap = true
 tracks/14/keys = {
-"times": PackedFloat32Array(0, 0.3, 1.2),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.12, 0.45, 1.7),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [Color(1.000, 1.000, 1.000, 1.000), Color(1.400, 0.800, 1.400, 1.000), Color(0.600, 0.500, 0.700, 0.350)]
+"values": [Color(1.000, 1.000, 1.000, 1.000), Color(1.600, 0.800, 0.900, 1.000), Color(1.100, 0.850, 1.000, 1.000), Color(0.550, 0.480, 0.620, 1.000)]
 }
 tracks/15/type = "value"
 tracks/15/imported = false
 tracks/15/enabled = true
-tracks/15/path = NodePath("Circle:modulate")
+tracks/15/path = NodePath("Visuals/Rig/Sigil:modulate")
 tracks/15/interp = 2
 tracks/15/loop_wrap = true
 tracks/15/keys = {
-"times": PackedFloat32Array(0.0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.6),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Color(0.850, 0.650, 1.000, 0.000)]
+"values": [Color(1.000, 1.000, 1.000, 0.400), Color(1.000, 1.000, 1.000, 0.000)]
 }
 tracks/16/type = "value"
 tracks/16/imported = false
 tracks/16/enabled = true
-tracks/16/path = NodePath("Shield:modulate")
+tracks/16/path = NodePath("Circle:modulate")
 tracks/16/interp = 2
 tracks/16/loop_wrap = true
 tracks/16/keys = {
 "times": PackedFloat32Array(0.0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1.000, 1.000, 1.000, 0.000)]
+"values": [Color(0.850, 0.650, 1.000, 0.000)]
 }
 tracks/17/type = "value"
 tracks/17/imported = false
 tracks/17/enabled = true
-tracks/17/path = NodePath("Visuals/Rig/Sigil:modulate")
+tracks/17/path = NodePath("Shield:modulate")
 tracks/17/interp = 2
 tracks/17/loop_wrap = true
 tracks/17/keys = {
 "times": PackedFloat32Array(0.0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1.000, 1.000, 1.000, 0.400)]
+"values": [Color(1.000, 1.000, 1.000, 0.000)]
 }
 tracks/18/type = "value"
 tracks/18/imported = false
@@ -15449,7 +15461,7 @@ tracks/18/keys = {
 
 [sub_resource type="Animation" id="a65"]
 resource_name = "Dead_Kneel"
-length = 1.4
+length = 1.9
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -15505,10 +15517,10 @@ tracks/4/path = NodePath("Visuals:rotation")
 tracks/4/interp = 2
 tracks/4/loop_wrap = true
 tracks/4/keys = {
-"times": PackedFloat32Array(0, 1.4),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.5, 0.95, 1.3, 1.5, 1.62, 1.9),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, 0.0600]
+"values": [0.0000, 0.0500, 0.1200, 0.9000, 1.5200, 1.4700, 1.5000]
 }
 tracks/5/type = "value"
 tracks/5/imported = false
@@ -15517,10 +15529,10 @@ tracks/5/path = NodePath("Visuals/Rig/Head:rotation")
 tracks/5/interp = 2
 tracks/5/loop_wrap = true
 tracks/5/keys = {
-"times": PackedFloat32Array(0, 0.4, 1.4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.12, 0.5, 0.95, 1.3, 1.5, 1.9),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, 0.3000, 0.4500]
+"values": [0.0000, -0.1500, 0.3500, 0.5000, 0.3000, 0.1000, 0.1200]
 }
 tracks/6/type = "value"
 tracks/6/imported = false
@@ -15529,10 +15541,10 @@ tracks/6/path = NodePath("Visuals/Rig/UpperL:rotation")
 tracks/6/interp = 2
 tracks/6/loop_wrap = true
 tracks/6/keys = {
-"times": PackedFloat32Array(0, 0.4),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.12, 0.5, 0.95, 1.5, 1.9),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, 0.0500]
+"values": [0.0000, 0.2000, 0.0500, 0.0000, 0.2000, 0.2200]
 }
 tracks/7/type = "value"
 tracks/7/imported = false
@@ -15541,10 +15553,10 @@ tracks/7/path = NodePath("Visuals/Rig/UpperL/ForeL:rotation")
 tracks/7/interp = 2
 tracks/7/loop_wrap = true
 tracks/7/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [0.0000]
+"values": [0.0000, 0.2000]
 }
 tracks/8/type = "value"
 tracks/8/imported = false
@@ -15553,10 +15565,10 @@ tracks/8/path = NodePath("Visuals/Rig/UpperR:rotation")
 tracks/8/interp = 2
 tracks/8/loop_wrap = true
 tracks/8/keys = {
-"times": PackedFloat32Array(0, 0.4),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.12, 0.5, 0.95, 1.5, 1.9),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0000, -0.0500]
+"values": [0.0000, -0.1500, -0.0500, 0.0000, -0.3000, -0.3000]
 }
 tracks/9/type = "value"
 tracks/9/imported = false
@@ -15565,10 +15577,10 @@ tracks/9/path = NodePath("Visuals/Rig/UpperR/ForeR:rotation")
 tracks/9/interp = 2
 tracks/9/loop_wrap = true
 tracks/9/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [0.0000]
+"values": [0.0000, -0.2000]
 }
 tracks/10/type = "value"
 tracks/10/imported = false
@@ -15601,10 +15613,10 @@ tracks/12/path = NodePath("Visuals:position")
 tracks/12/interp = 2
 tracks/12/loop_wrap = true
 tracks/12/keys = {
-"times": PackedFloat32Array(0, 0.4, 1.4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.12, 0.5, 0.95, 1.3, 1.5, 1.62, 1.9),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(0.000, -200.000), Vector2(0.000, -140.000), Vector2(0.000, -120.000)]
+"values": [Vector2(0.000, -200.000), Vector2(-10.000, -200.000), Vector2(0.000, -130.000), Vector2(0.000, -122.000), Vector2(30.000, -80.000), Vector2(44.000, -66.000), Vector2(44.000, -74.000), Vector2(44.000, -72.000)]
 }
 tracks/13/type = "value"
 tracks/13/imported = false
@@ -15613,10 +15625,10 @@ tracks/13/path = NodePath("Visuals:scale")
 tracks/13/interp = 2
 tracks/13/loop_wrap = true
 tracks/13/keys = {
-"times": PackedFloat32Array(0, 0.4, 1.4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.5, 0.95, 1.3, 1.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(1.000, 1.000), Vector2(1.000, 0.900), Vector2(1.000, 0.850)]
+"values": [Vector2(1.000, 1.000), Vector2(1.000, 0.860), Vector2(1.000, 0.850), Vector2(1.000, 0.950), Vector2(1.000, 1.000)]
 }
 tracks/14/type = "value"
 tracks/14/imported = false
@@ -15625,46 +15637,46 @@ tracks/14/path = NodePath("Visuals:modulate")
 tracks/14/interp = 2
 tracks/14/loop_wrap = true
 tracks/14/keys = {
-"times": PackedFloat32Array(0, 0.4, 1.4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.12, 0.5, 1.9),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [Color(1.000, 1.000, 1.000, 1.000), Color(1.200, 0.900, 1.200, 1.000), Color(0.600, 0.500, 0.700, 0.350)]
+"values": [Color(1.000, 1.000, 1.000, 1.000), Color(1.600, 0.800, 0.900, 1.000), Color(1.100, 0.850, 1.000, 1.000), Color(0.550, 0.480, 0.620, 1.000)]
 }
 tracks/15/type = "value"
 tracks/15/imported = false
 tracks/15/enabled = true
-tracks/15/path = NodePath("Circle:modulate")
+tracks/15/path = NodePath("Visuals/Rig/Sigil:modulate")
 tracks/15/interp = 2
 tracks/15/loop_wrap = true
 tracks/15/keys = {
-"times": PackedFloat32Array(0.0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.6),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Color(0.850, 0.650, 1.000, 0.000)]
+"values": [Color(1.000, 1.000, 1.000, 0.400), Color(1.000, 1.000, 1.000, 0.000)]
 }
 tracks/16/type = "value"
 tracks/16/imported = false
 tracks/16/enabled = true
-tracks/16/path = NodePath("Shield:modulate")
+tracks/16/path = NodePath("Circle:modulate")
 tracks/16/interp = 2
 tracks/16/loop_wrap = true
 tracks/16/keys = {
 "times": PackedFloat32Array(0.0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1.000, 1.000, 1.000, 0.000)]
+"values": [Color(0.850, 0.650, 1.000, 0.000)]
 }
 tracks/17/type = "value"
 tracks/17/imported = false
 tracks/17/enabled = true
-tracks/17/path = NodePath("Visuals/Rig/Sigil:modulate")
+tracks/17/path = NodePath("Shield:modulate")
 tracks/17/interp = 2
 tracks/17/loop_wrap = true
 tracks/17/keys = {
 "times": PackedFloat32Array(0.0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1.000, 1.000, 1.000, 0.400)]
+"values": [Color(1.000, 1.000, 1.000, 0.000)]
 }
 tracks/18/type = "value"
 tracks/18/imported = false

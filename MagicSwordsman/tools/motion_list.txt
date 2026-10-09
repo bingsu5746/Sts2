@@ -61,8 +61,8 @@ Hit	0.45s
 Hit_Light	0.3s
 Hit_Heavy	0.7s
 Hit_Stagger	0.6s
-Hit_Guarded	0.4s
-Dead	1.2s
-Dead_Kneel	1.4s
+Hit_Guarded	0.5s
+Dead	1.7s
+Dead_Kneel	1.9s
 Victory	1.4s
 TurnStart	0.6s
