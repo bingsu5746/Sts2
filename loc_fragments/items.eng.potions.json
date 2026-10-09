@@ -1,0 +1,14 @@
+{
+  "MAGICSWORDSMAN-WHETSTONE_OIL.title": "Whetstone Oil",
+  "MAGICSWORDSMAN-WHETSTONE_OIL.description": "This combat, your [gold]current sword[/gold] counts as {Levels} level higher (max 5). With no current sword, choose one of your swords.\nDraw {Cards} {Cards:plural:card|cards}.",
+  "MAGICSWORDSMAN-RALLYING_INCENSE.title": "Rallying Incense",
+  "MAGICSWORDSMAN-RALLYING_INCENSE.description": "Summon a random sword of yours that has not come out this combat and make it your [gold]current sword[/gold].\nDraw {Cards} {Cards:plural:card|cards}.",
+  "MAGICSWORDSMAN-TOMB_ECHO.title": "Echo of the Tomb",
+  "MAGICSWORDSMAN-TOMB_ECHO.description": "Choose 1 of 3 cards of magic swords you do not own and put it into your hand. It costs 0 this turn.",
+  "MAGICSWORDSMAN-HEART_TO_HEART_TEA.title": "Heart-to-Heart Tea",
+  "MAGICSWORDSMAN-HEART_TO_HEART_TEA.description": "Your [gold]current sword[/gold] gains {Affinity} affinity.\nThen draw {Cards} {Cards:plural:card|cards}, plus 1 more per affinity tier of that sword (Familiar 1, Trusted 2, Bonded 3).",
+  "MAGICSWORDSMAN-SEALING_SALT.title": "Sealing Salt",
+  "MAGICSWORDSMAN-SEALING_SALT.description": "[gold]Exhaust[/gold] every sword curse in your hand, draw pile and discard pile (this combat only).\nGain {Block} [gold]Block[/gold] for each curse Exhausted.",
+  "MAGICSWORDSMAN-TWIN_CUP_WINE.title": "Twin-Cup Wine",
+  "MAGICSWORDSMAN-TWIN_CUP_WINE.description": "This turn, the [gold]Pair[/gold] of every Ganjiang/Moye card always triggers.\nThis turn, your next card is played twice."
+}

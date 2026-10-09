@@ -73,7 +73,7 @@ public static class SwordAffinity
             if (state == null) return;
             if (state.GetCounter(sword, CardGainCounter) >= CardGainCapPerCombat) return;
             state.AddCounter(sword, CardGainCounter, 1);
-            Add(player, sword, 1);
+            Gain(player, sword, 1);
         }
         catch (Exception e)
         {
@@ -90,7 +90,7 @@ public static class SwordAffinity
         var gained = new List<SwordId>();
         foreach (var sword in swordsOut.Where(relic.Owns))
         {
-            Add(player, sword, gain);
+            Gain(player, sword, gain);
             gained.Add(sword);
         }
 
@@ -100,7 +100,19 @@ public static class SwordAffinity
     /// <summary>The sword's (pair's) level went up.</summary>
     public static void OnUpgraded(Player player, SwordId sword)
     {
-        foreach (var s in SwordRegistry.WithPartners(sword)) Add(player, s, UpgradeGain);
+        foreach (var s in SwordRegistry.WithPartners(sword)) Gain(player, s, UpgradeGain);
+    }
+
+    /// <summary>
+    /// An affinity GAIN from play (cards, victories, upgrades, items): <see cref="Add"/> plus the flat bonus of relics
+    /// implementing <see cref="IAffinityGainModifier"/> (검수 매듭 +1). Use <see cref="Add"/> for raw adjustments.
+    /// </summary>
+    public static (int Before, int After) Gain(Player player, SwordId sword, int amount)
+    {
+        if (amount > 0)
+            foreach (var m in player.Relics.OfType<IAffinityGainModifier>())
+                amount += m.ModifyAffinityGain(player, sword, amount);
+        return Add(player, sword, amount);
     }
 
     // ------------------------------------------------------------------ text
@@ -120,4 +132,11 @@ public static class SwordAffinity
             return "";
         }
     }
+}
+
+/// <summary>Implement on a relic to add to every positive affinity gain (<see cref="SwordAffinity.Gain"/>).</summary>
+public interface IAffinityGainModifier
+{
+    /// <summary>Extra points added to a gain of <paramref name="amount"/> (&gt; 0).</summary>
+    int ModifyAffinityGain(Player player, SwordId sword, int amount);
 }

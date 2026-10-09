@@ -81,7 +81,8 @@ public static class StringExtensions
 
     public static string PotionOutlineImagePath(this string path)
     {
-        path = Path.Join(MainFile.ResPath, "images", "potions", path);
+        // Outline lives in images/potions/outline/<name>.png (it used to look up the potion image itself).
+        path = Path.Join(MainFile.ResPath, "images", "potions", "outline", path);
         if (ResourceLoader.Exists(path)) return path;
 
         MainFile.Logger.Info("Could not find potion image path: " + path);
