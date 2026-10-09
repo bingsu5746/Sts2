@@ -54,7 +54,7 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
             var swordIdx = await EventChoiceScreen.Choose(Owner, choiceContext, Ui("PICK_SWORD"), Ui("TOMB_TEXT"),
                 $"{MainFile.ResPath}/images/relics/big/mangeomchong.png", new Godot.Color(0.62f, 0.45f, 0.95f),
                 candidates.Select(c => new EventChoiceScreen.Option(
-                    $"{SwordLore.NameText(c)} — {relic.GetLevel(c)}{Ui("LEVEL_SUFFIX")} {Text(SwordLore.StageName(c, relic.GetLevel(c)))}",
+                    $"{SwordLore.NameText(c)} — {LevelText(relic.GetLevel(c))} {Text(SwordLore.StageName(c, relic.GetLevel(c)))}",
                     WithMastery(Text(SwordLore.Line(c, "EFFECT")), SwordMastery.ForgeLine(relic, c)))).ToList(),
                 Ui("BACK"));
             if (swordIdx < 0 || swordIdx >= candidates.Count) return false;
@@ -67,7 +67,7 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
             var accent = Visuals.SwordVisuals.ColorOf(sword == SwordId.Ganjiang ? SwordId.Ganjiang : sword);
             var art = $"{MainFile.ResPath}/images/swords/{sword.ToString().ToLowerInvariant()}.png";
             var story = WithMastery(
-                $"{Text(SwordLore.Line(sword, "FORGE_INTRO"))}\n\n[gold]{lvl}{Ui("LEVEL_SUFFIX")}[/gold] — {Text(SwordLore.StageName(sword, lvl))}",
+                $"{Text(SwordLore.Line(sword, "FORGE_INTRO"))}\n\n[gold]{LevelText(lvl)}[/gold] — {Text(SwordLore.StageName(sword, lvl))}",
                 SwordMastery.ForgeLine(relic, sword));
             var modeIdx = await EventChoiceScreen.Choose(Owner, choiceContext,
                 Ui("PICK_METHOD").Replace("{Sword}", SwordLore.NameText(sword)), story, art, accent,
@@ -152,6 +152,9 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
         loc.Add("Card", legend.Title);
         return Text(loc);
     }
+
+    /// <summary>"3단계" / "Level 3" (LEVEL_FORMAT, {Level} replaced here).</summary>
+    private static string LevelText(int level) => Ui("LEVEL_FORMAT").Replace("{Level}", level.ToString());
 
     /// <summary>rest_site_ui.json MAGICSWORDSMAN_FORGE_UI.&lt;part&gt;</summary>
     private static string Ui(string part)

@@ -6,6 +6,6 @@
   "MAGICSWORDSMAN_FORGE_UI.RESULT": "강화 결과",
   "MAGICSWORDSMAN_FORGE_UI.BACK": "돌아가기",
   "MAGICSWORDSMAN_FORGE_UI.CONTINUE": "계속",
-  "MAGICSWORDSMAN_FORGE_UI.LEVEL_SUFFIX": "단계",
-  "MAGICSWORDSMAN_FORGE_UI.TOMB_TEXT": "만검총 앞에 앉는다. 잠든 검들 가운데 하나가 대답하듯 떨린다.\n어느 검을 벼릴까?"
+  "MAGICSWORDSMAN_FORGE_UI.TOMB_TEXT": "만검총 앞에 앉는다. 잠든 검들 가운데 하나가 대답하듯 떨린다.\n어느 검을 벼릴까?",
+  "MAGICSWORDSMAN_FORGE_UI.LEVEL_FORMAT": "{Level}단계"
 }
