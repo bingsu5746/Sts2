@@ -1,0 +1,10 @@
+{
+  "MAGICSWORDSMAN-ONIMARU_FALLING_BLADE.title": "쓰러지는 칼",
+  "MAGICSWORDSMAN-ONIMARU_FALLING_BLADE.description": "지금 종류와 상관없이 [gold]오니마루[/gold]가 대상에게 [gold]거합[/gold]을 1번 합니다(피해 {IaiDamage}). 종류는 바뀌지 않습니다.\n[gold]치명[/gold]: 이 공격으로 적을 처치하면 에너지를 {Energy} 얻습니다.\n[gold]오니마루[/gold] {SwordLevel}단계 (자동 공격이 강해짐).",
+  "MAGICSWORDSMAN-ONIMARU_NIGHT_WATCH.title": "불침번",
+  "MAGICSWORDSMAN-ONIMARU_NIGHT_WATCH.description": "지금 종류와 상관없이 [gold]오니마루[/gold]가 [gold]호위[/gold]를 1번 합니다([gold]방어도[/gold] {AutoBlock}). 종류는 바뀌지 않습니다.\n카드를 {Cards:diff()}장 뽑습니다.\n[gold]오니마루[/gold] {SwordLevel}단계 (자동 공격이 강해짐).",
+  "MAGICSWORDSMAN-ONIMARU_LEAP_FROM_SHEATH.title": "칼집을 박차다",
+  "MAGICSWORDSMAN-ONIMARU_LEAP_FROM_SHEATH.description": "[gold]명령[/gold]: [gold]오니마루[/gold]가 지금 종류로 즉시 자동 공격을 1번 합니다(거합이면 피해 {IaiDamage}).\n[gold]연속[/gold]: [gold]명령[/gold]을 1번 더 합니다.\n[gold]오니마루[/gold] {SwordLevel}단계 (자동 공격이 강해짐).",
+  "MAGICSWORDSMAN-ONIMARU_FIVE_STANCES.title": "다섯 자세",
+  "MAGICSWORDSMAN-ONIMARU_FIVE_STANCES.description": "[gold]오니마루[/gold]가 [gold]호위[/gold], [gold]퇴마[/gold], [gold]거합[/gold], [gold]난무[/gold], [gold]베기[/gold]를 1번씩 합니다(퇴마·거합은 대상에게). 종류는 바뀌지 않습니다.\n[gold]오니마루[/gold] {SwordLevel}단계 (자동 공격이 강해짐)."
+}
