@@ -233,7 +233,7 @@
 | `gram_regins_reforging.jpg` | a dwarf smith quenching a golden norse longsword in water, steam |
 | `gram_token.jpg` | a single golden norse longsword displayed, reforged seam glowing |
 | `gram_two_shards.jpg` | two glowing shards of a golden norse longsword crossed, striking twice |
-| `gram_kept_shards.jpg` | (2026-10-09) 임시: `gram_two_shards.jpg`를 그대로 복사. 간직한 조각 전용 그림 필요 |
+- `gram_kept_shards.jpg`: AI Horde img2img (v3 pipeline) from the Gram card art; no longer a placeholder copy.
 | `guard_swap.jpg` | a hooded swordsman in a dark cloak switching swords while blocking |
 | `heavy_chop.jpg` | a heavy overhead chop splitting the ground |
 | `heidreks_end.jpg` | a king murdered in his sleep by slaves, cursed sword, sickly purple curse aura |
