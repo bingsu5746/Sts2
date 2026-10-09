@@ -64,7 +64,7 @@ Key ideas:
 | `MagicSwordsmanCode/Swords/Behaviors/<Sword>Behavior.cs` | **content agent of that sword** | replace the stub body; keep the class name; keep the lines marked FRAMEWORK PARTS (Kusanagi, Skofnung) |
 | `MagicSwordsmanCode/Cards/<Sword>/` (e.g. `Cards/Gram/`, `Cards/GanjiangMoye/`, `Cards/ClaiomhSolais/`) | content agent of that sword | sword cards |
 | `MagicSwordsmanCode/Cards/Common/` | common-card agent | common cards (`Sword == null`) |
-| `MagicSwordsmanCode/Cards/Basic/` | framework | starting deck (Strike, Defend, BrokenBlade, SwordSwap) |
+| `MagicSwordsmanCode/Cards/Basic/` | framework | starting deck (Strike, Defend, SwordSwap) + BrokenBlade (one of Gram's 2 starter cards) |
 | `MagicSwordsmanCode/Cards/Tokens/` | framework | selection tokens (sword tokens, forge tokens) |
 | `MagicSwordsmanCode/Curses/` | content agents | one file per curse, `<Sword>...Curse.cs`, derive from `SwordCurseCard` |
 | `MagicSwordsmanCode/Powers/` | content agents may add files | `CurrentSwordPower.cs`, `MagicSwordsmanPower.cs` are framework |
@@ -108,6 +108,11 @@ Run level (spec §2, §4):
 - Losing a sword moves all of its cards from the deck into Mangeomchong storage (`StoredCards`, pattern: game relic
   `PaelsTooth`) and resets its level to 0 ([Claude]); re-acquiring restores them. Starter cards are only granted the
   first time a sword is ever owned in the run.
+- First sword (2026-10-09): no fixed starting sword. `Mangeomchong.AfterObtained` (new run only, via
+  `RunManager.FinalizeStartingRelics`) grants one random sword of all 10 (`SwordRegistry.StartingSwordCandidates`,
+  `new Rng(Owner.PlayerRng.Seed, "magicswordsman_starting_sword")`) with its `StarterCards` put straight into the deck
+  and `SwordBehavior.OnAcquiredAsStartingSword` for the acquisition cost; run counter `start.first_sword`. The
+  starting deck itself has no sword card (Strike x4, Defend x4, 검 바꾸기).
 - Rest site "마검 강화" (`SwordForgeRestSiteOption`): pick sword -> pick 안전 강화 (+1) / 도박 +2 (65/32/3) /
   도박 +3 (40/52/8); gambles that would exceed level 5 are not offered. Failure: 50:50 the sword's
   `FailureCurse` or level -1 (level 0 -> curse only; no curse defined -> level -1, or nothing at 0). Shatter: lose the
@@ -139,7 +144,8 @@ public SwordId? LevelOwnerOverride { get; init; }              // Moye -> Ganjia
 public SwordId LevelOwner { get; }
 public bool CanBeLost { get; init; } = true;                   // Gram: false
 public bool EmergesAtCombatStart { get; init; }                // Onimaru: true
-public bool OfferedByAcquisition { get; init; } = true;        // Gram, Moye: false
+public bool OfferedByAcquisition { get; init; } = true;        // Moye: false (Gram offered too since 2026-10-09)
+public bool CanBeReleased { get; init; } = true;               // every sword, Gram included
 public bool IsPairLeader { get; }
 ```
 
@@ -356,7 +362,7 @@ public static Task<SwordId?> OfferChoice(Player player, IReadOnlyList<SwordId> c
 public static Task<SwordId?> OfferRandom(Player player, int count, Rng rng, PlayerChoiceContext choiceContext, bool canSkip = true);
 public static Task<SwordId?> PickSword(Player player, IReadOnlyList<SwordId> swords, PlayerChoiceContext choiceContext, bool canSkip, LocString gridPrompt);
 ```
-`OfferChoice` asks the player to release a sword when Mangeomchong is full (Gram cannot be released). Pass a game
+`OfferChoice` asks the player to release a sword when Mangeomchong is full (any sword, Gram included). Pass a game
 Rng (an event's `Rng`, or `player.RunState.Rng.Niche`) — never `System.Random`.
 
 ### 3.11 `SwordForge` (rest-site rules, RestSite/SwordForge.cs)

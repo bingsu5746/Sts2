@@ -37,6 +37,9 @@ namespace MagicSwordsman.MagicSwordsmanCode.Relics;
 ///  - StoredCards     List&lt;SerializableCard&gt;  cards of lost swords (pattern: PaelsTooth)
 ///  - RunCounters     string "key=value;..." free-form per-run counters for content (Tyrfing curse count...)
 ///
+/// First sword (사용자 결정 2026-10-09): there is no fixed starting sword any more. When the run is created the relic
+/// grants one random sword out of all 10 (간장·막야 = one pair) with its starter cards — see GrantStartingSword.
+///
 /// Effects:
 ///  - Card rewards and shops only offer common cards + cards of owned swords.
 ///  - Rest site: adds "마검 강화" (SwordForgeRestSiteOption).
@@ -51,9 +54,10 @@ public class Mangeomchong : MagicSwordsmanRelic
 {
     private const string SwordListVar = "SwordList";
 
-    private int[] _ownedSwordIds = [(int)SwordId.Gram];
+    // Empty until the run's random first sword is granted (AfterObtained -> GrantStartingSword, 2026-10-09).
+    private int[] _ownedSwordIds = [];
     private int[] _swordLevels = new int[16];
-    private int[] _everOwnedIds = [(int)SwordId.Gram];
+    private int[] _everOwnedIds = [];
     private int _extraSlots;
     private List<SerializableCard> _storedCards = new();
     private string _runCounters = "";
@@ -237,7 +241,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     /// <summary>
     /// Removes the sword (and partners) from Mangeomchong and moves all of their cards from the deck into storage.
     /// The level is reset to 0 ([Claude] decision: a lost/shattered sword comes back un-upgraded).
-    /// Gram cannot be lost by a shatter (SwordForge handles that), but this method does not block it.
+    /// Gram is not lost by a shatter (SwordDefinition.CanBeLost, handled by SwordForge), but this method does not block it.
     /// </summary>
     public async Task LoseSword(SwordId sword)
     {
@@ -416,7 +420,54 @@ public class Mangeomchong : MagicSwordsmanRelic
     public override async Task AfterObtained()
     {
         await base.AfterObtained();
+        // New run: RunManager.FinalizeStartingRelics calls this for every player's starting relics on every client.
+        // Not on load (the saved properties already hold the swords), and not after the Ancient upgrade
+        // (OpenedMangeomchong copies the run data before RelicCmd.Replace obtains it).
+        if (_ownedSwordIds.Length == 0 && _everOwnedIds.Length == 0) GrantStartingSword();
         UpdateSwordList();
+    }
+
+    /// <summary>Run counter: the run's random first sword as (int)SwordId + 1 (0 = none / run from before 2026-10-09).</summary>
+    public const string StartingSwordCounter = "start.first_sword";
+
+    /// <summary>The run's random first sword (pair leader), or null for runs started before the rule existed.</summary>
+    public SwordId? StartingSword =>
+        GetRunCounter(StartingSwordCounter) is var v and > 0 ? (SwordId)(v - 1) : null;
+
+    /// <summary>
+    /// 사용자 결정 2026-10-09: the first sword is no longer Gram but one of all 10 swords (간장·막야 = one pair) at random.
+    /// Seeded: a named Rng on the player's own seed (run seed + player slot), so the roll is fixed for a seed, differs
+    /// between the players of a multiplayer run, is identical on every client, and advances no game Rng.
+    /// The run is still being created here (no room, no UI), so this works like Player.PopulateStartingDeck: the sword's
+    /// StarterCards (the same cards an acquisition grants: 2 per sword or pair) go straight into the deck without
+    /// commands or previews, and OnAcquiredAsStartingSword applies the acquisition cost (간장·막야 Max HP).
+    /// The presentation (popup + the text naming the sword) is the run-start pick (TombResonanceEvent START page).
+    /// Saved through OwnedSwordIds / EverOwnedIds / RunCounters like every other acquisition.
+    /// </summary>
+    private void GrantStartingSword()
+    {
+        var candidates = SwordRegistry.StartingSwordCandidates();
+        if (candidates.Count == 0) return;
+        var rng = new MegaCrit.Sts2.Core.Random.Rng(Owner.PlayerRng.Seed, "magicswordsman_starting_sword");
+        var sword = candidates[rng.NextInt(candidates.Count)];
+        var group = SwordRegistry.WithPartners(sword);
+
+        OwnedSwordIds = group.Select(s => (int)s).ToArray();
+        EverOwnedIds = group.Select(s => (int)s).ToArray();
+        SetRunCounter(StartingSwordCounter, (int)sword + 1);
+
+        foreach (var s in group)
+        {
+            foreach (var canonical in SwordRegistry.Get(s).StarterCards)
+            {
+                var card = Owner.RunState.CreateCard(canonical, Owner);
+                card.FloorAddedToDeck = 1;
+                Owner.Deck.AddInternal(card);
+            }
+        }
+
+        foreach (var s in group) SwordRegistry.Get(s).OnAcquiredAsStartingSword(Owner);
+        MainFile.Logger.Info($"[Mangeomchong] starting sword: {string.Join(",", group)}");
     }
 
     public override async Task AfterRoomEntered(AbstractRoom room)

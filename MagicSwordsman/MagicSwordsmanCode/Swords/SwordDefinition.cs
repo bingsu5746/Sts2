@@ -25,7 +25,10 @@ public sealed class SwordDefinition
 
     public SwordId LevelOwner => LevelOwnerOverride ?? Id;
 
-    /// <summary>Spec §4: Gram never leaves on a shatter — it returns to level 0 ("부서진 그람").</summary>
+    /// <summary>
+    /// Spec §4: Gram never leaves on a shatter — it returns to level 0 ("부서진 그람"). This is Gram's legend (Odin broke
+    /// it, Regin re-forged it), kept after Gram stopped being the fixed first sword (2026-10-09).
+    /// </summary>
     public bool CanBeLost { get; init; } = true;
 
     /// <summary>
@@ -39,8 +42,8 @@ public sealed class SwordDefinition
     public bool EmergesAtCombatStart { get; init; }
 
     /// <summary>
-    /// Whether this sword can be offered by acquisition events / random rolls.
-    /// False for the starting sword (Gram) and for Moye (it comes with Ganjiang).
+    /// Whether this sword can be offered by acquisition events / random rolls / the random first sword of a run.
+    /// False only for Moye (it comes with Ganjiang). Gram is offered like any other sword since 2026-10-09.
     /// </summary>
     public bool OfferedByAcquisition { get; init; } = true;
 

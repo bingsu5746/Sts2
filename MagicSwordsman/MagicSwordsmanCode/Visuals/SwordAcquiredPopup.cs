@@ -21,13 +21,15 @@ public static class SwordAcquiredPopup
     private static readonly Color Panel = new(0.07f, 0.075f, 0.095f, 0.97f);
     private static readonly Color Muted = new(0.72f, 0.72f, 0.76f);
 
-    public static void Show(SwordId sword)
+    /// <param name="headerKey">SWORD_LORE generic key of the header line; the run's random first sword uses
+    /// POPUP_HEADER_FIRST (shown by the run-start pick, TombResonanceEvent).</param>
+    public static void Show(SwordId sword, string headerKey = "POPUP_HEADER")
     {
-        try { ShowInner(SwordRegistry.GroupLeader(sword)); }
+        try { ShowInner(SwordRegistry.GroupLeader(sword), headerKey); }
         catch (Exception e) { MainFile.Logger.Warn($"[SwordAcquiredPopup] failed: {e.Message}"); }
     }
 
-    private static void ShowInner(SwordId sword)
+    private static void ShowInner(SwordId sword, string headerKey)
     {
         if (Engine.GetMainLoop() is not SceneTree tree) return;
         var accent = SwordVisuals.ColorOf(sword == SwordId.Ganjiang ? SwordId.Moye : sword);
@@ -103,7 +105,7 @@ public static class SwordAcquiredPopup
         col.AddThemeConstantOverride("separation", 8);
         row.AddChild(col);
 
-        col.AddChild(MakeLabel(Lore("POPUP_HEADER"), 18, accent));
+        col.AddChild(MakeLabel(Lore(headerKey), 18, accent));
         col.AddChild(MakeLabel(SwordLore.NameText(sword), 46, Colors.White, bold: true));
         col.AddChild(MakeLabel(Text(SwordLore.Line(sword, "TAGLINE")), 20, Muted));
         var origin = MakeLabel(Text(SwordLore.Line(sword, "ORIGIN")), 18, new Color(0.85f, 0.82f, 0.75f));

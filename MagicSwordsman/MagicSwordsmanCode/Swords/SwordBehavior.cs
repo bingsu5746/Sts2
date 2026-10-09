@@ -55,6 +55,16 @@ public abstract class SwordBehavior
     /// <summary>After the sword (and its partners) were added to Mangeomchong. firstTime = never owned before in this run.</summary>
     public virtual Task OnAcquired(Player player, bool firstTime) => Task.CompletedTask;
 
+    /// <summary>
+    /// The run-level part of <see cref="OnAcquired"/> (firstTime = true) for the random first sword of a run, which is
+    /// granted while the run is still being created (Mangeomchong.AfterObtained via RunManager.FinalizeStartingRelics,
+    /// before any room or UI exists). Must change state directly and synchronously — no commands, no visuals.
+    /// Same effect as the first acquisition (e.g. 간장·막야 Max HP cost). Default: nothing.
+    /// </summary>
+    public virtual void OnAcquiredAsStartingSword(Player player)
+    {
+    }
+
     /// <summary>After the sword was removed from Mangeomchong (its cards are already moved into storage).</summary>
     public virtual Task OnLost(Player player) => Task.CompletedTask;
 

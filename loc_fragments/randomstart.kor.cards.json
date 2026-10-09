@@ -1,0 +1,4 @@
+{
+  "MAGICSWORDSMAN-GRAM_KEPT_SHARDS.title": "간직한 조각",
+  "MAGICSWORDSMAN-GRAM_KEPT_SHARDS.description": "[gold]방어도[/gold]를 {Block:diff()} 얻습니다.\n[gold]연속[/gold]: 카드를 {Cards:diff()}장 뽑습니다.\n[gold]그람[/gold] {SwordLevel}단계 (단계마다 방어도 +1)."
+}

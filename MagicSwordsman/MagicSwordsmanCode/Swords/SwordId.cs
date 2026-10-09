@@ -7,7 +7,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Swords;
 /// </summary>
 public enum SwordId
 {
-    Gram = 0,           // 그람 (starting sword)
+    Gram = 0,           // 그람 (an ordinary sword since 2026-10-09; the first sword of a run is random)
     Ganjiang = 1,       // 간장 (male blade of the pair; acquired together with Moye)
     Moye = 2,           // 막야 (female blade of the pair)
     Kusanagi = 3,       // 쿠사나기

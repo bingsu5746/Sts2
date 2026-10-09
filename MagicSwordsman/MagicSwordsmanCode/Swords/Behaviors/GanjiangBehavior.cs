@@ -16,6 +16,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 ///  - Pair: acquired/lost together with Moye (2 slots); Moye shares Ganjiang's level (SwordDefinition.LevelOwner).
 ///    The 【짝】 pair bonus is card logic (Cards/GanjiangMoye/PairRules); twin-sword cards use Sword = Ganjiang.
 ///  - Cost [확정]: lose 6 Max HP when the pair is acquired — only the FIRST time in a run (content doc §0.4 #10).
+///    Also when the pair is the random first sword of the run (OnAcquiredAsStartingSword, 2026-10-09).
 ///  - Starter card: 간장 베기 (Moye grants 막야 막기). Forge-failure curse: 용광로의 제물 (shared with Moye).
 /// </summary>
 public sealed class GanjiangBehavior : SwordBehavior
@@ -39,6 +40,17 @@ public sealed class GanjiangBehavior : SwordBehavior
         if (dealer != ctx.Creature) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
         return ctx.Scale(DamageBonus(ctx.LevelFor(cardSource)));
+    }
+
+    /// <summary>
+    /// The pair rolled as the run's first sword: the same Max HP cost, applied directly because the run is still being
+    /// created (no room yet, so no damage command). Current HP is clamped to the new maximum.
+    /// </summary>
+    public override void OnAcquiredAsStartingSword(Player player)
+    {
+        var creature = player.Creature;
+        creature.SetMaxHpInternal(Math.Max(1, creature.MaxHp - MaxHpCost));
+        MainFile.Logger.Info($"[Ganjiang] starting sword: lost {MaxHpCost} Max HP");
     }
 
     public override async Task OnAcquired(Player player, bool firstTime)

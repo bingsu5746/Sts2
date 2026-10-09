@@ -1,0 +1,4 @@
+{
+  "MAGICSWORDSMAN-GRAM_KEPT_SHARDS.title": "Kept Shards",
+  "MAGICSWORDSMAN-GRAM_KEPT_SHARDS.description": "Gain {Block:diff()} [gold]Block[/gold].\n[gold]Combo[/gold]: Draw {Cards:diff()} {Cards:plural:card|cards}.\n[gold]Gram[/gold] level {SwordLevel} (+1 Block per level)."
+}
