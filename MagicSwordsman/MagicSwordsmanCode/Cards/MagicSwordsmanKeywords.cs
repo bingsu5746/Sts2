@@ -76,6 +76,8 @@ public static class MagicSwordsmanKeywords
         [typeof(Cards.GanjiangMoye.TwinMatedPair)] = [Pair, TwinSword],
         [typeof(Cards.GanjiangMoye.TwinSwordDance)] = [Pair, TwinSword],
         [typeof(Cards.Gram.GramBalmungNothung)] = [CurrentSword],
+        [typeof(Cards.Gram.GramBladeBetween)] = [Combo],
+        [typeof(Cards.Gram.GramFafnirsHeart)] = [CurrentSword],
         [typeof(Cards.Gram.GramFleeceCutter)] = [Combo],
         [typeof(Cards.Onimaru.OnimaruFirstAmongFive)] = [Command],
         [typeof(Cards.Onimaru.OnimaruLeapFromSheath)] = [Command, Combo],

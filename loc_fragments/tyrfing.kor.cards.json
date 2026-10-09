@@ -1,0 +1,10 @@
+{
+  "MAGICSWORDSMAN-TYRFING_SAMSO_DUEL.title": "삼쇠섬 결투",
+  "MAGICSWORDSMAN-TYRFING_SAMSO_DUEL.description": "피해를 {Damage:diff()} 줍니다.\n체력을 {HpLoss} 잃습니다.\n[gold]티르빙[/gold] {SwordLevel}단계 (단계마다 피해 +1).",
+  "MAGICSWORDSMAN-TYRFING_ANGANTYRS_WARNING.title": "앙간튀르의 경고",
+  "MAGICSWORDSMAN-TYRFING_ANGANTYRS_WARNING.description": "[gold]방어도[/gold]를 {Block:diff()} 얻습니다.\n뽑을 카드 더미에 [gold]부상[/gold]을 1장 섞어 넣습니다.\n[gold]티르빙[/gold] {SwordLevel}단계 (단계마다 방어도 +1).",
+  "MAGICSWORDSMAN-TYRFING_BARROW_FIRES.title": "무덤의 불길",
+  "MAGICSWORDSMAN-TYRFING_BARROW_FIRES.description": "체력을 {HpLoss} 잃습니다.\n손의 저주 카드를 모두 [gold]소멸[/gold]시키고, 그 장수만큼 카드를 뽑습니다.\n[gold]티르빙[/gold] {SwordLevel}단계 (3단계부터 체력 손실 2).",
+  "MAGICSWORDSMAN-TYRFING_TWELVE_BERSERKERS.title": "열두 광전사",
+  "MAGICSWORDSMAN-TYRFING_TWELVE_BERSERKERS.description": "내 턴이 시작될 때마다 체력을 {HpLoss} 잃고, 이번 전투 동안 [gold]티르빙[/gold] 카드의 공격 피해가 {TyrfingBerserkersPower} 증가합니다.\n[gold]티르빙[/gold] {SwordLevel}단계 (3단계부터 체력 손실 1)."
+}
