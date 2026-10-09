@@ -1,0 +1,12 @@
+{
+  "MAGICSWORDSMAN-UNION.title": "조합",
+  "MAGICSWORDSMAN-UNION.description": "[gold]{SwordA}[/gold]와(과) [gold]{SwordB}[/gold]를 둘 다 [gold]만검총[/gold]에 가지고 있을 때만 카드 보상·상점·변화에 나오는 카드입니다.\n쓰면 앞의 검이 [gold]현재 검[/gold]이 되고, 뒤의 검도 함께 소환됩니다. 수치는 두 검의 강화 단계를 함께 따릅니다.",
+  "MAGICSWORDSMAN-UNION.swordTipHeader": "[purple]조합[/purple] 카드",
+  "MAGICSWORDSMAN-UNION.swordTipOpen": "• {Card} ({Sword}와 함께) — 열림",
+  "MAGICSWORDSMAN-UNION.swordTipLocked": "• {Card} ({Sword}가 있으면 열림)",
+  "MAGICSWORDSMAN-UNION.popupHeader": "만검총이 울린다",
+  "MAGICSWORDSMAN-UNION.popupTitle": "새 조합이 열렸다",
+  "MAGICSWORDSMAN-UNION.popupPair": "{SwordA} + {SwordB}",
+  "MAGICSWORDSMAN-UNION.popupBody": "두 검을 함께 가진 동안 이 [purple]조합[/purple] 카드가 카드 보상·상점에 나옵니다.\n쓰면 두 검이 함께 소환되어 같이 움직입니다.",
+  "MAGICSWORDSMAN-UNION.popupContinue": "클릭하거나 아무 키나 눌러 계속"
+}

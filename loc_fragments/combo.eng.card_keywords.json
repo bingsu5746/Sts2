@@ -1,0 +1,12 @@
+{
+  "MAGICSWORDSMAN-UNION.title": "Union",
+  "MAGICSWORDSMAN-UNION.description": "Only offered in card rewards, shops and transforms while BOTH [gold]{SwordA}[/gold] and [gold]{SwordB}[/gold] are in [gold]Mangeomchong[/gold].\nPlaying it makes the first sword your [gold]current sword[/gold] and summons the second one too. Its numbers follow both swords' levels.",
+  "MAGICSWORDSMAN-UNION.swordTipHeader": "[purple]Union[/purple] cards",
+  "MAGICSWORDSMAN-UNION.swordTipOpen": "• {Card} (with {Sword}) — unlocked",
+  "MAGICSWORDSMAN-UNION.swordTipLocked": "• {Card} (unlocks with {Sword})",
+  "MAGICSWORDSMAN-UNION.popupHeader": "Mangeomchong resonates",
+  "MAGICSWORDSMAN-UNION.popupTitle": "A new union is open",
+  "MAGICSWORDSMAN-UNION.popupPair": "{SwordA} + {SwordB}",
+  "MAGICSWORDSMAN-UNION.popupBody": "While you hold both swords, this [purple]Union[/purple] card can appear in card rewards and shops.\nPlaying it summons both swords and they move together.",
+  "MAGICSWORDSMAN-UNION.popupContinue": "Click or press any key to continue"
+}

@@ -51,6 +51,8 @@ public static class MotionDirector
         {
             LastCard[player.NetId] = play.Card;
             LastTarget[player.NetId] = play.Target;
+            UnionMotion.OnCardPlayed(player);
+            if (play.Card is Cards.Union.UnionCard) return; // its own motion plays from the card (UnionMotion)
             switch (play.Card.Type)
             {
                 case CardType.Power:
@@ -143,6 +145,8 @@ public static class MotionDirector
             {
                 case "Attack":
                     LastTarget.TryGetValue(player.NetId, out var target);
+                    LastCard.TryGetValue(player.NetId, out var last);
+                    if (UnionMotion.TryHandleAttackTrigger(player, last, target, out var unionClip)) return unionClip;
                     SwordVisuals.Strike(player, target);
                     return AttackVariant(player);
                 case "Dead":
