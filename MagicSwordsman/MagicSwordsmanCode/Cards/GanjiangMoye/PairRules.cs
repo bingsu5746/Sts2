@@ -13,7 +13,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.GanjiangMoye;
 ///    Ganjiang/Moye card of any kind (bug report 2026-10-09: it used to linger across turns and past cards without
 ///    a pair effect);
 ///  - 암수 한 쌍 (TwinMatedPair): for the rest of this turn every Ganjiang/Moye card triggers it.
-/// Every trigger also feeds 막야의 투신 (<see cref="MoyesSacrificePower"/>).
+/// Every trigger also feeds 막야의 투신 (<see cref="MoyesSacrificePower"/>) and 쌍룡 (<see cref="TwinDragonsPower"/>).
 /// Per-combat bookkeeping lives in SwordCombatState counters on SwordId.Ganjiang (reset every combat).
 /// </summary>
 public static class PairRules
@@ -53,6 +53,8 @@ public static class PairRules
         {
             var power = player.Creature.GetPower<MoyesSacrificePower>();
             if (power != null) await power.OnPairTriggered();
+            var dragons = player.Creature.GetPower<TwinDragonsPower>();
+            if (dragons != null) await dragons.OnPairTriggered();
         }
 
         return triggers;
