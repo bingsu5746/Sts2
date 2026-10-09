@@ -389,3 +389,7 @@
 ## v3 redraw (2026-10-09)
 
 All 140 existing card portraits were regenerated with more varied subjects (swords, monsters, objects, places; Ensifer only on cards that are about him), each sword keeping its own palette. Same pipeline as before: AI Horde, model AlbedoBase XL (SDXL), img2img from hand-composed layouts. The v2 set is archived in `art_versions/v2_card_portraits/`.
+
+## Side-view combat body (2026-10-09)
+
+The combat rig parts (`images/character/parts/*`) and `images/character/magic_swordsman.png` now come from a new side-view body whose head is turned toward the enemies (user feedback: the previous body looked at the viewer). AI Horde, AlbedoBase XL (SDXL), img2img (denoise 0.62) from the previous body; background removed with rembg (isnet-general-use); painted smoke removed and parts split by `tools/split_body.py`.

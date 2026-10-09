@@ -18436,50 +18436,50 @@ offset = Vector2(-255, -400)
 texture = ExtResource("p_body")
 
 [node name="Head" type="Sprite2D" parent="Visuals/Rig"]
-position = Vector2(-10.5, -230.0)
+position = Vector2(-23.5, -274.0)
 centered = false
-offset = Vector2(-49, -112)
+offset = Vector2(-48, -106)
 texture = ExtResource("p_head")
 
 [node name="CoatL" type="Sprite2D" parent="Visuals/Rig"]
-position = Vector2(-63.5, -18.0)
+position = Vector2(-92.5, -45.0)
 centered = false
-offset = Vector2(-95, -14)
+offset = Vector2(-77, -13)
 texture = ExtResource("p_coat_l")
 
 [node name="CoatR" type="Sprite2D" parent="Visuals/Rig"]
-position = Vector2(27.5, -22.0)
+position = Vector2(41.5, -30.0)
 centered = false
-offset = Vector2(-4, -10)
+offset = Vector2(-8, -2)
 texture = ExtResource("p_coat_r")
 
 [node name="UpperL" type="Sprite2D" parent="Visuals/Rig"]
-position = Vector2(-73.5, -205.0)
+position = Vector2(-104.5, -236.0)
 centered = false
-offset = Vector2(-65, -16)
+offset = Vector2(-55, -19)
 texture = ExtResource("p_upper_l")
 
 [node name="ForeL" type="Sprite2D" parent="Visuals/Rig/UpperL"]
-position = Vector2(-46, 144)
+position = Vector2(-50, 140)
 centered = false
-offset = Vector2(-116, -10)
+offset = Vector2(-97, -15)
 texture = ExtResource("p_fore_l")
 
 [node name="UpperR" type="Sprite2D" parent="Visuals/Rig"]
-position = Vector2(41.5, -208.0)
+position = Vector2(26.5, -242.0)
 centered = false
-offset = Vector2(-15, -13)
+offset = Vector2(-20, -19)
 texture = ExtResource("p_upper_r")
 
 [node name="ForeR" type="Sprite2D" parent="Visuals/Rig/UpperR"]
-position = Vector2(75, 117)
+position = Vector2(43, 125)
 centered = false
-offset = Vector2(-23, -2)
+offset = Vector2(-17, -21)
 texture = ExtResource("p_fore_r")
 
 [node name="HandL" type="Node2D" parent="Visuals/Rig/UpperL/ForeL"]
 modulate = Color(0.850, 0.650, 1.000, 0.000)
-position = Vector2(-73.500, 114.947)
+position = Vector2(-60.211, 131.526)
 scale = Vector2(0.450, 0.450)
 
 [node name="Tint" type="Node2D" parent="Visuals/Rig/UpperL/ForeL/HandL"]
@@ -18514,7 +18514,7 @@ texture = ExtResource("h_core")
 
 [node name="HandR" type="Node2D" parent="Visuals/Rig/UpperR/ForeR"]
 modulate = Color(0.850, 0.650, 1.000, 0.000)
-position = Vector2(70.105, 69.289)
+position = Vector2(125.000, 40.684)
 scale = Vector2(0.450, 0.450)
 
 [node name="Tint" type="Node2D" parent="Visuals/Rig/UpperR/ForeR/HandR"]
@@ -18550,7 +18550,7 @@ texture = ExtResource("h_core")
 [node name="Sigil" type="Sprite2D" parent="Visuals/Rig"]
 material = SubResource("add")
 modulate = Color(1, 1, 1, 0.4)
-position = Vector2(-5.5, -190.78947368421052)
+position = Vector2(-15.36842105263159, -227.6315789473684)
 texture = ExtResource("5_glow")
 
 [node name="Shield" type="Sprite2D" parent="."]

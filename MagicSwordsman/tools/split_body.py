@@ -1,6 +1,6 @@
 """Splits the full-body Ensifer art into animation parts with Godot pivots.
 Input: the background-removed full-body PNG of the game-style Ensifer (side-on, facing right; 776x1216 — source:
-AI Horde body_137 of round 2, mirrored, see docs/card-art-credits.md). Output: MagicSwordsman/images/character/parts/*.png
+AI Horde side-view i2 (img2img of the previous body, head turned toward the enemy), see docs/card-art-credits.md). Output: MagicSwordsman/images/character/parts/*.png
 and parts.json (pivot + offset per part, in output pixels). The base 'body' has the moving parts inpainted out so no
 hole shows when an arm or coat flap swings. The painted magic swirls of the source are removed (the rig draws its
 own palm circles). Usage: python3 tools/split_body.py body_cut.png
@@ -13,17 +13,17 @@ os.makedirs(OUT,exist_ok=True)
 S=800/1216  # output scale (parts are 800 px tall; the scene shows them at 0.5)
 # R = the arm toward the enemy (screen right), L = the back arm (screen left)
 PARTS={  # name: (polygon in source px, pivot = joint the part rotates around)
- 'head':([(298,80),(450,80),(452,200),(420,248),(372,262),(330,248),(298,212)],(372,258)),
- 'upper_r':([(428,268),(486,268),(540,360),(596,452),(560,500),(510,470),(452,380),(430,330)],(452,292)),
- 'fore_r':([(548,440),(630,470),(700,505),(752,540),(752,690),(640,690),(600,600),(560,530),(530,490)],(566,470)),
- 'upper_l':([(232,272),(312,272),(300,360),(258,470),(226,540),(170,530),(196,440)],(276,296)),
- 'fore_l':([(160,500),(232,520),(210,600),(170,690),(150,780),(30,780),(30,620),(100,560)],(206,516)),
- 'coat_l':([(176,610),(292,560),(318,700),(296,990),(160,995),(140,820)],(292,580)),
- 'coat_r':([(424,560),(540,610),(668,860),(650,890),(520,860),(432,770)],(430,575)),
+ 'head':([(268,22),(432,22),(432,118),(402,172),(372,192),(330,198),(296,150),(268,100)],(352,192)),
+ 'upper_r':([(398,212),(452,212),(502,326),(532,418),(502,462),(458,420),(418,322),(398,268)],(428,240)),
+ 'fore_r':([(468,398),(560,416),(642,436),(732,466),(732,562),(640,562),(588,522),(518,482),(468,460)],(494,430)),
+ 'upper_l':([(204,214),(262,228),(252,330),(202,440),(150,482),(118,450),(168,330)],(230,250)),
+ 'fore_l':([(108,430),(192,452),(170,562),(122,642),(104,702),(14,702),(6,612),(58,520)],(154,462)),
+ 'coat_l':([(130,600),(238,520),(290,700),(262,900),(180,940),(128,800)],(248,540)),
+ 'coat_r':([(440,560),(560,560),(662,700),(652,842),(560,802),(470,762)],(452,562)),
 }
 ARMS=('upper_l','fore_l','upper_r','fore_r')
 DISCARD=()
-HANDS=[(30,600,170,790),(590,500,752,700)]  # glowing hands: keep their magenta glow
+HANDS=[(4,596,134,712),(586,436,734,566)]  # glowing hands: keep their magenta glow
 im=Image.open(SRC).convert('RGBA'); W,H=im.size
 a=np.array(im); yy,xx=np.mgrid[0:H,0:W]
 # painted magic swirls / wisps: magenta strokes outside the hands, and faint semi-transparent smoke
@@ -31,11 +31,18 @@ mag=(a[...,0].astype(int)>140)&(a[...,2].astype(int)>140)&(a[...,1].astype(int)<
 keep=np.zeros((H,W),bool)
 for x0,y0,x1,y1 in HANDS: keep[y0:y1,x0:x1]=True
 # the face (pink make-up) and the chest gem are magenta too: keep them; every other magenta stroke is painted magic
-for x0,y0,x1,y1 in ((285,70,465,275),(320,260,460,380)): keep[y0:y1,x0:x1]=True
+for x0,y0,x1,y1 in ((280,40,440,210),(318,196,424,352)): keep[y0:y1,x0:x1]=True
 a[mag&~keep,3]=0
 a[a[...,3]<90,3]=0
+# the painted grey smoke around the hands and coat hem: light, unsaturated pixels (the figure itself is dark)
+rgb=a[...,:3].astype(int); light=(rgb.min(-1)>120)&((rgb.max(-1)-rgb.min(-1))<40)
+a[light,3]=0
+a[(yy>1120)&(xx>405),3]=0  # cast shadow beside the front boot
+grey=(rgb.min(-1)>55)&((rgb.max(-1)-rgb.min(-1))<32)
+for x0,y0,x1,y1 in ((560,420,776,680),(0,540,160,740),(420,740,700,880)):  # darker smoke near the hands and hem
+    z=np.zeros((H,W),bool); z[y0:y1,x0:x1]=True; a[z&grey,3]=0
 # ground shadow under the boots
-a[(yy>1170)&((xx<330)|(xx>440)),3]=0
+a[(yy>1100)&((xx<280)|(xx>440)),3]=0
 n,lab,st,_=cv2.connectedComponentsWithStats((a[...,3]>0).astype(np.uint8),8)
 a[lab!=1+np.argmax(st[1:,4])]=0
 im=Image.fromarray(a)
@@ -72,7 +79,7 @@ alpha=np.array(im.getchannel('A')).copy()
 # pixels of an arm that hang outside the torso belong to the arm only (no copy left in the base)
 arms=np.zeros((H,W),bool)
 for n in ARMS: arms|=np.array(mask(PARTS[n][0]))>0
-outside=arms&((xx<230)|(xx>470))
+outside=arms&((xx<196)|(xx>468))
 alpha[outside]=0
 base.putalpha(Image.fromarray(alpha))
 bb=(0,0,W,H)

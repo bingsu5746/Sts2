@@ -16,7 +16,7 @@ HERE=os.path.dirname(__file__)
 OUT=os.path.join(HERE,'..','MagicSwordsman','scenes','magic_swordsman_combat.tscn')
 PARTS=json.load(open(os.path.join(HERE,'..','MagicSwordsman','images','character','parts','parts.json')))
 CW,CH=PARTS['_size']; CX,CY=CW/2,CH/2
-CHEST=(380*800/1216-CX,318*800/1216-CY)  # the glowing gem on his chest (split_body.py source px)
+CHEST=(365*800/1216-CX,262*800/1216-CY)  # the glowing gem on his chest (split_body.py source px)
 REST_Y=-200
 JOINTS={'head':'Visuals/Rig/Head','ul':'Visuals/Rig/UpperL','fl':'Visuals/Rig/UpperL/ForeL',
         'ur':'Visuals/Rig/UpperR','fr':'Visuals/Rig/UpperR/ForeR','cl':'Visuals/Rig/CoatL','cr':'Visuals/Rig/CoatR'}
@@ -260,7 +260,7 @@ P='res://MagicSwordsman/images/'
 ORDER=[('Body','body',None),('Head','head',None),('CoatL','coat_l',None),('CoatR','coat_r',None),
        ('UpperL','upper_l',None),('ForeL','fore_l','UpperL'),('UpperR','upper_r',None),('ForeR','fore_r','UpperR')]
 PARENT_PART={'ForeL':'upper_l','ForeR':'upper_r'}
-PALM={'L':('fore_l',(95*800/1216,690*800/1216)),'R':('fore_r',(672*800/1216,575*800/1216))}  # palms, output canvas px
+PALM={'L':('fore_l',(62*800/1216,662*800/1216)),'R':('fore_r',(684*800/1216,492*800/1216))}  # palms, output canvas px
 # layers of one hand circle: (name, texture, tilt rotation, tilt y-squash, spin turns per 6 s)
 LAYERS=[('Ring','h_ring',0.0,1.0,1),('Glyph','h_glyph',0.0,1.0,-1),('Core','h_core',0.0,1.0,0)]  # one slow turn per 12 s
 res='\n'.join(f'[ext_resource type="Texture2D" path="{P}character/parts/{f}.png" id="p_{f}"]' for _,f,_ in ORDER)
