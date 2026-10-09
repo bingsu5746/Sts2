@@ -82,11 +82,17 @@ def rest(c,t): c.hand('LR',t,*HAND_REST); return c.pose(t,**R0,sx=1,sy=1,tint=(1
 M=[]
 
 # ---------------------------------------------------------------- idle family (looping / fidgets)
-c=Clip('idle',3.0,loop=True)
-for t,b in ((0,0),(1.5,1),(3.0,0)):
-    c.pose(t,y=-4*b,sx=1+0.006*b,sy=1+0.014*b,head=0.02*b,ul=0.035*b,ur=-0.035*b,fl=0.02*b,fr=-0.02*b)
-c.pose(0.9,cl=0.03,cr=-0.012); c.pose(2.1,cl=-0.012,cr=-0.035); c.pose(0,cl=0,cr=0); c.pose(3.0,cl=0,cr=0)
-c.fx('Visuals/Rig/Sigil',0,0.35,(1,1,1)).fx('Visuals/Rig/Sigil',1.5,0.9,(1,1,1)).fx('Visuals/Rig/Sigil',3.0,0.35,(1,1,1)); M.append(c)
+# idle: a slow 4.2 s breath; the head and arms lag the chest a little and the coat sways on its own rhythm, so the
+# loop never moves everything at once (feedback 2026-10-09: make motions more natural)
+c=Clip('idle',4.2,loop=True)
+for t,b in ((0,0),(2.1,1),(4.2,0)):
+    c.pose(t,y=-4*b,sx=1+0.006*b,sy=1+0.014*b)
+for t,b in ((0,0.15),(0.5,0),(2.6,1),(4.2,0.15)):
+    c.pose(t,head=0.025*b,ul=0.035*b,ur=-0.03*b,fl=0.025*b,fr=-0.03*b)
+for t,(l,r) in ((0,(0.0,0.0)),(1.0,(0.03,-0.01)),(2.0,(0.005,-0.03)),(3.2,(-0.012,-0.012)),(4.2,(0.0,0.0))):
+    c.pose(t,cl=l,cr=r)
+c.pose(0,rot=0.0); c.pose(2.3,rot=0.006); c.pose(4.2,rot=0.0)
+c.fx('Visuals/Rig/Sigil',0,0.35,(1,1,1)).fx('Visuals/Rig/Sigil',2.1,0.9,(1,1,1)).fx('Visuals/Rig/Sigil',4.2,0.35,(1,1,1)); M.append(c)
 c=Clip('Idle_Look',2.4); rest(c,0); c.pose(0.5,head=0.12,y=-2); c.pose(1.3,head=0.12,y=-2); c.pose(1.8,head=-0.05); rest(c,2.4); M.append(c)
 c=Clip('Idle_Flex',2.2); rest(c,0); c.pose(0.5,fr=-0.5,ur=-0.15); c.pose(0.8,fr=-0.42,ur=-0.15); c.pose(1.1,fr=-0.5,ur=-0.15); rest(c,2.2)
 c.fx('Visuals/Rig/Sigil',0.8,0.9,(1,1,1)); M.append(c)
@@ -98,6 +104,12 @@ c=Clip('Idle_Shift',2.4); rest(c,0); c.pose(0.8,x=-6,rot=-0.015,head=0.04,cl=0.0
 c=Clip('Idle_Glance',2.6); rest(c,0); c.pose(0.6,head=-0.16,y=-2); c.pose(1.5,head=-0.14); c.pose(1.9,head=0.02); rest(c,2.6); M.append(c)  # looks up at his swords
 c=Clip('Idle_Wrist',2.2); rest(c,0); c.pose(0.5,fr=-0.3,ur=-0.05); c.pose(0.9,fr=-0.15); c.pose(1.3,fr=-0.3); rest(c,2.2)
 c.hand('R',0.5,0.3,0.0); c.hand('R',0.9,0.35,0.5); c.hand('R',1.5,0.35,0.0); M.append(c)         # turns the wrist, a faint circle
+c=Clip('Idle_Roll',2.4); rest(c,0); c.pose(0.5,ul=-0.06,ur=0.06,y=-3,head=-0.04); c.pose(1.0,ul=0.05,ur=-0.05,y=1,head=0.03); c.pose(1.5,ul=-0.03,ur=0.03,y=-1); rest(c,2.4); M.append(c)  # shoulder roll
+c=Clip('Idle_Ready',2.6); rest(c,0); c.pose(0.6,x=10,rot=0.02,head=0.05,ur=-0.25,fr=-0.3,cl=-0.03,cr=0.04); c.pose(1.6,x=9,rot=0.018,ur=-0.22,fr=-0.28)
+c.hand('R',0.6,0.4,0.0); c.hand('R',0.9,0.45,0.45); c.hand('R',1.6,0.45,0.0); rest(c,2.6); M.append(c)  # leans into a ready stance
+c=Clip('Idle_Gem',2.6); rest(c,0); c.pose(0.6,fl=-0.75,ul=-0.2,head=0.12,y=-1); c.pose(1.7,fl=-0.7,ul=-0.18,head=0.1)
+c.fx('Visuals/Rig/Sigil',0.6,1.2,(1,1,1)).fx('Visuals/Rig/Sigil',1.7,1.0,(1,1,1)); rest(c,2.6); M.append(c)  # touches the gem on his chest
+c=Clip('Idle_Hair',1.8); rest(c,0); c.pose(0.25,head=-0.09,y=-2); c.pose(0.45,head=0.05); c.pose(0.8,head=0.0); rest(c,1.8); M.append(c)  # tosses the hair out of his eyes
 c=Clip('Idle_Breath',3.0); rest(c,0); c.pose(1.2,y=-8,sy=1.03,ul=0.07,ur=-0.07,head=-0.04,cl=0.03,cr=-0.03); rest(c,3.0); M.append(c)
 
 # ---------------------------------------------------------------- attacks
@@ -176,6 +188,9 @@ M.append(cast('Cast_Flick',0.45,dict(ur=-0.4,fr=-1.2,head=0.05),circle=0,sigil=0
 M.append(cast('Cast_Gather',0.7,dict(ul=-0.2,fl=1.0,ur=0.2,fr=-1.0,head=0.12),circle=0.5,sigil=1.5,y=-4))  # hands draw in to the chest
 M.append(cast('Cast_Push',0.6,dict(ur=-1.1,fr=0.2,head=0.05,cr=-0.04),circle=0.5,y=-2))             # pushes the palm forward
 M.append(cast('Cast_Point2',0.5,dict(ur=-1.0,fr=-0.3,head=0.08),circle=0,sigil=0.9,y=-2))          # two fingers point
+M.append(cast('Cast_Snap',0.45,dict(ur=-0.7,fr=-0.6,head=0.04),circle=0,sigil=1.1,y=-2))          # a finger snap
+M.append(cast('Cast_Sweep',0.7,dict(ur=-0.9,fr=0.3,ul=0.2,head=0.06,cr=-0.05),circle=0.7,y=-4))      # palm sweeps sideways
+M.append(cast('Cast_Raise',0.6,dict(ul=0.8,fl=0.6,head=-0.08),circle=0.6,sigil=1.2,y=-8))             # back hand raised
 c=Clip('Cast_Beckon',0.7); rest(c,0)                                                                # palm up, fingers curl in
 c.pose(0.18,x=3,ur=-0.35,fr=-0.6,head=-0.05); c.pose(0.32,fr=-0.95); c.pose(0.44,fr=-0.7); c.pose(0.54,fr=-0.95)
 c.hand('R',0.18,0.45,0.8); c.hand('R',0.54,0.6,1.0); c.hand('R',0.7,0.6,0.0); rest(c,0.7); M.append(c)

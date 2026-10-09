@@ -24,13 +24,15 @@ public static class MotionDirector
         ["Attack", "Attack_Thrust", "Attack_Backhand", "Attack_Sweep", "Attack_Left", "Attack_Command"];
     private static readonly string[] HeavyAttacks = ["Attack_Heavy", "Attack_Overhead"];
     private static readonly string[] Casts =
-        ["Cast", "Cast_Point", "Cast_LeftHand", "Cast_Chest", "Cast_Draw", "Cast_Flick", "Cast_Gather", "Cast_Beckon", "Cast_Trace"];
+        ["Cast", "Cast_Point", "Cast_LeftHand", "Cast_Chest", "Cast_Draw", "Cast_Flick", "Cast_Gather", "Cast_Beckon", "Cast_Trace",
+         "Cast_Snap", "Cast_Sweep", "Cast_Raise"];
     private static readonly string[] TargetedCasts = ["Cast_Point", "Cast_Debuff", "Cast_Push", "Cast_Point2"];
     private static readonly string[] Powers = ["Power_Rise", "Power_Focus", "Power_Burst"];
     private static readonly string[] Blocks = ["Block", "Block_Cross", "Block_Brace", "Block_Palm"];
     private static readonly string[] Swaps = ["Swap_1", "Swap_2", "Swap_3"];
     private static readonly string[] Fidgets =
-        ["Idle_Look", "Idle_Flex", "Idle_Weave", "Idle_Breath", "Idle_Shift", "Idle_Glance", "Idle_Wrist"];
+        ["Idle_Look", "Idle_Flex", "Idle_Weave", "Idle_Breath", "Idle_Shift", "Idle_Glance", "Idle_Wrist",
+         "Idle_Roll", "Idle_Ready", "Idle_Gem", "Idle_Hair"];
     private static readonly string[] Deaths = ["Dead", "Dead_Kneel"];
 
     private static readonly Random Rng = new();

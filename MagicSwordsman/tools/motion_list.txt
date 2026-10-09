@@ -1,10 +1,14 @@
-idle	3.0s
+idle	4.2s
 Idle_Look	2.4s
 Idle_Flex	2.2s
 Idle_Weave	2.6s
 Idle_Shift	2.4s
 Idle_Glance	2.6s
 Idle_Wrist	2.2s
+Idle_Roll	2.4s
+Idle_Ready	2.6s
+Idle_Gem	2.6s
+Idle_Hair	1.8s
 Idle_Breath	3.0s
 Attack	0.6s
 Attack_Thrust	0.6s
@@ -44,6 +48,9 @@ Cast_Flick	0.45s
 Cast_Gather	0.7s
 Cast_Push	0.6s
 Cast_Point2	0.5s
+Cast_Snap	0.45s
+Cast_Sweep	0.7s
+Cast_Raise	0.6s
 Cast_Beckon	0.7s
 Cast_Trace	0.9s
 Summon_Gram	0.95s
