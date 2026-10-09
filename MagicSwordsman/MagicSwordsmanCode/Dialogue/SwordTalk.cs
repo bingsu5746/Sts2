@@ -3,10 +3,13 @@ using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Relics;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MagicSwordsman.MagicSwordsmanCode.Visuals;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Nodes.Events;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
 using MegaCrit.Sts2.Core.Nodes.Vfx;
 using MegaCrit.Sts2.Core.Nodes.Vfx.Utilities;
@@ -25,6 +28,12 @@ namespace MagicSwordsman.MagicSwordsmanCode.Dialogue;
 ///   Shown in the order A, C, B. Missing tier -> the nearest lower tier, then higher.
 /// Rate limits: one exchange at a time, at least <see cref="CooldownSeconds"/> between exchanges, at most
 /// <see cref="MaxPerCombat"/> during a combat (victory not counted), plus a chance per moment.
+///
+/// Moments (2026-10-09 "더 다양하게"): besides the original six, a sword speaks when it becomes the current sword
+/// (already out), at elite / boss combat start, after a boss kill, after a near-flawless win (Ensifer gloats), when it
+/// gives Ensifer a curse, when it leaves the tomb (farewell) or comes back to it, at a shop or an ordinary event, and
+/// when the player has done nothing for a while in combat. Two specific swords out together may banter once per
+/// combat (<see cref="SwordBanter"/>). Chances are the constants below.
 /// </summary>
 public static class SwordTalk
 {
@@ -36,7 +45,34 @@ public static class SwordTalk
         Rest,
         LowHp,
         Upgrade,
+        Switch,
+        EliteStart,
+        BossStart,
+        BossVictory,
+        Flawless,
+        Cursed,
+        Released,
+        Reacquired,
+        Shop,
+        Event,
+        Idle,
     }
+
+    // chance per moment (after cooldown / caps)
+    private const double CombatStartChance = 0.2;
+    private const double EliteStartChance = 0.5;
+    private const double BossStartChance = 0.8;
+    private const double SwitchChance = 0.12;
+    private const double BossVictoryChance = 0.9;
+    private const double FlawlessShare = 0.5; // of the ordinary victory line, when HP >= FlawlessHpFraction
+    private const float FlawlessHpFraction = 0.9f;
+    private const double CursedChance = 0.7;
+    private const double ReleasedChance = 0.85;
+    private const double ReacquiredChance = 0.85;
+    private const double ShopChance = 0.35;
+    private const double EventChance = 0.2;
+    private const double IdleChance = 0.7;
+    private const double IdleSeconds = 40.0;
 
     private const double CooldownSeconds = 25.0;
     private const int MaxPerCombat = 2;
@@ -55,6 +91,12 @@ public static class SwordTalk
         // per combat (reset by OnCombatStart / snapshot)
         public int TalksThisCombat;
         public bool LowHpDone;
+        public bool BanterDone;
+        public bool IdleDone;
+        public int CombatGeneration;
+        public bool CombatOver;
+        public SwordId? JustSummoned;
+        public ulong JustSummonedMs;
         public List<SwordId> LastCombatSwordsOut = [];
         public SwordId? LastCombatCurrent;
     }
@@ -73,14 +115,25 @@ public static class SwordTalk
             var st = StateOf(player);
             st.TalksThisCombat = 0;
             st.LowHpDone = false;
+            st.BanterDone = false;
+            st.IdleDone = false;
+            st.CombatOver = false;
+            st.CombatGeneration++;
             var relic = player.GetRelic<Mangeomchong>();
             if (relic == null || relic.OwnedSwords.Count == 0) return;
+            if (LocalContext.IsMe(player)) TaskHelper.RunSafely(IdleWatch(player, st, st.CombatGeneration));
             // Onimaru is already out at combat start, so it is the one most likely to speak up.
             var owned = relic.OwnedSwords;
             var sword = owned.Contains(SwordId.Onimaru) && Rand.NextDouble() < 0.5
                 ? SwordId.Onimaru
                 : owned[Rand.Next(owned.Count)];
-            TryTalk(player, sword, Situation.CombatStart, 0.2, delaySeconds: 0.8);
+            var (situation, chance) = player.RunState.CurrentRoom?.RoomType switch
+            {
+                RoomType.Boss => (Situation.BossStart, BossStartChance),
+                RoomType.Elite => (Situation.EliteStart, EliteStartChance),
+                _ => (Situation.CombatStart, CombatStartChance),
+            };
+            TryTalk(player, sword, situation, chance, delaySeconds: 0.8);
         }
         catch (Exception e)
         {
@@ -94,6 +147,9 @@ public static class SwordTalk
         try
         {
             var st = StateOf(player);
+            st.JustSummoned = sword;
+            st.JustSummonedMs = Time.GetTicksMsec();
+            if (TryBanter(player, sword, st)) return;
             var chance = st.SpokenThisSession.Contains(sword) ? 0.3 : 0.6;
             TryTalk(player, sword, Situation.Summon, chance, delaySeconds: 0.5);
         }
@@ -132,6 +188,7 @@ public static class SwordTalk
         try
         {
             var st = StateOf(player);
+            st.CombatOver = true;
             var combat = SwordCombat.Get(player);
             st.LastCombatSwordsOut = combat == null ? [] : combat.Present.Union(combat.Summoned).Distinct().ToList();
             st.LastCombatCurrent = combat?.Current;
@@ -158,6 +215,7 @@ public static class SwordTalk
             var risen = gained.Where(s => SwordAffinity.Tier(player, s) > tiersBefore[s]).ToList();
             SwordId sword;
             double chance;
+            var situation = Situation.Victory;
             if (risen.Count > 0)
             {
                 sword = risen[Rand.Next(risen.Count)];
@@ -169,10 +227,22 @@ public static class SwordTalk
                     ? cur
                     : gained[Rand.Next(gained.Count)];
                 chance = 0.35;
+                var creature = player.Creature;
+                if (room.RoomType != RoomType.Boss && creature.MaxHp > 0 &&
+                    creature.CurrentHp >= creature.MaxHp * FlawlessHpFraction && Rand.NextDouble() < FlawlessShare)
+                    situation = Situation.Flawless;
+            }
+
+            // a boss kill always gets its own line (a tier-up line waits for an ordinary fight)
+            if (room.RoomType == RoomType.Boss)
+            {
+                situation = Situation.BossVictory;
+                chance = BossVictoryChance;
             }
 
             st.TalksThisCombat = 0; // the victory line does not count against the combat cap
-            TryTalk(player, sword, Situation.Victory, chance, delaySeconds: 0.6, ignoreCooldown: risen.Count > 0);
+            TryTalk(player, sword, situation, chance, delaySeconds: 0.6,
+                ignoreCooldown: risen.Count > 0 || situation == Situation.BossVictory);
         }
         catch (Exception e)
         {
@@ -180,18 +250,25 @@ public static class SwordTalk
         }
     }
 
-    /// <summary>Any room entered: rest sites get a quiet line by the fire.</summary>
+    /// <summary>Any room entered: rest sites get a quiet line by the fire; shops and ordinary events a remark.</summary>
     public static void OnRoomEntered(Player player, AbstractRoom room)
     {
         try
         {
-            if (room is not RestSiteRoom) return;
+            var (situation, chance, delay) = room switch
+            {
+                RestSiteRoom => (Situation.Rest, 0.5, 1.6),
+                MerchantRoom => (Situation.Shop, ShopChance, 1.8),
+                EventRoom { CanonicalEvent: not AncientEventModel } => (Situation.Event, EventChance, 2.2),
+                _ => (Situation.Rest, 0.0, 0.0),
+            };
+            if (chance <= 0) return;
             var relic = player.GetRelic<Mangeomchong>();
             if (relic == null || relic.OwnedSwords.Count == 0) return;
             var owned = relic.OwnedSwords;
             // the closest sword is a little more likely to speak
             var sword = owned.OrderByDescending(s => SwordAffinity.Points(player, s) + Rand.Next(30)).First();
-            TryTalk(player, sword, Situation.Rest, 0.5, delaySeconds: 1.6);
+            TryTalk(player, sword, situation, chance, delaySeconds: delay);
         }
         catch (Exception e)
         {
@@ -215,16 +292,212 @@ public static class SwordTalk
         }
     }
 
+    /// <summary>SwordCombat.SwitchTo: <paramref name="sword"/> became the current sword.</summary>
+    public static void OnSwitched(Player player, SwordId? old, SwordId sword)
+    {
+        try
+        {
+            if (old == sword) return;
+            var st = StateOf(player);
+            // a sword summoned by this very switch already had its summon moment
+            if (st.JustSummoned == sword && Time.GetTicksMsec() - st.JustSummonedMs < 1500) return;
+            TryTalk(player, sword, Situation.Switch, SwitchChance, delaySeconds: 0.4);
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordTalk] switch: {e.Message}");
+        }
+    }
+
+    /// <summary>Mangeomchong.AddCurse: a sword's own curse went into the deck.</summary>
+    public static void OnCursed(Player player, CardModel curse)
+    {
+        try
+        {
+            if (curse is not Curses.SwordCurseCard sc) return;
+            TryTalk(player, sc.Sword, Situation.Cursed, CursedChance, delaySeconds: 1.4, ignoreCooldown: true);
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordTalk] cursed: {e.Message}");
+        }
+    }
+
+    /// <summary>Mangeomchong.LoseSword: the sword (pair) left the tomb.</summary>
+    public static void OnReleased(Player player, SwordId sword)
+    {
+        try
+        {
+            var group = SwordRegistry.WithPartners(sword);
+            TryTalk(player, group[Rand.Next(group.Count)], Situation.Released, ReleasedChance, delaySeconds: 1.0,
+                ignoreCooldown: true);
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordTalk] released: {e.Message}");
+        }
+    }
+
+    /// <summary>Mangeomchong.AcquireSword: a sword that had been in the tomb earlier this run came back.</summary>
+    public static void OnReacquired(Player player, SwordId sword)
+    {
+        try
+        {
+            var group = SwordRegistry.WithPartners(sword);
+            TryTalk(player, group[Rand.Next(group.Count)], Situation.Reacquired, ReacquiredChance, delaySeconds: 1.2,
+                ignoreCooldown: true);
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordTalk] reacquired: {e.Message}");
+        }
+    }
+
+    // ------------------------------------------------------------------ idle (local, single player only)
+
+    /// <summary>
+    /// Polls once a second during the player's turn; when nothing at all changed (hand, piles, energy, HP, block,
+    /// turn) for <see cref="IdleSeconds"/>, one sword nudges Ensifer. Once per combat. Stops when the combat ends.
+    /// </summary>
+    private static async Task IdleWatch(Player player, TalkState st, int generation)
+    {
+        try
+        {
+            if (player.RunState.Players.Count > 1) return; // waiting for teammates is not idling
+            var tree = (SceneTree)Engine.GetMainLoop();
+            long lastSignature = 0;
+            var still = 0.0;
+            while (st.CombatGeneration == generation && !st.CombatOver && !st.IdleDone)
+            {
+                await Wait(1.0);
+                if (st.CombatGeneration != generation || st.CombatOver) return;
+                var pcs = player.PlayerCombatState;
+                var cm = CombatManager.Instance;
+                if (pcs == null || player.Creature.IsDead || !cm.IsInProgress || cm.IsOverOrEnding) return;
+                if (tree.Paused || pcs.Phase != PlayerTurnPhase.Play || st.Busy)
+                {
+                    still = 0;
+                    continue;
+                }
+
+                var signature = IdleSignature(player, pcs);
+                if (signature != lastSignature)
+                {
+                    lastSignature = signature;
+                    still = 0;
+                    continue;
+                }
+
+                still += 1.0;
+                if (still < IdleSeconds) continue;
+
+                st.IdleDone = true;
+                var combat = SwordCombat.Get(player);
+                SwordId? sword = combat?.Current;
+                if (sword == null && combat != null && combat.Present.Count > 0)
+                    sword = combat.Present.ElementAt(Rand.Next(combat.Present.Count));
+                if (sword == null && player.GetRelic<Mangeomchong>() is { } relic && relic.OwnedSwords.Count > 0)
+                    sword = relic.OwnedSwords[Rand.Next(relic.OwnedSwords.Count)];
+                if (sword != null)
+                    TryTalk(player, sword.Value, Situation.Idle, IdleChance, delaySeconds: 0.0, ignoreCombatCap: true);
+                return;
+            }
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordTalk] idle: {e.Message}");
+        }
+    }
+
+    private static long IdleSignature(Player player, PlayerCombatState pcs)
+    {
+        unchecked
+        {
+            long h = pcs.TurnNumber;
+            h = h * 31 + pcs.Hand.Cards.Count;
+            h = h * 31 + pcs.DrawPile.Cards.Count;
+            h = h * 31 + pcs.DiscardPile.Cards.Count;
+            h = h * 31 + pcs.ExhaustPile.Cards.Count;
+            h = h * 31 + pcs.Energy;
+            h = h * 31 + player.Creature.CurrentHp;
+            h = h * 31 + player.Creature.Block;
+            foreach (var card in pcs.Hand.Cards) h = h * 31 + card.GetHashCode();
+            return h;
+        }
+    }
+
+    // ------------------------------------------------------------------ banter (two swords out together)
+
+    /// <summary>
+    /// <paramref name="arrived"/> just came out: if a banter partner is already out, maybe play their exchange
+    /// (once per combat). Returns true when a banter was started (the summon line is then skipped).
+    /// </summary>
+    private static bool TryBanter(Player player, SwordId arrived, TalkState st)
+    {
+        if (!LocalContext.IsMe(player) || st.BanterDone || st.Busy) return false;
+        var combat = SwordCombat.Get(player);
+        if (combat == null) return false;
+        var now = Time.GetTicksMsec();
+        if (st.LastTalkMs != 0 && now - st.LastTalkMs < CooldownSeconds * 1000) return false;
+
+        var candidates = SwordBanter.PairsFor(arrived, combat.Present.ToList());
+        if (candidates.Count == 0) return false;
+        if (Rand.NextDouble() >= SwordBanter.Chance) return false;
+
+        var pair = candidates[Rand.Next(candidates.Count)];
+        var variants = SwordBanter.Variants(pair);
+        if (variants.Count == 0) return false;
+        var fresh = variants.Where(v => !st.Recent.Contains(v)).ToList();
+        var pool = fresh.Count > 0 ? fresh : variants;
+        var key = pool[Rand.Next(pool.Count)];
+
+        st.BanterDone = true;
+        st.Busy = true;
+        st.LastTalkMs = now;
+        st.Recent.Enqueue(key);
+        while (st.Recent.Count > RecentMemory) st.Recent.Dequeue();
+        TaskHelper.RunSafely(PlayBanter(player, key, st));
+        return true;
+    }
+
+    private static async Task PlayBanter(Player player, string key, TalkState st)
+    {
+        try
+        {
+            await Wait(0.6);
+            foreach (var (locKey, speaker) in SwordBanter.Lines(key))
+            {
+                var lines = new List<(string Text, SwordId? Speaker)>();
+                AddLine(lines, locKey, speaker, speaker);
+                if (lines.Count == 0) continue;
+                var (text, who) = lines[0];
+                var seconds = Math.Max(2.4, CharCount(text) * 0.13);
+                if (!Show(player, text, who, seconds)) return;
+                await Wait(seconds - 0.2);
+            }
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordTalk] banter {key}: {e.Message}");
+        }
+        finally
+        {
+            st.Busy = false;
+            st.LastTalkMs = Time.GetTicksMsec();
+        }
+    }
+
     // ------------------------------------------------------------------ selection
 
     private static void TryTalk(Player player, SwordId sword, Situation situation, double chance, double delaySeconds,
-        bool ignoreCooldown = false)
+        bool ignoreCooldown = false, bool ignoreCombatCap = false)
     {
         if (!LocalContext.IsMe(player)) return;
         var st = StateOf(player);
         if (st.Busy) return;
-        var inCombat = situation is Situation.Summon or Situation.CombatStart or Situation.LowHp;
-        if (inCombat && st.TalksThisCombat >= MaxPerCombat) return;
+        var inCombat = situation is Situation.Summon or Situation.CombatStart or Situation.LowHp or Situation.Switch
+            or Situation.EliteStart or Situation.BossStart;
+        if (inCombat && !ignoreCombatCap && st.TalksThisCombat >= MaxPerCombat) return;
         var now = Time.GetTicksMsec();
         if (!ignoreCooldown && st.LastTalkMs != 0 && now - st.LastTalkMs < CooldownSeconds * 1000) return;
         if (Rand.NextDouble() >= chance) return;
@@ -241,7 +514,7 @@ public static class SwordTalk
         TaskHelper.RunSafely(Play(player, sword, key, situation, delaySeconds, st));
     }
 
-    private static string SwordKey(SwordId sword) => sword.ToString().ToUpperInvariant();
+    internal static string SwordKey(SwordId sword) => sword.ToString().ToUpperInvariant();
 
     /// <summary>Base key of a random unused variant (…&lt;n&gt;), or null when the sword has no line for this moment.</summary>
     private static string? PickLine(Player player, SwordId sword, Situation situation, TalkState st)
@@ -253,7 +526,7 @@ public static class SwordTalk
         {
             var baseKey = $"{SwordAffinity.LocPrefix}.{SwordKey(sword)}.{situation.ToString().ToUpperInvariant()}.T{t}";
             var variants = new List<string>();
-            for (var n = 0; n < 12; n++)
+            for (var n = 0; n < 16; n++)
             {
                 var k = $"{baseKey}.{n}";
                 if (LocString.Exists(SwordAffinity.LocTable, k + ".A")) variants.Add(k);
@@ -310,7 +583,7 @@ public static class SwordTalk
         lines.Add((text, speaker));
     }
 
-    /// <summary>Shows one bubble. Returns false when the place to show it is gone (room left, owner dead).</summary>
+    /// <summary>Shows one bubble (combat, rest site, shop or ordinary event). Returns false when there is no place to show it.</summary>
     private static bool Show(Player player, string text, SwordId? sword, double seconds)
     {
         var creature = player.Creature;
@@ -353,6 +626,52 @@ public static class SwordTalk
             var bubble = NSpeechBubbleVfx.Create(text, side, anchor, seconds, color);
             if (bubble == null) return false;
             rest.AddChildSafely(bubble);
+            return true;
+        }
+
+        // shop: above Ensifer's merchant figure (the local player's visual is always first)
+        var merchant = NMerchantRoom.Instance;
+        if (merchant != null && GodotObject.IsInstanceValid(merchant) && merchant.IsVisibleInTree() &&
+            merchant.PlayerVisuals.Count > 0 && GodotObject.IsInstanceValid(merchant.PlayerVisuals[0]))
+        {
+            // magic_swordsman_merchant.tscn: a 256x400 sprite centred 200 px above the node origin
+            var figure = merchant.PlayerVisuals[0].GlobalPosition;
+            var anchor = sword != null ? figure + new Vector2(-70f, -430f) : figure + new Vector2(70f, -330f);
+            var side = anchor.X > merchant.GetViewportRect().Size.X * 0.5f ? DialogueSide.Right : DialogueSide.Left;
+            var color = sword is { } s3 ? ColorOf(s3) : player.Character.SpeechBubbleColor;
+            var bubble = NSpeechBubbleVfx.Create(text, side, anchor, seconds, color);
+            if (bubble == null) return false;
+            merchant.AddChildSafely(bubble);
+            return true;
+        }
+
+        // ordinary event: over the lower part of the event portrait (Ensifer has no figure there)
+        var eventRoom = NEventRoom.Instance;
+        var layout = eventRoom?.Layout;
+        if (eventRoom != null && layout != null && layout is not NAncientEventLayout &&
+            GodotObject.IsInstanceValid(layout))
+        {
+            var portrait = layout.GetNodeOrNull<Control>("%Portrait");
+            Vector2 anchor;
+            if (portrait != null && portrait.IsVisibleInTree())
+            {
+                var box = portrait.GetGlobalRect();
+                anchor = sword != null
+                    ? box.Position + new Vector2(box.Size.X * 0.22f, box.Size.Y * 0.62f)
+                    : box.Position + new Vector2(box.Size.X * 0.32f, box.Size.Y * 0.84f);
+            }
+            else
+            {
+                var view = eventRoom.GetViewportRect().Size;
+                anchor = sword != null
+                    ? new Vector2(view.X * 0.14f, view.Y * 0.6f)
+                    : new Vector2(view.X * 0.2f, view.Y * 0.74f);
+            }
+
+            var color = sword is { } s4 ? ColorOf(s4) : player.Character.SpeechBubbleColor;
+            var bubble = NSpeechBubbleVfx.Create(text, DialogueSide.Left, anchor, seconds, color);
+            if (bubble == null) return false;
+            eventRoom.AddChildSafely(bubble);
             return true;
         }
 

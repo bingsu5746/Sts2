@@ -283,6 +283,7 @@ public static class SwordCombat
             await listener.AfterSwordSwitched(player, old, sword, choiceContext);
 
         MainFile.Logger.Info($"[Sword] {player.NetId}: current sword {old?.ToString() ?? "none"} -> {sword}");
+        SwordTalk.OnSwitched(player, old, sword); // presentation: maybe a line from the new sword (Dialogue/SwordTalk.cs)
         return true;
     }
 
