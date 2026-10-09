@@ -3,6 +3,7 @@ using MagicSwordsman.MagicSwordsmanCode.Visuals;
 using System.Runtime.CompilerServices;
 using MagicSwordsman.MagicSwordsmanCode.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
+using MagicSwordsman.MagicSwordsmanCode.Dialogue;
 using MagicSwordsman.MagicSwordsmanCode.RestSite;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MegaCrit.Sts2.Core.Combat;
@@ -322,6 +323,7 @@ public class Mangeomchong : MagicSwordsmanRelic
         foreach (var s in SwordRegistry.WithPartners(owner))
             await SwordRegistry.Get(s).OnLevelChanged(Owner, old, level);
         await SwordMastery.AfterLevelChanged(this, owner, old, level); // level-5 reward (Swords/SwordMastery.cs)
+        if (level > old) SwordTalk.OnUpgraded(Owner, owner); // 친밀도 + maybe a line (Dialogue/SwordTalk.cs)
     }
 
     private void WriteLevel(SwordId sword, int level)
@@ -415,6 +417,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     {
         await base.AfterRoomEntered(room);
         UpdateSwordList();
+        SwordTalk.OnRoomEntered(Owner, room);
     }
 
     /// <summary>
@@ -516,6 +519,7 @@ public class Mangeomchong : MagicSwordsmanRelic
 
         foreach (var sword in OwnedSwords)
             await SwordRegistry.Get(sword).OnCombatStart(SwordCombat.ContextFor(Owner, sword), choiceContext);
+        SwordTalk.OnCombatStart(Owner);
     }
 
     public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
@@ -544,6 +548,7 @@ public class Mangeomchong : MagicSwordsmanRelic
         }
         finally
         {
+            SwordTalk.SnapshotCombat(Owner); // which swords were out, for the victory affinity gain
             SwordCombat.Clear(Owner);
         }
     }
@@ -568,6 +573,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     public override Task AfterDamageReceived(PlayerChoiceContext choiceContext, Creature target, DamageResult result,
         ValueProp props, Creature? dealer, CardModel? cardSource)
     {
+        if (target == Owner.Creature && result.UnblockedDamage > 0) SwordTalk.OnOwnerDamaged(Owner);
         if (target == Owner.Creature && dealer != target && !props.HasFlag(ValueProp.SkipHurtAnim))
             MotionDirector.OnDamageReceived(Owner, result.UnblockedDamage, result.WasFullyBlocked);
         else if (dealer == Owner.Creature && target != Owner.Creature && props.HasFlag(ValueProp.Move))
@@ -578,6 +584,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     public override Task AfterCombatVictory(CombatRoom room)
     {
         if (!Owner.Creature.IsDead) MotionDirector.OnVictory(Owner);
+        SwordTalk.OnVictory(Owner, room); // 친밀도 for the swords that were out + maybe a line
         return Task.CompletedTask;
     }
 
