@@ -26,15 +26,14 @@ public sealed class SwordDefinition
     public SwordId LevelOwner => LevelOwnerOverride ?? Id;
 
     /// <summary>
-    /// Spec §4: Gram never leaves on a shatter — it returns to level 0 ("부서진 그람"). This is Gram's legend (Odin broke
-    /// it, Regin re-forged it), kept after Gram stopped being the fixed first sword (2026-10-09).
+    /// False = a forge shatter resets the sword to level 0 instead of losing it (SwordForge, ForgeOutcomeKind.ShatterReset).
+    /// No sword uses it any more: Gram had it until 사용자 결정 2026-10-09 removed the protection. Kept as a framework option.
     /// </summary>
     public bool CanBeLost { get; init; } = true;
 
     /// <summary>
     /// Whether the player may release this sword to make room in Mangeomchong. Separate from <see cref="CanBeLost"/>
-    /// (a forge shatter): Gram never shatters away (it resets to level 0) but can be released by choice (user
-    /// decision 2026-10-09).
+    /// (a forge shatter).
     /// </summary>
     public bool CanBeReleased { get; init; } = true;
 

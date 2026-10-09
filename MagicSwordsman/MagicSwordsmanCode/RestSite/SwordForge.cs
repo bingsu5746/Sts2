@@ -19,7 +19,7 @@ public enum ForgeOutcomeKind
     FailureCurse,
     FailureNothing, // level 0 and the sword has no curse card yet
     Shatter,        // sword lost (cards stored in Mangeomchong)
-    ShatterReset,   // Gram: back to level 0 instead of being lost
+    ShatterReset,   // SwordDefinition.CanBeLost = false: back to level 0 instead of being lost (unused since 2026-10-09)
 }
 
 public readonly record struct ForgeOdds(int Success, int Failure, int Shatter);

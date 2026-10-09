@@ -42,9 +42,11 @@ public static class SwordAcquisition
     /// to release (Gram included, see SwordDefinition.CanBeReleased). The picks are only collected at first; they are released only once the
     /// reserved room is enough for the new sword, so cancelling a later prompt loses nothing.
     /// Returns false when already owned, the player cancels, or nothing can make room.
+    /// After a successful acquisition the player may take 1 of 3 cards from the sword's pool (<see cref="SwordCardPick"/>,
+    /// 사용자 결정 2026-10-09); <paramref name="offerCardPick"/> false lets the caller offer it itself (run-start pick).
     /// </summary>
     public static async Task<bool> AcquireWithRelease(Player player, Mangeomchong relic, SwordId sword,
-        PlayerChoiceContext choiceContext)
+        PlayerChoiceContext choiceContext, bool offerCardPick = true)
     {
         sword = SwordRegistry.GroupLeader(sword);
         if (SwordRegistry.WithPartners(sword).Any(relic.Owns)) return false;
@@ -68,7 +70,9 @@ public static class SwordAcquisition
         }
 
         foreach (var r in pending) await relic.LoseSword(r);
-        return await relic.AcquireSword(sword);
+        if (!await relic.AcquireSword(sword)) return false;
+        if (offerCardPick) await SwordCardPick.Offer(player, sword, choiceContext);
+        return true;
     }
 
     /// <summary>Acquisition with random candidates rolled from the given game Rng (spec §5: 3 candidates).</summary>

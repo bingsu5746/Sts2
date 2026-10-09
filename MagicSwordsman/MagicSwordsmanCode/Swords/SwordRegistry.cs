@@ -20,9 +20,9 @@ public static class SwordRegistry
 
     private static readonly Dictionary<SwordId, SwordDefinition> Definitions = new()
     {
-        // Gram: an ordinary sword in every pool since 2026-10-09 (no longer the fixed first sword). CanBeLost = false is
-        // its legend (broken and re-forged), not a starting-sword rule: a shatter resets it to 0 ("부서진 그람").
-        [SwordId.Gram] = new SwordDefinition { Id = SwordId.Gram, CanBeLost = false },
+        // Gram: an ordinary sword since 2026-10-09 — in every pool (no longer the fixed first sword) and, like the others,
+        // lost by a forge shatter (its "back to level 0" protection was removed the same day).
+        [SwordId.Gram] = new SwordDefinition { Id = SwordId.Gram },
         [SwordId.Ganjiang] = new SwordDefinition { Id = SwordId.Ganjiang, Partners = [SwordId.Moye] },
         [SwordId.Moye] = new SwordDefinition
         {

@@ -7,8 +7,8 @@ using MegaCrit.Sts2.Core.Saves.Runs;
 namespace MagicSwordsman.MagicSwordsmanCode.Relics;
 
 /// <summary>
-/// 흑칠 칼집 (Common) — 다음 박살 1번을 실패로 바꾼다. 쓰면 빈 칼집이 된다 (content doc §7). One-use insurance; also
-/// protects Gram from being reset to level 0. Used-up pattern: game relic LizardTail ([SavedProperty] bool +
+/// 흑칠 칼집 (Common) — 다음 박살 1번을 실패로 바꾼다. 쓰면 빈 칼집이 된다 (content doc §7). One-use insurance against
+/// losing a sword (Gram included since its protection was removed, 2026-10-09). Used-up pattern: game relic LizardTail ([SavedProperty] bool +
 /// IsUsedUp + RelicStatus.Disabled).
 /// 원전: 「거의 밀폐된 흑칠 나무 칼집 … 2,500년 동안 녹이 거의 슬지 않았다」(월왕 구천검)
 /// </summary>

@@ -54,7 +54,7 @@ public abstract class ForgeStoryModeToken : ForgeModeToken
         }
 
         description.Add("Story", StoryLine());
-        // Spec §4 [확정]: Gram does not disappear on a shatter, it goes back to level 0.
+        // CanBeLost = false (no sword since 2026-10-09) would mean "back to level 0" instead of losing the sword.
         description.Add("ShatterRule", SwordLore.Generic(
             SwordRegistry.GetDefinition(SwordRegistry.GroupLeader(Sword)).CanBeLost ? "SHATTER_RULE" : "SHATTER_RULE_RESET"));
     }

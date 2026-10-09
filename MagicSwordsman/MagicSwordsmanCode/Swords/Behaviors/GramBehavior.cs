@@ -17,8 +17,8 @@ namespace MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 /// Cost [확정]: on reaching level 5, curse "니벨룽의 보물" (content doc §3.2 / §0.4 #18: only the FIRST time
 /// level 5 is reached in a run, one card per run).
 /// Forge failure curse: 오딘이 꺾은 칼날 (content doc §3.1).
-/// Shatter at the rest site returns Gram to level 0 instead of losing it (SwordDefinition.CanBeLost = false) — its
-/// legend (broken by Odin, re-forged by Regin), kept as a Gram trait. It can still be released by choice.
+/// Shatter: Gram is lost like every other sword (사용자 결정 2026-10-09 "시작 검 보호는 없애도 되지 그람" — the old
+/// "returns to level 0" protection was removed). The legend stays in the visuals and texts: level 0 is "부서진 그람".
 /// Card cost thresholds (레긴의 재단조, 발뭉·노퉁) are applied here via <see cref="GramCard.CostAtLevel"/>.
 /// </summary>
 public sealed class GramBehavior : SwordBehavior
