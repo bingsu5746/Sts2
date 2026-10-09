@@ -549,6 +549,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     public override bool TryModifyRestSiteOptions(Player player, ICollection<RestSiteOption> options)
     {
         if (player != Owner) return false;
+        if (player.GetRelic<CooledFurnace>() != null) return false; // 식은 용광로: no 마검 강화 at rest sites
         options.Add(new SwordForgeRestSiteOption(player));
         return true;
     }

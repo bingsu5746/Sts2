@@ -88,7 +88,11 @@ public static class SwordCombat
         if (relic == null) return 0;
         var level = relic.GetLevel(sword);
         if (!relic.Owns(sword)) return level;
-        var bonus = Get(player)?.GetCounter(SwordRegistry.GetDefinition(sword).LevelOwner, CombatLevelBonusKey) ?? 0;
+        var state = Get(player);
+        var bonus = state?.GetCounter(SwordRegistry.GetDefinition(sword).LevelOwner, CombatLevelBonusKey) ?? 0;
+        if (state != null)
+            foreach (var m in player.Relics.OfType<ISwordLevelModifier>())
+                bonus += m.CombatLevelBonus(player, sword);
         return bonus == 0 ? level : Math.Clamp(level + bonus, 0, SwordRegistry.MaxLevel);
     }
 
@@ -371,6 +375,15 @@ public static class SwordCombat
             list.AddRange(player.PlayerCombatState.AllCards.OfType<ISwordListener>());
         return list;
     }
+}
+
+/// <summary>
+/// Implement on a relic to add a temporary level bonus to a sword during combat (마음의 칼집). Read by
+/// <see cref="SwordCombat.LevelOf"/> only while a combat state exists; keep it pure (called for previews).
+/// </summary>
+public interface ISwordLevelModifier
+{
+    int CombatLevelBonus(Player player, SwordId sword);
 }
 
 /// <summary>
