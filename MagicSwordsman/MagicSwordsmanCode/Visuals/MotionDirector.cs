@@ -99,6 +99,9 @@ public static class MotionDirector
     {
         if (anim.HasMeta(HookMeta) || !anim.HasAnimation("idle")) return;
         anim.SetMeta(HookMeta, true);
+        // every switch between clips is cross-faded a little (it used to snap, e.g. when an idle fidget started mid
+        // breath — bug report 2026-10-09); idle <-> fidget gets a longer, invisible blend below
+        anim.PlaybackDefaultBlendTime = 0.15;
 
         anim.AnimationStarted += name =>
         {
@@ -114,7 +117,7 @@ public static class MotionDirector
         anim.AnimationFinished += name =>
         {
             if (!GodotObject.IsInstanceValid(anim) || name.ToString().StartsWith("Dead")) return;
-            if (name != "idle") anim.Play("idle");
+            if (name != "idle") anim.Play("idle", name.ToString().StartsWith("Idle_") ? 0.6 : 0.25);
         };
 
         var timer = new Godot.Timer { WaitTime = 6.5, Autostart = true, Name = "MotionFidget" };
@@ -123,7 +126,7 @@ public static class MotionDirector
             timer.WaitTime = 5.5 + Rng.NextDouble() * 5;
             if (!GodotObject.IsInstanceValid(anim) || anim.CurrentAnimation != "idle") return;
             var fidget = Pick(Fidgets);
-            if (anim.HasAnimation(fidget)) anim.Play(fidget);
+            if (anim.HasAnimation(fidget)) anim.Play(fidget, 0.6);
         };
         anim.AddChild(timer);
     }

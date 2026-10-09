@@ -25,6 +25,10 @@ public static class SwordVisuals
     {
         public required Node2D Root;
         public readonly Dictionary<SwordId, Node2D> Swords = new();
+        /// <summary>Where each sword rests (set by Layout): strikes start from here, never from the summon point.</summary>
+        public readonly Dictionary<SwordId, Vector2> Slots = new();
+        /// <summary>The running layout tween of each sword (killed when a strike takes over the sword).</summary>
+        public readonly Dictionary<SwordId, Tween> Moves = new();
         public SwordId? Current;
     }
 
@@ -74,8 +78,8 @@ public static class SwordVisuals
             if (!anim.HasAnimation(clip) && clip.Contains('_')) clip = clip[..clip.IndexOf('_')];
             if (!anim.HasAnimation(clip)) return;
             if (onlyIfIdle && anim.IsPlaying() && anim.CurrentAnimation != "idle") return;
-            anim.Stop();
-            anim.Play(clip);
+            if (anim.CurrentAnimation == clip) anim.Stop(); // restart the same clip; otherwise cross-fade into it
+            anim.Play(clip, 0.12);
         }
         catch (Exception e)
         {
@@ -145,7 +149,10 @@ public static class SwordVisuals
         {
             var isCurrent = rig.Current == sword;
             var pos = isCurrent ? CurrentPos : IdleSlots[slot++ % IdleSlots.Length];
+            rig.Slots[sword] = pos;
+            if (rig.Moves.TryGetValue(sword, out var old) && GodotObject.IsInstanceValid(old)) old.Kill();
             var t = node.CreateTween().SetParallel();
+            rig.Moves[sword] = t;
             t.TweenProperty(node, "position", pos, 0.35).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
             t.TweenProperty(node, "scale", isCurrent ? new Vector2(1.15f, 1.15f) : new Vector2(0.8f, 0.8f), 0.3);
             t.TweenProperty(node, "rotation", 0f, 0.3);
@@ -293,18 +300,24 @@ public static class SwordVisuals
         {
             var rig = GetRig(player, create: false);
             if (rig == null || rig.Swords.Count == 0) return;
-            var node = rig.Current is { } c && rig.Swords.TryGetValue(c, out var cur) ? cur : rig.Swords.Values.First();
+            var sword = rig.Current is { } c && rig.Swords.ContainsKey(c) ? c : rig.Swords.Keys.First();
+            var node = rig.Swords[sword];
             var now = Time.GetTicksMsec();
             if (LastStrike.TryGetValue(node, out var t0) && now - t0 < 420) return;
             LastStrike[node] = now;
-
             var room = NCombatRoom.Instance;
             var targetNode = target != null ? room?.GetCreatureNode(target) : null;
             Vector2 aim;
             if (targetNode != null) aim = rig.Root.ToLocal(targetNode.GlobalPosition + new Vector2(0, -130));
             else aim = node.Position + new Vector2(520, 40); // no single target: thrust toward the enemy side
 
-            var home = node.Position;
+            // a sword summoned by this very card is still flying out of Ensifer: put it on its slot first so the strike
+            // starts from there (bug report 2026-10-09: it looked like a swing from his hand)
+            if (!rig.Slots.TryGetValue(sword, out var home)) home = node.Position;
+            if (rig.Moves.TryGetValue(sword, out var move) && GodotObject.IsInstanceValid(move)) move.Kill();
+            node.Position = home;
+            node.Scale = Vector2.One * 1.15f;
+            node.Modulate = Colors.White;
             var dir = aim - home;
             var angle = Mathf.Atan2(dir.Y, dir.X) + Mathf.Pi / 2; // art points up
             // stop a little short so the blade tip, not the hilt, meets the target
