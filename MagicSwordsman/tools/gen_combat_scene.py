@@ -94,6 +94,10 @@ c.fx('Visuals/Rig/Sigil',0.8,0.9,(1,1,1)); M.append(c)
 c=Clip('Idle_Weave',2.6); rest(c,0); c.pose(0.5,ul=0.25,fl=0.9,ur=-0.15,fr=-0.7,head=0.08); c.hand('L',0.5,0.55,0.8)
 c.pose(1.1,ul=0.3,fl=1.0,ur=-0.2,fr=-0.95); c.hand('L',1.1,0.55,0.9)
 c.pose(1.7,ul=0.25,fl=0.85,ur=-0.12,fr=-0.6); c.hand('L',1.9,0.55,0.0); rest(c,2.6); M.append(c)
+c=Clip('Idle_Shift',2.4); rest(c,0); c.pose(0.8,x=-6,rot=-0.015,head=0.04,cl=0.02); c.pose(1.6,x=-5,rot=-0.012); rest(c,2.4); M.append(c)   # weight shift
+c=Clip('Idle_Glance',2.6); rest(c,0); c.pose(0.6,head=-0.16,y=-2); c.pose(1.5,head=-0.14); c.pose(1.9,head=0.02); rest(c,2.6); M.append(c)  # looks up at his swords
+c=Clip('Idle_Wrist',2.2); rest(c,0); c.pose(0.5,fr=-0.3,ur=-0.05); c.pose(0.9,fr=-0.15); c.pose(1.3,fr=-0.3); rest(c,2.2)
+c.hand('R',0.5,0.3,0.0); c.hand('R',0.9,0.35,0.5); c.hand('R',1.5,0.35,0.0); M.append(c)         # turns the wrist, a faint circle
 c=Clip('Idle_Breath',3.0); rest(c,0); c.pose(1.2,y=-8,sy=1.03,ul=0.07,ur=-0.07,head=-0.04,cl=0.03,cr=-0.03); rest(c,3.0); M.append(c)
 
 # ---------------------------------------------------------------- attacks
@@ -142,9 +146,15 @@ STYLE={'Gram':dict(wind=(-2.0,-0.5),strike=(-0.5,-0.1),heavy=True,dur=0.75,slash
 for sw,st in STYLE.items(): M.append(attack('Attack_'+sw,SWORD_COL[sw],**st))
 
 # ---------------------------------------------------------------- skills / powers
+ARM=0.6  # arm angles of gestures are scaled down: big two-arm raises read as unnatural (feedback 2026-10-09)
 def cast(name,dur,peak,col=PURPLE,circle=0.75,sigil=1.0,y=-12,glow=(1.3,1.18,1.55)):
+    """A casting gesture: upper arms lead, forearms follow ~0.06 s later (follow-through), a small lean forward."""
     c=Clip(name,dur); rest(c,0); t=dur*0.35
-    c.pose(t,y=y,tint=glow,**peak); c.pose(dur*0.6,y=y*0.6,**{k:v*0.8 for k,v in peak.items()})
+    upper={k:(v*ARM if k in ('ul','ur') else v) for k,v in peak.items() if k not in ('fl','fr')}
+    fore={k:v*ARM for k,v in peak.items() if k in ('fl','fr')}
+    c.pose(t*0.85,y=y*0.8,x=4,tint=glow,**upper)
+    if fore: c.pose(t*0.85,**{k:v*0.4 for k,v in fore.items()}); c.pose(min(dur*0.55,t+0.06),**fore)
+    c.pose(dur*0.62,y=y*0.5,x=2,**{k:v*0.75 for k,v in {**upper,**fore}.items()})
     hs=0.55+0.25*max(circle,0.4); c.hand('LR',t*0.6,hs*0.85,0.85,col); c.hand('LR',t,hs,1.0,col); c.hand('LR',dur*0.85,hs,0.0,col)
     c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1)).fx('Visuals/Rig/Sigil',t,sigil,(1,1,1)).fx('Visuals/Rig/Sigil',dur,0.4,(1,1,1))
     if circle: c.fx('Circle',0,0,col,scale=(circle*0.75,circle*0.26)).fx('Circle',t*0.6,0.8,col).fx('Circle',dur,0,col,scale=(circle*0.75,circle*0.26))
@@ -162,12 +172,25 @@ M.append(cast('Power_Focus',0.95,dict(ul=0.3,fl=1.5,ur=-0.3,fr=-1.5,head=0.2),ci
 M.append(cast('Power_Burst',0.9,dict(ul=0.8,ur=-0.8,cl=0.08,cr=-0.08,head=-0.05),circle=1.2,sigil=1.8,y=-16,glow=(1.7,1.4,2.1)))
 M.append(cast('Heal',0.9,dict(ul=0.5,fl=1.0,ur=-0.5,fr=-1.0,head=0.1),col=(0.5,1.0,0.6),circle=0.7,glow=(1.1,1.4,1.1)))
 M.append(cast('Buff',0.7,dict(ur=-0.3,fr=-1.4,head=-0.05),col=(1.0,0.85,0.4),circle=0.6,glow=(1.4,1.3,1.0)))
+M.append(cast('Cast_Flick',0.45,dict(ur=-0.4,fr=-1.2,head=0.05),circle=0,sigil=0.8,y=-3))           # a flick of the wrist
+M.append(cast('Cast_Gather',0.7,dict(ul=-0.2,fl=1.0,ur=0.2,fr=-1.0,head=0.12),circle=0.5,sigil=1.5,y=-4))  # hands draw in to the chest
+M.append(cast('Cast_Push',0.6,dict(ur=-1.1,fr=0.2,head=0.05,cr=-0.04),circle=0.5,y=-2))             # pushes the palm forward
+M.append(cast('Cast_Point2',0.5,dict(ur=-1.0,fr=-0.3,head=0.08),circle=0,sigil=0.9,y=-2))          # two fingers point
+c=Clip('Cast_Beckon',0.7); rest(c,0)                                                                # palm up, fingers curl in
+c.pose(0.18,x=3,ur=-0.35,fr=-0.6,head=-0.05); c.pose(0.32,fr=-0.95); c.pose(0.44,fr=-0.7); c.pose(0.54,fr=-0.95)
+c.hand('R',0.18,0.45,0.8); c.hand('R',0.54,0.6,1.0); c.hand('R',0.7,0.6,0.0); rest(c,0.7); M.append(c)
+c=Clip('Cast_Trace',0.9); rest(c,0)                                                                 # traces a circle in the air
+for k,tt in enumerate((0.15,0.3,0.45,0.6,0.75)):
+    a=k*1.4; c.pose(tt,x=3,ur=-0.45+0.15*math.cos(a),fr=-0.6+0.25*math.sin(a),head=0.04)
+c.hand('R',0.15,0.3,0.6); c.hand('R',0.75,0.7,1.0); c.hand('R',0.9,0.7,0.0); rest(c,0.9); M.append(c)
 
 # ---------------------------------------------------------------- summons (one per sword) / swaps
 for sw,col in SWORD_COL.items():
     c=Clip('Summon_'+sw,0.95); rest(c,0)
-    c.pose(0.3,y=-20,ul=0.6,ur=-0.6,fl=0.15,fr=-0.15,cl=0.05,cr=-0.05,head=-0.1,tint=(1.45,1.22,1.85))
-    c.pose(0.6,y=-16,ul=0.55,ur=-0.55,head=-0.06)
+    # one hand calls the sword out of the air, palm up; the other stays low (no two-arm raise)
+    c.pose(0.22,y=-8,x=4,ur=-0.45,fr=-0.35,ul=0.12,head=-0.08,cr=-0.03,tint=(1.35,1.18,1.7))
+    c.pose(0.32,fr=-0.7)
+    c.pose(0.6,y=-6,ur=-0.4,fr=-0.6,ul=0.1,head=-0.05)
     c.hand('LR',0.15,0.6,0.9,col); c.hand('LR',0.3,0.85,1.0,col); c.hand('LR',0.6,0.85,1.0,col); c.hand('LR',0.9,0.85,0.0,col)
     c.fx('Circle',0,0,col,scale=(0.8,0.27)).fx('Circle',0.2,0.9,col).fx('Circle',0.95,0,col,scale=(0.8,0.27))
     c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1),scale=(1,1)).fx('Visuals/Rig/Sigil',0.3,1,col,scale=(1.5,1.5)).fx('Visuals/Rig/Sigil',0.95,0.4,(1,1,1),scale=(1,1))
@@ -183,10 +206,10 @@ def block(name,peak,dur=0.55,back=-10,shield=0.55):
     c.fx('Shield',0,0,(1,1,1),scale=(0.55,0.55)).fx('Shield',0.1,shield,(1,1,1),scale=(0.7,0.7)).fx('Shield',dur,0,(1,1,1),scale=(0.74,0.74))
     rest(c,dur); return c
 M.append(block('Block',dict(ur=-0.55,ul=0.2,cl=0.05,cr=0.05)))
-M.append(block('Block_Cross',dict(ur=-0.3,fr=-1.3,ul=0.3,fl=1.3,head=0.08),shield=0.65))
+M.append(block('Block_Cross',dict(ur=-0.25,fr=-0.8,ul=0.25,fl=0.8,head=0.08),shield=0.65))
 M.append(block('Block_Brace',dict(ur=-0.2,ul=0.2,head=0.1,sy=0.97,y=6),back=-16))
-M.append(block('Block_Palm',dict(ur=-1.35,fr=-0.2),shield=0.7))
-M.append(block('Block_Big',dict(ul=0.7,ur=-0.7,fl=0.4,fr=-0.4,cl=0.06,cr=-0.06),dur=0.7,shield=0.85))
+M.append(block('Block_Palm',dict(ur=-0.85,fr=-0.25),shield=0.7))
+M.append(block('Block_Big',dict(ul=0.4,ur=-0.45,fl=0.3,fr=-0.35,cl=0.05,cr=-0.05,sy=0.98),dur=0.7,shield=0.85))
 def hit(name,dur,back,spin,arms,red=(1.8,0.75,0.75)):
     c=Clip(name,dur); rest(c,0)
     c.pose(0.06,x=back,rot=spin,tint=red,**arms); c.pose(0.12,x=back*0.65,rot=spin*0.5); c.pose(0.18,x=back*0.9,rot=spin*0.8,tint=(1.2,1,1))
@@ -227,7 +250,7 @@ c.pose(1.62,x=44,y=126,rot=1.47)
 c.pose(1.9,x=44,y=128,rot=1.5,head=0.12,ul=0.22,ur=-0.3,tint=DEAD_TINT)
 c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1)).fx('Visuals/Rig/Sigil',0.6,0,(1,1,1))
 M.append(c)
-c=Clip('Victory',1.4); rest(c,0); c.pose(0.4,y=-10,ur=-2.3,fr=-0.2,head=-0.1,cl=0.04,cr=-0.04); c.pose(1.0,y=-8,ur=-2.2,fr=-0.25)
+c=Clip('Victory',1.4); rest(c,0); c.pose(0.4,y=-8,ur=-1.2,fr=-0.7,head=-0.12,cl=0.03,cr=-0.03); c.pose(1.0,y=-6,ur=-1.1,fr=-0.65,head=-0.08)
 c.fx('Visuals/Rig/Sigil',0.4,1,(1,1,1),scale=(1.4,1.4)); c.hand('R',0.4,0.9,1.0); c.hand('R',1.2,0.9,0.0); rest(c,1.4); M.append(c)
 c=Clip('TurnStart',0.6); rest(c,0); c.pose(0.25,y=-6,head=-0.05,ul=0.1,ur=-0.1); c.hand('LR',0.25,0.55,0.8); c.hand('LR',0.55,0.55,0.0); rest(c,0.6); M.append(c)
 

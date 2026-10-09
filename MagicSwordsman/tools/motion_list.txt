@@ -2,6 +2,9 @@ idle	3.0s
 Idle_Look	2.4s
 Idle_Flex	2.2s
 Idle_Weave	2.6s
+Idle_Shift	2.4s
+Idle_Glance	2.6s
+Idle_Wrist	2.2s
 Idle_Breath	3.0s
 Attack	0.6s
 Attack_Thrust	0.6s
@@ -37,6 +40,12 @@ Power_Focus	0.95s
 Power_Burst	0.9s
 Heal	0.9s
 Buff	0.7s
+Cast_Flick	0.45s
+Cast_Gather	0.7s
+Cast_Push	0.6s
+Cast_Point2	0.5s
+Cast_Beckon	0.7s
+Cast_Trace	0.9s
 Summon_Gram	0.95s
 Summon_Ganjiang	0.95s
 Summon_Moye	0.95s
