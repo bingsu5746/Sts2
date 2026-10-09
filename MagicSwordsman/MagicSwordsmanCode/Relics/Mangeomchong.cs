@@ -227,6 +227,8 @@ public class Mangeomchong : MagicSwordsmanRelic
         Flash();
         // First acquisition in the run: a short "new sword" card (presentation only, local player only).
         if (firstTime.Values.Any(f => f) && LocalContext.IsMe(Owner)) SwordAcquiredPopup.Show(sword);
+        // 【조합】 cards this sword completes: "새 조합이 열렸다" (shown after the sword popup closes; presentation only)
+        if (LocalContext.IsMe(Owner)) UnionUnlockedPopup.Show(this, group);
         MainFile.Logger.Info($"[Mangeomchong] acquired {string.Join(",", group)}");
         return true;
     }
@@ -401,8 +403,12 @@ public class Mangeomchong : MagicSwordsmanRelic
     // Run hooks: rewards / shop / rest site
     // =====================================================================================
 
-    /// <summary>Common cards (Sword == null) and cards of owned swords; other pools untouched.</summary>
-    public bool IsCardAllowed(CardModel card) => card is not MagicSwordCard { Sword: { } s } || Owns(s);
+    /// <summary>
+    /// Common cards (Sword == null) and cards of owned swords; other pools untouched. 【조합】 cards also need their
+    /// second sword (Cards/Union/UnionCard.cs).
+    /// </summary>
+    public bool IsCardAllowed(CardModel card) =>
+        (card is not MagicSwordCard { Sword: { } s } || Owns(s)) && Cards.Union.UnionCatalog.IsAllowed(this, card);
 
     public override async Task AfterObtained()
     {

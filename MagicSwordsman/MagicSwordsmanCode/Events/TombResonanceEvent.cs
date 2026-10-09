@@ -103,7 +103,8 @@ public sealed class TombResonanceEvent : CustomEventModel
                 var s = sword;
                 var option = new EventOption(this, () => ChooseSword(s), SwordLore.Name(s),
                     SwordEventHelper.OptionDescription(s), $"{PageKey(StartPage)}.options.SWORD_{SwordLore.SwordKey(s)}",
-                    [HoverTipFactory.FromCard(SwordTokenCard.CanonicalFor(s))]);
+                    // + the 【조합】 cards this sword would complete with the swords already owned (discovery)
+                    [HoverTipFactory.FromCard(SwordTokenCard.CanonicalFor(s)), ..Cards.Union.UnionCatalog.TipsIfAcquired(tomb, s)]);
                 options.Add(option);
             }
         }

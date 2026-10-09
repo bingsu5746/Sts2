@@ -1,0 +1,5 @@
+{
+  "MAGICSWORDSMAN-UNION_RELIC_GRACE_POWER.title": "성유물의 가호",
+  "MAGICSWORDSMAN-UNION_RELIC_GRACE_POWER.description": "다음 내 턴까지 적의 공격 피해가 타격마다 줄어듭니다. [gold]뒤랑달[/gold] 효과가 켜져 있는 동안에는 겹치지 않습니다.",
+  "MAGICSWORDSMAN-UNION_RELIC_GRACE_POWER.smartDescription": "다음 내 턴까지 적의 공격 피해가 타격마다 {Amount} 줄어듭니다. [gold]뒤랑달[/gold] 효과가 켜져 있는 동안에는 겹치지 않습니다."
+}

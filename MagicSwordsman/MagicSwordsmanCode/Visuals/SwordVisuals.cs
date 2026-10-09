@@ -19,7 +19,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Visuals;
 /// (blade pointing up) to replace the drawn placeholder shapes. TODO(art): real art, VFX on summon.
 /// UNVERIFIED in game: node offsets relative to the creature node, z-ordering against the creature body.
 /// </summary>
-public static class SwordVisuals
+public static partial class SwordVisuals
 {
     private sealed class Rig
     {
@@ -525,6 +525,7 @@ public static class SwordVisuals
         {
             var level = SwordCombat.LevelOf(player, sword);
             var desc = $"{Text(Events.SwordLore.StageName(sword, level))} ({level})\n{Text(Events.SwordLore.Line(sword, "EFFECT"))}";
+            desc += Cards.Union.UnionCatalog.SwordTipLine(player, sword); // 【조합】 cards of this sword
             MegaCrit.Sts2.Core.Nodes.HoverTips.NHoverTipSet.CreateAndShow(owner,
                 new MegaCrit.Sts2.Core.HoverTips.HoverTip(Events.SwordLore.Name(sword), desc));
         }
@@ -564,6 +565,7 @@ public static class SwordVisuals
             if (rig == null || rig.Swords.Count == 0) return;
             var sword = rig.Current is { } c && rig.Swords.ContainsKey(c) ? c : rig.Swords.Keys.First();
             var node = rig.Swords[sword];
+            if (IsUnionBusy(node)) return; // a 【조합】 choreography is moving it (SwordVisuals.Union.cs)
             var now = Time.GetTicksMsec();
             if (LastStrike.TryGetValue(node, out var t0) && now - t0 < 420) return;
             LastStrike[node] = now;
