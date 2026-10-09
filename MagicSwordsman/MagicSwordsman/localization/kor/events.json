@@ -971,5 +971,6 @@
   "MAGICSWORDSMAN-THREE_HILLS_EVENT.pages.INITIAL.options.WITHDRAW.description": "덱에서 카드 1장을 [gold]변화[/gold]시킨다.",
   "MAGICSWORDSMAN-THREE_HILLS_EVENT.pages.HILLS.description": "칼날이 하늘에 닿을 듯 길어지고, 언덕 꼭대기가 무너져 내린다. 끝내 치지 못한 왕의 방패가 눈앞에 아른거린다.\n[gold]{Sword}[/gold] — {NewLevel}단계, {Stage}.",
   "MAGICSWORDSMAN-THREE_HILLS_EVENT.pages.OCHAIN.description": "방패가 비명을 지르자 사방의 방패가 따라 운다. 귀가 먹먹하다. 그 소리를 칼에 담아 둔다.",
-  "MAGICSWORDSMAN-THREE_HILLS_EVENT.pages.WITHDRAW.description": "칼을 거두고 전장을 등진다. 등 뒤에서 싸움의 흐름이 뒤바뀐다."
+  "MAGICSWORDSMAN-THREE_HILLS_EVENT.pages.WITHDRAW.description": "칼을 거두고 전장을 등진다. 등 뒤에서 싸움의 흐름이 뒤바뀐다.",
+  "MAGICSWORDSMAN-SWORD_LORE.POPUP_HEADER_FIRST": "이번 길에 만검총에서 가장 먼저 깨어난 마검"
 }

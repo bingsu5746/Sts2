@@ -483,5 +483,7 @@
   "MAGICSWORDSMAN-UNION_HIDDEN_BLADES.title": "숨긴 칼",
   "MAGICSWORDSMAN-UNION_HIDDEN_BLADES.description": "[purple]조합[/purple] {SwordA} + {SwordB}\n[gold]방어도[/gold]를 {Block:diff()} 얻습니다.\n보존된 채 턴을 넘길 때마다 이번 전투 동안 이 카드의 방어도 +{RetainBonus}.\n[gold]짝[/gold]을 발동시키고, 다음 간장·막야 카드도 [gold]짝[/gold]이 발동합니다.\n두 검 단계 합 {UnionLevel} (2마다 방어도 +1).",
   "MAGICSWORDSMAN-UNION_WILDFIRE_BLADE.title": "들불의 칼날",
-  "MAGICSWORDSMAN-UNION_WILDFIRE_BLADE.description": "[purple]조합[/purple] {SwordA} + {SwordB}\n손의 상태이상·저주 카드를 모두 [gold]소멸[/gold]시킵니다.\n무작위 적에게 피해를 {Damage:diff()}만큼 {Hits}번(1 + 소멸시킨 장수) 줍니다.\n두 검 단계 합 {UnionLevel} (2마다 피해 +1)."
+  "MAGICSWORDSMAN-UNION_WILDFIRE_BLADE.description": "[purple]조합[/purple] {SwordA} + {SwordB}\n손의 상태이상·저주 카드를 모두 [gold]소멸[/gold]시킵니다.\n무작위 적에게 피해를 {Damage:diff()}만큼 {Hits}번(1 + 소멸시킨 장수) 줍니다.\n두 검 단계 합 {UnionLevel} (2마다 피해 +1).",
+  "MAGICSWORDSMAN-GRAM_KEPT_SHARDS.title": "간직한 조각",
+  "MAGICSWORDSMAN-GRAM_KEPT_SHARDS.description": "[gold]방어도[/gold]를 {Block:diff()} 얻습니다.\n[gold]연속[/gold]: 카드를 {Cards:diff()}장 뽑습니다.\n[gold]그람[/gold] {SwordLevel}단계 (단계마다 방어도 +1)."
 }

@@ -483,5 +483,7 @@
   "MAGICSWORDSMAN-UNION_HIDDEN_BLADES.title": "Hidden Blades",
   "MAGICSWORDSMAN-UNION_HIDDEN_BLADES.description": "[purple]Union[/purple] {SwordA} + {SwordB}\nGain {Block:diff()} [gold]Block[/gold].\nEach time this is retained over a turn, +{RetainBonus} Block this combat.\nTriggers [gold]Pair[/gold], and the next Ganjiang & Moye card triggers [gold]Pair[/gold] too.\nCombined level {UnionLevel} (+1 Block every 2).",
   "MAGICSWORDSMAN-UNION_WILDFIRE_BLADE.title": "Wildfire Blade",
-  "MAGICSWORDSMAN-UNION_WILDFIRE_BLADE.description": "[purple]Union[/purple] {SwordA} + {SwordB}\n[gold]Exhaust[/gold] every Status and Curse in your hand.\nDeal {Damage:diff()} damage to a random enemy {Hits} times (1 + cards exhausted).\nCombined level {UnionLevel} (+1 damage every 2)."
+  "MAGICSWORDSMAN-UNION_WILDFIRE_BLADE.description": "[purple]Union[/purple] {SwordA} + {SwordB}\n[gold]Exhaust[/gold] every Status and Curse in your hand.\nDeal {Damage:diff()} damage to a random enemy {Hits} times (1 + cards exhausted).\nCombined level {UnionLevel} (+1 damage every 2).",
+  "MAGICSWORDSMAN-GRAM_KEPT_SHARDS.title": "Kept Shards",
+  "MAGICSWORDSMAN-GRAM_KEPT_SHARDS.description": "Gain {Block:diff()} [gold]Block[/gold].\n[gold]Combo[/gold]: Draw {Cards:diff()} {Cards:plural:card|cards}.\n[gold]Gram[/gold] level {SwordLevel} (+1 Block per level)."
 }

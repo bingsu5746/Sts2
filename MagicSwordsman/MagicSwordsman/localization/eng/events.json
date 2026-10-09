@@ -971,5 +971,6 @@
   "MAGICSWORDSMAN-THREE_HILLS_EVENT.pages.INITIAL.options.WITHDRAW.description": "[gold]Transform[/gold] a card in your deck.",
   "MAGICSWORDSMAN-THREE_HILLS_EVENT.pages.HILLS.description": "The blade grows as if to touch the sky, and the hilltops fall away. The shield of the king you never struck still floats before your eyes.\n[gold]{Sword}[/gold] — level {NewLevel}, {Stage}.",
   "MAGICSWORDSMAN-THREE_HILLS_EVENT.pages.OCHAIN.description": "The shield screams, and every shield around it answers. Your ears ring. You keep that sound in the blade.",
-  "MAGICSWORDSMAN-THREE_HILLS_EVENT.pages.WITHDRAW.description": "You sheathe your sword and turn from the field. Behind you, the tide of battle turns."
+  "MAGICSWORDSMAN-THREE_HILLS_EVENT.pages.WITHDRAW.description": "You sheathe your sword and turn from the field. Behind you, the tide of battle turns.",
+  "MAGICSWORDSMAN-SWORD_LORE.POPUP_HEADER_FIRST": "The first blade to wake in the tomb for this journey"
 }
