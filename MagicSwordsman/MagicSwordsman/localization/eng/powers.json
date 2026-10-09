@@ -100,7 +100,7 @@
   "MAGICSWORDSMAN-SOLAIS_FOUR_TREASURES_POWER.smartDescription": "When you end your turn with [gold]Claíomh Solais[/gold] current, charge {Amount} more [gold]Light[/gold]. From level 3, also gain [gold]Block[/gold].",
   "MAGICSWORDSMAN-SOLAIS_SILVER_ARM_POWER.title": "Silver Arm",
   "MAGICSWORDSMAN-SOLAIS_SILVER_ARM_POWER.description": "When [gold]Light[/gold] fades as a cost, gain [gold]Block[/gold] per Light. Whenever you [gold]Draw-cut[/gold], draw cards.",
-  "MAGICSWORDSMAN-SOLAIS_SILVER_ARM_POWER.smartDescription": "When [gold]Light[/gold] fades as a cost, gain 4 (5 from level 3) x{Amount} [gold]Block[/gold] per Light. Whenever you [gold]Draw-cut[/gold], draw 2 x{Amount} cards.",
+  "MAGICSWORDSMAN-SOLAIS_SILVER_ARM_POWER.smartDescription": "When [gold]Light[/gold] fades as a cost, gain 4 (5 from level 3) x{Amount} [gold]Block[/gold] per Light. Whenever you [gold]Draw-cut[/gold], draw {Amount} card(s).",
   "MAGICSWORDSMAN-SOLAIS_MAG_TUIRED_POWER.title": "Mag Tuired",
   "MAGICSWORDSMAN-SOLAIS_MAG_TUIRED_POWER.description": "Gain less energy next turn.",
   "MAGICSWORDSMAN-SOLAIS_MAG_TUIRED_POWER.smartDescription": "Gain {Amount} less energy next turn.",

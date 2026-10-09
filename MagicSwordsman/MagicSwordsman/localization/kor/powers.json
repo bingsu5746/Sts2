@@ -100,7 +100,7 @@
   "MAGICSWORDSMAN-SOLAIS_FOUR_TREASURES_POWER.smartDescription": "[gold]클라이브 솔라시[/gold]가 현재 검인 채 턴을 마칠 때 [gold]빛[/gold]을 {Amount} 더 충전합니다. 3단계부터 [gold]방어도[/gold]도 얻습니다.",
   "MAGICSWORDSMAN-SOLAIS_SILVER_ARM_POWER.title": "은팔",
   "MAGICSWORDSMAN-SOLAIS_SILVER_ARM_POWER.description": "[gold]빛[/gold]이 대가로 사라질 때 빛 1당 [gold]방어도[/gold]를 얻습니다. [gold]발도[/gold]할 때마다 카드를 뽑습니다.",
-  "MAGICSWORDSMAN-SOLAIS_SILVER_ARM_POWER.smartDescription": "[gold]빛[/gold]이 대가로 사라질 때 빛 1당 [gold]방어도[/gold]를 4(3단계부터 5)×{Amount} 얻습니다. [gold]발도[/gold]할 때마다 카드를 2×{Amount}장 뽑습니다.",
+  "MAGICSWORDSMAN-SOLAIS_SILVER_ARM_POWER.smartDescription": "[gold]빛[/gold]이 대가로 사라질 때 빛 1당 [gold]방어도[/gold]를 4(3단계부터 5)×{Amount} 얻습니다. [gold]발도[/gold]할 때마다 카드를 {Amount}장 뽑습니다.",
   "MAGICSWORDSMAN-SOLAIS_MAG_TUIRED_POWER.title": "마그 투이레드",
   "MAGICSWORDSMAN-SOLAIS_MAG_TUIRED_POWER.description": "다음 턴에 에너지를 적게 받습니다.",
   "MAGICSWORDSMAN-SOLAIS_MAG_TUIRED_POWER.smartDescription": "다음 턴에 에너지를 {Amount} 적게 받습니다.",

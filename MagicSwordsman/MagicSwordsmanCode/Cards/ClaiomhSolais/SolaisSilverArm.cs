@@ -13,7 +13,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.ClaiomhSolais;
 
 /// <summary>
 /// 은팔의 누아다 (Rare power): when Light is lost as Claíomh Solais' cost, gain 4 Block per Light (5 from level 3).
-/// Whenever you 【발도】, draw 2 cards. Source: 「투아하 데 다난의 첫 왕 은팔의 누아다」.
+/// Whenever you 【발도】, draw 1 card (balance 2026-10-09, was 2). Source: 「투아하 데 다난의 첫 왕 은팔의 누아다」.
 /// </summary>
 public sealed class SolaisSilverArm : SolaisCard
 {

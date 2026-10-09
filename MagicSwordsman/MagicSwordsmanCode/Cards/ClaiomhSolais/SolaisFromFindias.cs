@@ -12,7 +12,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace MagicSwordsman.MagicSwordsmanCode.Cards.ClaiomhSolais;
 
 /// <summary>
-/// 핀디아스에서 온 검 (Common): draw 2 cards; if you have Light, draw 1 more. Cost 0 from level 3.
+/// 핀디아스에서 온 검 (Common): draw 2 cards; if you have Light, draw 1 more. Cost 0 from level 5 (balance 2026-10-09, was level 3).
 /// Source: 「네 가지 보물 중 하나로, 북방 도시 핀디아스에서 가져왔다」.
 /// </summary>
 public sealed class SolaisFromFindias : SolaisCard
@@ -24,7 +24,7 @@ public sealed class SolaisFromFindias : SolaisCard
         WithTip(typeof(SolaisLightPower));
     }
 
-    protected override int? CostAtLevel(int level) => level >= 3 ? 0 : null;
+    protected override int? CostAtLevel(int level) => level >= 5 ? 0 : null;
 
     protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {

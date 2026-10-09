@@ -49,14 +49,14 @@ public sealed class SolaisFourTreasuresPower : MagicSwordsmanPower
 
 /// <summary>
 /// 은팔의 누아다 (SolaisSilverArm): when Light is lost as Claíomh Solais' cost, gain 4 Block per Light lost (5 from
-/// level 3); whenever you 【발도】, draw 2 cards. Amount = number of copies played (multiplies both).
+/// level 3); whenever you 【발도】, draw 1 card. Amount = number of copies played (multiplies both).
 /// </summary>
 public sealed class SolaisSilverArmPower : MagicSwordsmanPower
 {
     public const int BlockPerLight = 4;
     public const int BlockPerLightHigh = 5;
     public const int HighFromLevel = 3;
-    public const int DrawPerDrawCut = 2;
+    public const int DrawPerDrawCut = 1; // balance 2026-10-09: was 2
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;

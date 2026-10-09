@@ -58,7 +58,7 @@ public sealed class GramSigmundAvenged : GramCard
 }
 
 /// <summary>
-/// 파프니르의 심장 — Gram, Power, Uncommon, cost 1 (0 from Gram level 3), self. This combat, if Gram is the current
+/// 파프니르의 심장 — Gram, Power, Uncommon, cost 1 (0 from Gram level 5; balance 2026-10-09, was level 3), self. This combat, if Gram is the current
 /// sword when your turn starts, draw 1 more card (<see cref="GramFafnirsHeartPower"/>, MachineLearning pattern).
 /// Lore: tasting the blood of Fafnir's heart, Sigurd understood the speech of birds.
 /// </summary>
@@ -69,7 +69,7 @@ public sealed class GramFafnirsHeart : GramCard
         WithPower<GramFafnirsHeartPower>(1);
     }
 
-    public override int? CostAtLevel(int level) => level >= 3 ? 0 : null;
+    public override int? CostAtLevel(int level) => level >= 5 ? 0 : null;
 
     protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
