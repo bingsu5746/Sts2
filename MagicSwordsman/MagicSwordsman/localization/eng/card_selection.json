@@ -4,5 +4,7 @@
   "MAGICSWORDSMAN-CHOOSE_SWORD_TO_ACQUIRE": "Choose a sword to take",
   "MAGICSWORDSMAN-CHOOSE_SWORD_TO_RELEASE": "The tomb is full. Choose a sword to release",
   "MAGICSWORDSMAN-CHOOSE_SWORD_TO_SUMMON": "Choose a sword to summon",
-  "MAGICSWORDSMAN-CHOOSE_SWORD_TO_TEMPER": "Choose a sword to raise for this combat"
+  "MAGICSWORDSMAN-CHOOSE_SWORD_TO_TEMPER": "Choose a sword to raise for this combat",
+  "MAGICSWORDSMAN-SWORD_CARD_PICK_HEADER": "Learn one technique of {Sword}",
+  "MAGICSWORDSMAN-SWORD_CARD_PICK_SKIP": "Skip"
 }
