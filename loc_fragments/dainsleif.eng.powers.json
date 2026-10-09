@@ -1,0 +1,5 @@
+{
+  "MAGICSWORDSMAN-DAINSLEIF_DWARF_FORGED_POWER.title": "Dwarf-Forged",
+  "MAGICSWORDSMAN-DAINSLEIF_DWARF_FORGED_POWER.description": "Whenever [gold]Dainsleif[/gold] returns an Attack card to your draw pile, that card deals more damage this combat.",
+  "MAGICSWORDSMAN-DAINSLEIF_DWARF_FORGED_POWER.smartDescription": "Whenever [gold]Dainsleif[/gold] returns an Attack card to your draw pile, that card deals {Amount} more damage this combat."
+}
