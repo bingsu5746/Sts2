@@ -128,6 +128,18 @@ public static class SwordVisuals
             t.Chain().TweenCallback(Callable.From(node.QueueFree));
         }
 
+        // level changed mid-combat (Hone, Temper...) -> redraw that sword in place
+        foreach (var (sw, node) in rig.Swords.ToList())
+        {
+            if (!node.HasMeta("level") || (int)node.GetMeta("level") == SwordCombat.LevelOf(player, sw)) continue;
+            var fresh = CreateSword(sw, player);
+            rig.Root.AddChild(fresh);
+            fresh.Position = node.Position;
+            fresh.Scale = node.Scale;
+            node.QueueFree();
+            rig.Swords[sw] = fresh;
+        }
+
         // new swords -> fly out of the character
         foreach (var sword in state.Present.Where(s => !rig.Swords.ContainsKey(s)))
         {
@@ -219,12 +231,18 @@ public static class SwordVisuals
                     Modulate = new Color(AuraColor, 0.22f), Name = "Aura",
                 };
                 blade.AddChild(aura);
+                // stronger, larger aura the higher the sword's level (user request 2026-10-09)
+                var lv = Math.Clamp(SwordCombat.LevelOf(player, sword), 0, 5);
+                float lo = 0.08f + 0.05f * lv, hi = 0.18f + 0.07f * lv;
+                aura.Scale *= 1f + 0.03f * lv;
                 var breathe = aura.CreateTween().SetLoops();
-                breathe.TweenProperty(aura, "modulate:a", 0.38f, 1.8).SetTrans(Tween.TransitionType.Sine);
-                breathe.TweenProperty(aura, "modulate:a", 0.2f, 1.8).SetTrans(Tween.TransitionType.Sine);
+                breathe.TweenProperty(aura, "modulate:a", hi, lv >= 5 ? 0.9 : 1.8).SetTrans(Tween.TransitionType.Sine);
+                breathe.TweenProperty(aura, "modulate:a", lo, lv >= 5 ? 0.9 : 1.8).SetTrans(Tween.TransitionType.Sine);
             }
 
-            blade.AddChild(new Sprite2D { Texture = tex, TextureFilter = CanvasItem.TextureFilterEnum.Linear, Scale = new Vector2(scale, scale) });
+            var level = SwordCombat.LevelOf(player, sword);
+            holder.SetMeta("level", level);
+            AddBlade(blade, sword, level, tex, scale);
             size = new Vector2(tex.GetWidth(), tex.GetHeight()) * scale;
         }
         else
@@ -256,6 +274,49 @@ public static class SwordVisuals
         sway.TweenProperty(blade, "rotation", 0.05f, period * 1.3).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
         sway.TweenProperty(blade, "rotation", -0.05f, period * 1.3).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
         return holder;
+    }
+
+    /// <summary>
+    /// The blade itself, by level: dull and greyed at 0 brightening to full colour at 5, motes of light from level 3.
+    /// Gram at level 0 is "부서진 그람": drawn as two shards with a gap (its stage name; Odin broke it).
+    /// </summary>
+    private static void AddBlade(Node2D blade, SwordId sword, int level, Texture2D tex, float scale)
+    {
+        level = Math.Clamp(level, 0, 5);
+        var t = level / 5f;
+        var tint = new Color(0.62f + 0.38f * t, 0.6f + 0.4f * t, 0.66f + 0.34f * t);
+        if (sword == SwordId.Gram && level == 0)
+        {
+            int w = tex.GetWidth(), h = tex.GetHeight();
+            var top = new Sprite2D
+            {
+                Texture = tex, RegionEnabled = true, RegionRect = new Rect2(0, 0, w, h * 0.47f), Scale = new Vector2(scale, scale),
+                Position = new Vector2(10, -h * 0.29f * scale), Rotation = 0.22f, Modulate = tint, TextureFilter = CanvasItem.TextureFilterEnum.Linear,
+            };
+            var bottom = new Sprite2D
+            {
+                Texture = tex, RegionEnabled = true, RegionRect = new Rect2(0, h * 0.53f, w, h * 0.47f), Scale = new Vector2(scale, scale),
+                Position = new Vector2(0, h * 0.27f * scale), Modulate = tint, TextureFilter = CanvasItem.TextureFilterEnum.Linear,
+            };
+            blade.AddChild(bottom);
+            blade.AddChild(top);
+            return;
+        }
+
+        blade.AddChild(new Sprite2D { Texture = tex, TextureFilter = CanvasItem.TextureFilterEnum.Linear, Scale = new Vector2(scale, scale), Modulate = tint });
+        if (level < 3) return;
+        var motes = new CpuParticles2D
+        {
+            Amount = 4 + level * 3, Lifetime = 1.8, Preprocess = 1.8,
+            EmissionShape = CpuParticles2D.EmissionShapeEnum.Rectangle,
+            EmissionRectExtents = new Vector2(tex.GetWidth() * scale * 0.3f, tex.GetHeight() * scale * 0.45f),
+            Gravity = new Vector2(0, -18), InitialVelocityMin = 2, InitialVelocityMax = 10,
+            ScaleAmountMin = 0.035f, ScaleAmountMax = 0.07f, Color = ColorOf(sword).Lightened(0.3f),
+            Material = new CanvasItemMaterial { BlendMode = CanvasItemMaterial.BlendModeEnum.Add },
+        };
+        var core = $"{MainFile.ResPath}/images/vfx/hand_core.png";
+        if (ResourceLoader.Exists(core)) motes.Texture = GD.Load<Texture2D>(core);
+        blade.AddChild(motes);
     }
 
     private static void ShowTip(Control owner, SwordId sword, Player player)
