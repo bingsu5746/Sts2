@@ -1,0 +1,10 @@
+{
+  "MAGICSWORDSMAN-GRAM_BLADE_BETWEEN.title": "사이에 놓인 검",
+  "MAGICSWORDSMAN-GRAM_BLADE_BETWEEN.description": "[gold]방어도[/gold]를 {Block:diff()} 얻습니다.\n[gold]연속[/gold]: [gold]방어도[/gold]를 {ComboBlock} 더 얻습니다.\n[gold]그람[/gold] {SwordLevel}단계 (단계마다 방어도 +1).",
+  "MAGICSWORDSMAN-GRAM_SIGMUND_AVENGED.title": "부친의 복수",
+  "MAGICSWORDSMAN-GRAM_SIGMUND_AVENGED.description": "모든 적에게 피해를 {Damage:diff()} 줍니다.\n[gold]그람[/gold] {SwordLevel}단계 (2단계마다 피해 +1).",
+  "MAGICSWORDSMAN-GRAM_FAFNIRS_HEART.title": "파프니르의 심장",
+  "MAGICSWORDSMAN-GRAM_FAFNIRS_HEART.description": "이번 전투 동안 내 턴이 시작될 때 [gold]그람[/gold]이 현재 검이면 카드를 {GramFafnirsHeartPower}장 더 뽑습니다.\n[gold]그람[/gold] {SwordLevel}단계 (3단계부터 비용 0).",
+  "MAGICSWORDSMAN-GRAM_LAST_THROW.title": "최후의 투척",
+  "MAGICSWORDSMAN-GRAM_LAST_THROW.description": "피해를 {Damage:diff()} 줍니다.\n체력이 최대 체력의 절반 이하면 2번 줍니다.\n[gold]그람[/gold] {SwordLevel}단계 (단계마다 피해 +1)."
+}
