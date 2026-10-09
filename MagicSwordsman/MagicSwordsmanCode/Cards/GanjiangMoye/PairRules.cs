@@ -9,7 +9,9 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.GanjiangMoye;
 /// 【짝】 (Ganjiang/Moye pair bonus) rules, content doc §0.3:
 ///  - a Ganjiang card triggers it when the current sword right before it was Moye, and vice versa;
 ///  - twin-sword cards (쌍검) always trigger it, and the NEXT Ganjiang/Moye card after a twin card triggers it
-///    whichever side it is ("primed");
+///    whichever side it is ("primed"). The primed flag only lasts for the turn it was set and is used up by the next
+///    Ganjiang/Moye card of any kind (bug report 2026-10-09: it used to linger across turns and past cards without
+///    a pair effect);
 ///  - 암수 한 쌍 (TwinMatedPair): for the rest of this turn every Ganjiang/Moye card triggers it.
 /// Every trigger also feeds 막야의 투신 (<see cref="MoyesSacrificePower"/>).
 /// Per-combat bookkeeping lives in SwordCombatState counters on SwordId.Ganjiang (reset every combat).
@@ -25,7 +27,8 @@ public static class PairRules
         if (isTwin) return true;
         var state = SwordCombat.Get(player);
         if (state == null) return false;
-        if (state.GetCounter(SwordId.Ganjiang, PrimedKey) > 0) return true;
+        if (state.GetCounter(SwordId.Ganjiang, PrimedKey) is var primed && primed > 0 && primed == TurnNumber(player))
+            return true;
         var always = state.GetCounter(SwordId.Ganjiang, AlwaysTurnKey);
         if (always > 0 && always == TurnNumber(player)) return true;
         return side switch
@@ -44,7 +47,7 @@ public static class PairRules
     {
         var triggers = WouldTrigger(player, side, isTwin, swordBeforePlay);
         var state = SwordCombat.Get(player);
-        state?.SetCounter(SwordId.Ganjiang, PrimedKey, isTwin ? 1 : 0);
+        state?.SetCounter(SwordId.Ganjiang, PrimedKey, isTwin ? TurnNumber(player) : 0);
 
         if (triggers)
         {
@@ -54,6 +57,9 @@ public static class PairRules
 
         return triggers;
     }
+
+    /// <summary>A Ganjiang/Moye card without a pair effect was played: it still uses up a twin card's "primed" flag.</summary>
+    public static void ConsumePrimed(Player player) => SwordCombat.Get(player)?.SetCounter(SwordId.Ganjiang, PrimedKey, 0);
 
     /// <summary>암수 한 쌍: every Ganjiang/Moye card triggers 【짝】 for the rest of this turn.</summary>
     public static void MakeAlwaysThisTurn(Player player)

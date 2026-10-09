@@ -67,7 +67,7 @@ public sealed class CaladbolgBehavior : SwordBehavior
         if (CaladbolgSpread.HittableEnemyCount(ctx.Creature) != 1) return 1m;
         if (ctx.Creature.HasPower<CaladbolgLethePower>()) return 1m; // 레테의 검: no single-enemy penalty
 
-        decimal percent = PenaltyPercent(ctx.Level);
+        decimal percent = PenaltyPercent(ctx.LevelFor(cardSource));
         if (ctx.Creature.HasPower<CaladbolgUlsterHeroPower>()) percent /= 2m;
         return 1m - percent / 100m;
     }

@@ -62,6 +62,7 @@ public abstract class GanjiangMoyeCard(int cost, CardType type, CardRarity rarit
     {
         await SummonTwinPartner(choiceContext);
         var pair = (HasPairEffect || IsTwin) && await PairRules.Resolve(Owner, Side, IsTwin, _swordBeforePlay);
+        if (!HasPairEffect && !IsTwin) PairRules.ConsumePrimed(Owner);
         _pairActive = pair;
         try
         {

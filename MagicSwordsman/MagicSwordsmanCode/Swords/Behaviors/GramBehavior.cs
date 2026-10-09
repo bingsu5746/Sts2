@@ -42,7 +42,7 @@ public sealed class GramBehavior : SwordBehavior
         if (dealer != ctx.Creature) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
         if (!ctx.IsInherited && ctx.Creature.HasPower<BalmungNothungPower>()) return 0m;
-        return ctx.Scale(ctx.Level);
+        return ctx.Scale(ctx.LevelFor(cardSource));
     }
 
     public override bool TryModifyEnergyCost(SwordContext ctx, MagicSwordCard card, decimal originalCost,

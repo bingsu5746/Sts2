@@ -34,6 +34,6 @@ public sealed class MoyeBehavior : SwordBehavior
         if (cardSource == null || cardSource.Owner?.Creature != ctx.Creature) return 0m;
         if (target != ctx.Creature) return 0m;
         if (!props.IsPoweredCardOrMonsterMoveBlock()) return 0m;
-        return ctx.Scale(BlockBonus(ctx.Level));
+        return ctx.Scale(BlockBonus(ctx.LevelFor(cardSource)));
     }
 }

@@ -20,6 +20,14 @@ public sealed class SwordContext
     public required int Level { get; init; }
 
     /// <summary>
+    /// The level that applies to a card's numbers: the sword's level for sword cards, 0 for shared (colourless) cards
+    /// and anything else. Shared cards still carry the current sword's effect, but upgrading a sword never makes them
+    /// stronger (user decision 2026-10-09, replacing content doc §6 "공용 카드는 검 효과를 운반" for the level part).
+    /// </summary>
+    public int LevelFor(MegaCrit.Sts2.Core.Models.CardModel? card) =>
+        card is MagicSwordsman.MagicSwordsmanCode.Cards.MagicSwordCard { Sword: not null } ? Level : 0;
+
+    /// <summary>
     /// True when Kusanagi is running this behavior as an inherited effect (spec: 50%, rounded down, min 1,
     /// costs/penalties are NOT inherited). Use <see cref="Scale(int)"/> for numbers and skip penalties.
     /// </summary>

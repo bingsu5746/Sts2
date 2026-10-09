@@ -38,7 +38,7 @@ public sealed class GanjiangBehavior : SwordBehavior
     {
         if (dealer != ctx.Creature) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
-        return ctx.Scale(DamageBonus(ctx.Level));
+        return ctx.Scale(DamageBonus(ctx.LevelFor(cardSource)));
     }
 
     public override async Task OnAcquired(Player player, bool firstTime)
