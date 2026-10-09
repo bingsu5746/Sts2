@@ -101,6 +101,26 @@ public static class SwordVisuals
         return anim;
     }
 
+    /// <summary>
+    /// Global point a sword's speech bubble should start from (Dialogue/SwordTalk.cs): just above the floating blade,
+    /// or the "above the head" slot when the sword is not out. Null outside combat.
+    /// </summary>
+    public static Vector2? SpeechAnchor(Player player, SwordId sword)
+    {
+        try
+        {
+            if (Rigs.TryGetValue(player, out var rig) && GodotObject.IsInstanceValid(rig.Root) &&
+                rig.Swords.TryGetValue(sword, out var node) && GodotObject.IsInstanceValid(node))
+                return node.ToGlobal(new Vector2(20, -SwordSpriteHeight * 0.5f));
+            var creatureNode = NCombatRoom.Instance?.GetCreatureNode(player.Creature);
+            return creatureNode == null ? null : creatureNode.GetGlobalTransform() * IdleSlots[1];
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     /// <summary>Combat over: forget the rig (its nodes die with the combat room).</summary>
     public static void Clear(Player player)
     {
@@ -525,6 +545,8 @@ public static class SwordVisuals
         {
             var level = SwordCombat.LevelOf(player, sword);
             var desc = $"{Text(Events.SwordLore.StageName(sword, level))} ({level})\n{Text(Events.SwordLore.Line(sword, "EFFECT"))}";
+            var affinity = Dialogue.SwordAffinity.TipLine(player, sword);
+            if (affinity.Length > 0) desc += "\n" + affinity;
             MegaCrit.Sts2.Core.Nodes.HoverTips.NHoverTipSet.CreateAndShow(owner,
                 new MegaCrit.Sts2.Core.HoverTips.HoverTip(Events.SwordLore.Name(sword), desc));
         }

@@ -1,6 +1,7 @@
 using MagicSwordsman.MagicSwordsmanCode.Visuals;
 using System.Runtime.CompilerServices;
 using MagicSwordsman.MagicSwordsmanCode.Cards;
+using MagicSwordsman.MagicSwordsmanCode.Dialogue;
 using MagicSwordsman.MagicSwordsmanCode.Powers;
 using MagicSwordsman.MagicSwordsmanCode.Relics;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
@@ -215,6 +216,7 @@ public static class SwordCombat
         if (card.Sword is not { } sword || !card.IsMutable) return;
         var owner = card.Owner;
         if (owner?.PlayerCombatState == null) return;
+        SwordAffinity.OnCardPlayed(owner, sword);
         await SwitchTo(owner, sword, choiceContext, SwitchReason.CardPlayed);
     }
 
@@ -308,6 +310,7 @@ public static class SwordCombat
 
         foreach (var listener in Listeners(player))
             await listener.AfterSwordSummoned(player, sword, choiceContext);
+        SwordTalk.OnSummoned(player, sword); // presentation: maybe a short exchange (Dialogue/SwordTalk.cs)
         return true;
     }
 
