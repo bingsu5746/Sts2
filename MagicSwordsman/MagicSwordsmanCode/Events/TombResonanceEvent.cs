@@ -180,7 +180,7 @@ public sealed class TombResonanceEvent : CustomEventModel
     }
 
     /// <summary>
-    /// "만검총이 가득 찼다" page: one option per owned sword that can be released (Gram cannot), plus BACK.
+    /// "만검총이 가득 찼다" page: one option per owned sword that can be released (Gram included), plus BACK.
     /// Picks are only reserved; once they free enough room they are released and the new sword is acquired.
     /// </summary>
     private void ShowRelease(SwordId newSword, List<SwordId> pending)
@@ -199,7 +199,7 @@ public sealed class TombResonanceEvent : CustomEventModel
         var options = new List<EventOption>();
         foreach (var owned in tomb.OwnedSwords.Select(SwordRegistry.GroupLeader).Distinct())
         {
-            if (!SwordRegistry.GetDefinition(owned).CanBeLost || pending.Contains(owned)) continue;
+            if (!SwordRegistry.GetDefinition(owned).CanBeReleased || pending.Contains(owned)) continue;
             var o = owned;
             var title = SwordLore.Name(o);
             var body = L10NLookup($"{PageKey("RELEASE")}.options.SWORD.description");

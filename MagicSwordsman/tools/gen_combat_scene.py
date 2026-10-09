@@ -20,7 +20,7 @@ CHEST=(380*800/1216-CX,318*800/1216-CY)  # the glowing gem on his chest (split_b
 REST_Y=-200
 JOINTS={'head':'Visuals/Rig/Head','ul':'Visuals/Rig/UpperL','fl':'Visuals/Rig/UpperL/ForeL',
         'ur':'Visuals/Rig/UpperR','fr':'Visuals/Rig/UpperR/ForeR','cl':'Visuals/Rig/CoatL','cr':'Visuals/Rig/CoatR'}
-SWORD_COL={'Gram':(0.95,0.78,0.30),'Ganjiang':(0.45,0.55,0.75),'Moye':(0.90,0.75,0.82),'Kusanagi':(0.45,0.80,0.55),'Tyrfing':(1.0,0.55,0.20),
+SWORD_COL={'Gram':(0.95,0.78,0.30),'Ganjiang':(0.85,0.38,0.26),'Moye':(0.55,0.78,0.98),'Kusanagi':(0.45,0.80,0.55),'Tyrfing':(1.0,0.55,0.20),
  'Dainsleif':(0.75,0.15,0.20),'Durandal':(0.98,0.95,0.85),'Skofnung':(0.65,0.85,1.0),'Onimaru':(0.92,0.92,0.95),'ClaiomhSolais':(1.0,1.0,0.75),'Caladbolg':(0.40,0.90,0.95)}
 PURPLE=(0.85,0.65,1.0)
 HAND={'L':'Visuals/Rig/UpperL/ForeL/HandL','R':'Visuals/Rig/UpperR/ForeR/HandR'}

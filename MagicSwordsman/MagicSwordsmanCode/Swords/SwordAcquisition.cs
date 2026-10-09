@@ -18,7 +18,7 @@ public static class SwordAcquisition
 {
     /// <summary>
     /// Shows the candidates (pairs as their leader, e.g. 간장·막야 -> Ganjiang token) and acquires the chosen one.
-    /// If Mangeomchong has no room, the player is asked to release an owned sword first (Gram cannot be released);
+    /// If Mangeomchong has no room, the player is asked to release an owned sword first (Gram included, see SwordDefinition.CanBeReleased);
     /// cancelling that aborts. Returns the acquired sword or null (skipped / aborted / nothing to offer).
     /// TODO(art): spec §5 [임시] origin slideshow on acquisition (full version only the first time).
     /// </summary>
@@ -39,7 +39,7 @@ public static class SwordAcquisition
 
     /// <summary>
     /// Acquires <paramref name="sword"/> (and its partner). When Mangeomchong is full the player picks owned swords
-    /// to release (Gram cannot be released). The picks are only collected at first; they are released only once the
+    /// to release (Gram included, see SwordDefinition.CanBeReleased). The picks are only collected at first; they are released only once the
     /// reserved room is enough for the new sword, so cancelling a later prompt loses nothing.
     /// Returns false when already owned, the player cancels, or nothing can make room.
     /// </summary>
@@ -57,7 +57,7 @@ public static class SwordAcquisition
         {
             var releasable = relic.OwnedSwords
                 .Select(SwordRegistry.GroupLeader).Distinct()
-                .Where(s => SwordRegistry.GetDefinition(s).CanBeLost)
+                .Where(s => SwordRegistry.GetDefinition(s).CanBeReleased)
                 .Where(s => !pending.Contains(s))
                 .ToList();
             if (releasable.Count == 0) return false;

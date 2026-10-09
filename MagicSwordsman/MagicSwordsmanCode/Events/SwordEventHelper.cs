@@ -49,7 +49,7 @@ public static class SwordEventHelper
 
     /// <summary>
     /// Acquires <paramref name="sword"/> (and its partner). If Mangeomchong is full the player chooses owned swords to
-    /// release (their cards go to storage, spec §2 [확정]; Gram cannot be released). Releases are applied only when the
+    /// release (their cards go to storage, spec §2 [확정]; Gram can be released too since 2026-10-09). Releases are applied only when the
     /// acquisition is certain (see <see cref="SwordAcquisition.AcquireWithRelease"/>). Returns false when the player
     /// cancels or nothing can make room; in that case no sword was lost.
     /// </summary>

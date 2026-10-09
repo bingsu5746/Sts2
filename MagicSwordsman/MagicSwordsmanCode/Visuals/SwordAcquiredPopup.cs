@@ -211,7 +211,10 @@ public static class SwordAcquiredPopup
         var spritePath = $"{MainFile.ResPath}/images/swords/{sword.ToString().ToLowerInvariant()}.png";
         if (sword != SwordId.Ganjiang && ResourceLoader.Exists(spritePath)) return spritePath;
 
-        var id = Regex.Replace(sword.ToString(), "(?<!^)([A-Z])", "_$1").ToLowerInvariant() + "_token";
+        // the pair has its own crossed-swords picture; the Ganjiang token itself shows Ganjiang alone (swap screens)
+        var id = sword == SwordId.Ganjiang
+            ? "ganjiang_moye_pair"
+            : Regex.Replace(sword.ToString(), "(?<!^)([A-Z])", "_$1").ToLowerInvariant() + "_token";
         foreach (var ext in new[] { ".png", ".jpg" })
         {
             var path = $"{MainFile.ResPath}/images/card_portraits/big/{id}{ext}";

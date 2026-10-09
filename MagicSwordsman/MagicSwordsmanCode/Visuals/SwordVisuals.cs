@@ -327,8 +327,8 @@ public static class SwordVisuals
     internal static Color ColorOf(SwordId sword) => sword switch
     {
         SwordId.Gram => new Color(0.95f, 0.78f, 0.30f),
-        SwordId.Ganjiang => new Color(0.45f, 0.55f, 0.75f),
-        SwordId.Moye => new Color(0.90f, 0.75f, 0.82f),
+        SwordId.Ganjiang => new Color(0.85f, 0.38f, 0.26f), // bronze blade, red tassels (images/swords/ganjiang.png)
+        SwordId.Moye => new Color(0.55f, 0.78f, 0.98f),     // silver blade, blue inlay (images/swords/moye.png)
         SwordId.Kusanagi => new Color(0.45f, 0.80f, 0.55f),
         SwordId.Tyrfing => new Color(1.00f, 0.55f, 0.20f),
         SwordId.Dainsleif => new Color(0.75f, 0.15f, 0.20f),

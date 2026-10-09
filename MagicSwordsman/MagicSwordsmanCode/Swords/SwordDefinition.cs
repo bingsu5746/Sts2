@@ -28,6 +28,13 @@ public sealed class SwordDefinition
     /// <summary>Spec §4: Gram never leaves on a shatter — it returns to level 0 ("부서진 그람").</summary>
     public bool CanBeLost { get; init; } = true;
 
+    /// <summary>
+    /// Whether the player may release this sword to make room in Mangeomchong. Separate from <see cref="CanBeLost"/>
+    /// (a forge shatter): Gram never shatters away (it resets to level 0) but can be released by choice (user
+    /// decision 2026-10-09).
+    /// </summary>
+    public bool CanBeReleased { get; init; } = true;
+
     /// <summary>Spec §3: Onimaru comes out on its own at combat start. That is NOT a summon (no Mangeomchong bonus).</summary>
     public bool EmergesAtCombatStart { get; init; }
 

@@ -9,7 +9,7 @@ Re-run after adding a power:  python3 tools/gen_power_icons.py
 import os,re,glob,math
 from PIL import Image, ImageDraw, ImageFilter
 HERE=os.path.dirname(os.path.abspath(__file__)); A=os.path.join(HERE,'..','MagicSwordsman','images'); CODE=os.path.join(HERE,'..','MagicSwordsmanCode')
-COL={'gram':(242,199,77),'ganjiang':(115,140,191),'moye':(230,191,209),'kusanagi':(115,204,140),'tyrfing':(255,140,51),'dainsleif':(191,38,51),
+COL={'gram':(242,199,77),'ganjiang':(217,97,66),'moye':(140,199,250),'kusanagi':(115,204,140),'tyrfing':(255,140,51),'dainsleif':(191,38,51),
      'durandal':(250,242,217),'skofnung':(166,217,255),'onimaru':(235,235,242),'claiomhsolais':(255,255,191),'caladbolg':(102,230,242)}
 PREFIX={'solais':'claiomhsolais','moyes':'moye','balmung':'gram','nuadas':'claiomhsolais','unstruck':'durandal'}
 def sword(name,size,rot=-45):
