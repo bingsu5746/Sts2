@@ -8,7 +8,7 @@
   "MAGICSWORDSMAN-COMMAND.title": "명령",
   "MAGICSWORDSMAN-COMMAND.description": "[gold]오니마루[/gold]가 그 자리에서 현재 종류로 자동 공격을 1번 합니다. 현재 검 보너스가 붙고, 무작위 종류는 나오지 않습니다.",
   "MAGICSWORDSMAN-DRAW_CUT.title": "발도",
-  "MAGICSWORDSMAN-DRAW_CUT.description": "[gold]클라이브 솔라시[/gold]의 [gold]빛[/gold]을 전부 소모하는 공격입니다. 이 카드의 피해는 [gold]방어도[/gold]를 무시합니다.",
+  "MAGICSWORDSMAN-DRAW_CUT.description": "[gold]클라이브 솔라시[/gold]의 [gold]빛[/gold]을 모두 소모하는 공격입니다. 이 카드의 피해는 [gold]방어도[/gold]를 무시합니다.",
   "MAGICSWORDSMAN-CURRENT_SWORD.title": "현재 검",
   "MAGICSWORDSMAN-CURRENT_SWORD.description": "지금 손에 든 마검입니다. 그 검의 효과가 적용됩니다. 마검 카드를 쓰면 그 검이 현재 검이 됩니다(처음이면 소환). 공용 카드는 현재 검을 바꾸지 않습니다."
 }

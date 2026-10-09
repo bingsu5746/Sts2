@@ -9,8 +9,8 @@
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.cardsModifierDescription": "Ensifer cards will now appear in rewards and shops.",
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.eventDeathPrevention": "The door is not closed yet.",
   "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.goldMonologue": "[sine]Enough for one more shackle.[/sine]",
-  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.possessiveAdjective": "their",
-  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounObject": "them",
-  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounPossessive": "theirs",
-  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounSubject": "they"
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.possessiveAdjective": "his",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounObject": "him",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounPossessive": "his",
+  "MAGICSWORDSMAN-MAGIC_SWORDSMAN_CHARACTER.pronounSubject": "he"
 }
