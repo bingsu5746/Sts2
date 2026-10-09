@@ -396,4 +396,4 @@ The combat rig parts (`images/character/parts/*`) and `images/character/magic_sw
 
 ## 만검총 relic (2026-10-09)
 
-`images/relics/{mangeomchong,opened_mangeomchong}.png` (+ `_outline`, `big/`): a tomb gate in a stone arch generated with AI Horde (AlbedoBase XL, txt2img, then img2img denoise 0.5), composited in `tools/relic_art/compose_mangeomchong.py`: the 萬劍塚 plaque is drawn with WenQuanYi Zen Hei; the swords planted in front and floating in the open doorway are the mod's own sword sprites (`images/swords/`); the light seam and the violet doorway are drawn. Background removed with rembg.
+`images/relics/{mangeomchong,opened_mangeomchong}.png` (+ `_outline`, `big/`): a tomb gate in a stone arch generated with AI Horde (AlbedoBase XL, txt2img, then img2img denoise 0.5), composited in `tools/relic_art/compose_mangeomchong.py`: the 만검총 plaque (Hangul) is drawn with WenQuanYi Zen Hei; the swords planted in front and floating in the open doorway are the mod's own sword sprites (`images/swords/`); the light seam and the violet doorway are drawn. Background removed with rembg.

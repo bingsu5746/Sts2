@@ -26,7 +26,7 @@ def plaque(img,y0=96):
     for i in range(26):
         yy=rng.integers(y0+10,y1-10); d.line([(x0+10,yy),(x1-10,yy+rng.integers(-3,4))],fill=(44,27,20,140),width=int(rng.integers(1,3)))
     d.rounded_rectangle((x0+13,y0+13,x1-13,y1-13),5,outline=(170,128,60,255),width=3)
-    txt='萬劍塚'; bb=d.textbbox((0,0),txt,font=f); tw,th=bb[2]-bb[0],bb[3]-bb[1]
+    txt='만검총'; bb=d.textbbox((0,0),txt,font=f); tw,th=bb[2]-bb[0],bb[3]-bb[1]
     d.text(((x0+x1-tw)//2-bb[0]+2,(y0+y1-th)//2-bb[1]+3),txt,font=f,fill=(20,12,8,200))
     d.text(((x0+x1-tw)//2-bb[0],(y0+y1-th)//2-bb[1]),txt,font=f,fill=(214,170,84,255))
     pl=pl.filter(ImageFilter.GaussianBlur(0.6))
