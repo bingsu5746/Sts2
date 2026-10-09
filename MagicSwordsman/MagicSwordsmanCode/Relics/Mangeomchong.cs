@@ -581,6 +581,14 @@ public class Mangeomchong : MagicSwordsmanRelic
         return Task.CompletedTask;
     }
 
+    /// <summary>Presentation only: the boss-kill cut-in when the boss fight's last enemy falls (BossKillCutIn).</summary>
+    public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented,
+        float deathAnimLength)
+    {
+        BossKillCutIn.OnDeath(Owner, creature, wasRemovalPrevented);
+        return Task.CompletedTask;
+    }
+
     public override Task AfterCombatVictory(CombatRoom room)
     {
         if (!Owner.Creature.IsDead) MotionDirector.OnVictory(Owner);

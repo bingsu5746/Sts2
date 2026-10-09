@@ -161,6 +161,7 @@ public static class SwordVisuals
         }
 
         // new swords -> fly out of the character
+        var appeared = new List<SwordId>();
         foreach (var sword in state.Present.Where(s => !rig.Swords.ContainsKey(s)))
         {
             var node = CreateSword(sword, player);
@@ -168,12 +169,35 @@ public static class SwordVisuals
             node.Position = SpawnPos;
             node.Scale = new Vector2(0.3f, 0.3f);
             rig.Swords[sword] = node;
+            appeared.Add(sword);
         }
 
+        var previous = rig.Current;
         rig.Current = state.Current;
         Layout(rig);
         ApplyPalmCircles(player, state.Current);
+        PlaySyncFx(rig, appeared, previous);
     }
+
+    /// <summary>
+    /// Per-sword summon / switch effects and sounds (SwordFx). Runs right after Layout: the summon effect sets each new
+    /// sword's starting pose, which the layout tween (started next frame) then carries to its slot.
+    /// </summary>
+    private static void PlaySyncFx(Rig rig, List<SwordId> fresh, SwordId? previous)
+    {
+        foreach (var sword in fresh)
+        {
+            var node = rig.Swords[sword];
+            node.SetMeta(BornMeta, Time.GetTicksMsec());
+            SwordFx.Summon(rig.Root, node, sword, rig.Slots.TryGetValue(sword, out var slot) ? slot : node.Position);
+        }
+        // a switch to a sword that is appearing right now is already covered by its summon effect
+        if (rig.Current is not { } current || current == previous || !rig.Swords.TryGetValue(current, out var cur)) return;
+        if (cur.HasMeta(BornMeta) && Time.GetTicksMsec() - (ulong)cur.GetMeta(BornMeta) < 700) return;
+        SwordFx.Switch(rig.Root, current, CurrentPos);
+    }
+
+    private const string BornMeta = "ms_fx_born";
 
     private static void Layout(Rig rig)
     {
@@ -606,6 +630,7 @@ public static class SwordVisuals
             var tw = node.CreateTween();
             rig.Moves[sword] = tw; // a later strike / layout takes over cleanly instead of fighting this tween
             StrikeStyle(tw, node, sword, home, aim);
+            Sfx.Whoosh(sword);
             tw.TweenCallback(Callable.From(() => Layout(rig)));
         }
         catch (Exception e)

@@ -55,11 +55,13 @@ public static class MotionDirector
             {
                 case CardType.Power:
                     Play(player, Pick(Powers));
+                    Sfx.Circle(); // the Cast_* / Power_* clips raise the palm magic circle
                     break;
                 case CardType.Skill:
                     var targeted = play.Card.TargetType is TargetType.AnyEnemy or TargetType.AllEnemies
                         or TargetType.RandomEnemy;
                     Play(player, Pick(targeted ? TargetedCasts : Casts));
+                    Sfx.Circle();
                     break;
             }
         }
@@ -183,5 +185,9 @@ public static class MotionDirector
     }
 
     /// <summary>Our hit landed on an enemy (later hits of multi-hit / random-target attacks): the sword flies there.</summary>
-    public static void OnDealtDamage(Player player, Creature target) => SwordVisuals.Strike(player, target);
+    public static void OnDealtDamage(Player player, Creature target)
+    {
+        SwordVisuals.Strike(player, target);
+        SwordFx.Impact(player, target); // the current sword's own hit effect + impact sound
+    }
 }
