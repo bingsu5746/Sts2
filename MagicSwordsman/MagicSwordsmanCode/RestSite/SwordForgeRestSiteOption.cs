@@ -16,12 +16,11 @@ namespace MagicSwordsman.MagicSwordsmanCode.RestSite;
 
 /// <summary>
 /// Rest-site option "마검 강화" added by Mangeomchong (pattern: Girya -> LiftRestSiteOption).
-/// Flow (all with the game's own card-selection screens, cancellable):
-///   1. pick an owned sword (sword token cards; a pair shows its leader, e.g. 간장·막야 -> Ganjiang)
-///   2. the sword's story intro (Events/Forge/ForgeStory.cs)
-///   3. pick 안전 강화 (+1) / 도박 강화 +2 / 도박 강화 +3 (gambles that would exceed level 5 are not offered)
-///   4. roll with the run's Niche Rng, apply, show the sword's result card.
-/// The old PickMode/ShowResult helpers (plain ForgeModeToken / ForgeResultToken) are kept as a fallback.
+/// Flow (event-style pages, EventChoiceScreen; "돌아가기" = one step back):
+///   1. pick an owned sword (a pair shows its leader, e.g. 간장·막야 -> Ganjiang)
+///   2. that sword's story + 안전 강화 (+1) / 도박 강화 +2 / 도박 강화 +3 with the real odds
+///      (gambles that would exceed level 5 are not offered)
+///   3. roll with the player's reward Rng, apply, show the sword's result page.
 /// Returning false from OnSelect (cancel) leaves the rest site open, like the game's Smith option.
 /// Localization: rest_site_ui.json  OPTION_MAGICSWORDSMAN_FORGE.name / .description
 /// </summary>
@@ -47,35 +46,93 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
 
         var choiceContext = new BlockingPlayerChoiceContext();
 
-        // 1) sword -> 2) method. "돌아가기" on the method screen goes back to the sword list; on the sword list it
-        // closes the option (rest site stays open). The sword's story intro is the method screen's subtitle (it used
-        // to be a screen of its own showing the same sword card again — bug report 2026-10-08).
-        SwordId? sword;
-        ForgeMode? mode;
+        // An event-style page per step (EventChoiceScreen, user request 2026-10-09): 1) which sword (the tomb),
+        // 2) that sword's own story + how to forge it, 3) the result. "돌아가기" goes one step back; on the first page it
+        // closes the option and the rest site stays open.
         while (true)
         {
-            using (ChooseScreenText.Use(Ui("PICK_SWORD"), skip: Ui("BACK")))
-                sword = await PickSword(choiceContext, candidates);
-            if (sword == null) return false;
+            var swordIdx = await EventChoiceScreen.Choose(Owner, choiceContext, Ui("PICK_SWORD"), Ui("TOMB_TEXT"),
+                $"{MainFile.ResPath}/images/relics/big/mangeomchong.png", new Godot.Color(0.62f, 0.45f, 0.95f),
+                candidates.Select(c => new EventChoiceScreen.Option(
+                    $"{SwordLore.NameText(c)} — {relic.GetLevel(c)}{Ui("LEVEL_SUFFIX")} {Text(SwordLore.StageName(c, relic.GetLevel(c)))}",
+                    Text(SwordLore.Line(c, "EFFECT")))).ToList(),
+                Ui("BACK"));
+            if (swordIdx < 0 || swordIdx >= candidates.Count) return false;
+            var sword = candidates[swordIdx];
 
-            var lvl = relic.GetLevel(sword.Value);
-            var header = Ui("PICK_METHOD").Replace("{Sword}", SwordLore.NameText(sword.Value));
-            var subtitle = $"{Text(SwordLore.Line(sword.Value, "FORGE_INTRO"))}\n{lvl}{Ui("LEVEL_SUFFIX")} — {Text(SwordLore.StageName(sword.Value, lvl))}";
-            using (ChooseScreenText.Use(header, subtitle, Ui("BACK")))
-                mode = await ForgeStory.PickMode(Owner, sword.Value, lvl, choiceContext);
-            if (mode != null) break;
+            var lvl = relic.GetLevel(sword);
+            var modes = new List<ForgeMode> { ForgeMode.Safe };
+            if (SwordForge.IsAllowed(ForgeMode.GamblePlus2, lvl)) modes.Add(ForgeMode.GamblePlus2);
+            if (SwordForge.IsAllowed(ForgeMode.GamblePlus3, lvl)) modes.Add(ForgeMode.GamblePlus3);
+            var accent = Visuals.SwordVisuals.ColorOf(sword == SwordId.Ganjiang ? SwordId.Ganjiang : sword);
+            var art = $"{MainFile.ResPath}/images/swords/{sword.ToString().ToLowerInvariant()}.png";
+            var story = $"{Text(SwordLore.Line(sword, "FORGE_INTRO"))}\n\n[gold]{lvl}{Ui("LEVEL_SUFFIX")}[/gold] — {Text(SwordLore.StageName(sword, lvl))}";
+            var modeIdx = await EventChoiceScreen.Choose(Owner, choiceContext,
+                Ui("PICK_METHOD").Replace("{Sword}", SwordLore.NameText(sword)), story, art, accent,
+                modes.Select(m => ModeOption(sword, m)).ToList(), Ui("BACK"));
+            if (modeIdx < 0 || modeIdx >= modes.Count) continue;
+
+            // roll + apply (game RNG, never System.Random). Per-player stream: in multiplayer every client runs each
+            // player's OnSelect, in different orders (RestSiteSynchronizer runs remote choices when their message
+            // arrives), so a shared stream like RunState.Rng.Niche would give each client a different result.
+            var result = await ForgeStory.Apply(Owner, sword, modes[modeIdx], Owner.PlayerRng.Rewards);
+            relic.Flash();
+            MainFile.Logger.Info($"[Forge] {sword} {modes[modeIdx]}: {result.Outcome}");
+
+            var (title, text) = ResultText(result);
+            await EventChoiceScreen.Choose(Owner, choiceContext, title, text, art, accent,
+                [new EventChoiceScreen.Option(Ui("CONTINUE"), "")], null);
+            return true;
         }
+    }
 
-        // 4) roll + apply (game RNG, never System.Random). Per-player stream: in multiplayer every client runs each
-        // player's OnSelect, in different orders (RestSiteSynchronizer runs remote choices when their message
-        // arrives), so a shared stream like RunState.Rng.Niche would give each client a different result.
-        var result = await ForgeStory.Apply(Owner, sword.Value, mode.Value, Owner.PlayerRng.Rewards);
-        relic.Flash();
-        MainFile.Logger.Info($"[Forge] {sword} {mode}: {result.Outcome}");
+    private const string Cards = "cards";
 
-        using (ChooseScreenText.Use(Ui("RESULT"), skip: Ui("CONTINUE")))
-            await ForgeStory.ShowResult(Owner, result, choiceContext);
-        return true;
+    private EventChoiceScreen.Option ModeOption(SwordId sword, ForgeMode mode)
+    {
+        var key = mode switch
+        {
+            ForgeMode.Safe => "MAGICSWORDSMAN-FORGE_STORY_SAFE_TOKEN",
+            ForgeMode.GamblePlus2 => "MAGICSWORDSMAN-FORGE_STORY_GAMBLE2_TOKEN",
+            _ => "MAGICSWORDSMAN-FORGE_STORY_GAMBLE3_TOKEN",
+        };
+        var odds = SwordForge.OddsFor(Owner, sword, mode);
+        var desc = new LocString(Cards, key + ".description");
+        desc.Add("Story", mode switch
+        {
+            ForgeMode.Safe => SwordLore.Line(sword, "FORGE_SAFE"),
+            ForgeMode.GamblePlus2 => SwordLore.Line(sword, "FORGE_GAMBLE"),
+            _ => SwordLore.Generic("FORGE_GAMBLE3"),
+        });
+        desc.Add("Gain", SwordForge.GainFor(mode));
+        desc.Add("Success", odds.Success);
+        desc.Add("Failure", odds.Failure);
+        desc.Add("Shatter", odds.Shatter);
+        desc.Add("ShatterRule", SwordLore.Generic(
+            SwordRegistry.GetDefinition(SwordRegistry.GroupLeader(sword)).CanBeLost ? "SHATTER_RULE" : "SHATTER_RULE_RESET"));
+        return new EventChoiceScreen.Option(Text(new LocString(Cards, key + ".title")), Text(desc));
+    }
+
+    private static (string Title, string Text) ResultText(ForgeStoryResult r)
+    {
+        var o = r.Outcome;
+        var kind = o.Kind.ToString().ToUpperInvariant();
+        var key = "MAGICSWORDSMAN-FORGE_STORY_RESULT_TOKEN";
+        var line = new LocString(Cards, $"{key}.{kind}.text");
+        line.Add("SwordName", SwordLore.Name(o.Sword));
+        line.Add("OldLevel", o.OldLevel);
+        line.Add("NewLevel", o.NewLevel);
+        line.Add("Stage", SwordLore.StageName(o.Sword, o.NewLevel));
+        line.Add("CurseName", SwordRegistry.Get(o.Sword).FailureCurse?.Title ?? "");
+        var storyPart = o.Kind switch
+        {
+            ForgeOutcomeKind.Success => "FORGE_SUCCESS",
+            ForgeOutcomeKind.Shatter or ForgeOutcomeKind.ShatterReset => "FORGE_SHATTER",
+            _ => "FORGE_FAILURE",
+        };
+        var text = Text(SwordLore.Line(o.Sword, storyPart));
+        if (r.GotNibelung) text += Text(SwordLore.Line(SwordId.Gram, "NIBELUNG"));
+        return (Text(new LocString(Cards, $"{key}.{kind}.title")), $"{text}\n\n{Text(line)}");
     }
 
     /// <summary>rest_site_ui.json MAGICSWORDSMAN_FORGE_UI.&lt;part&gt;</summary>
@@ -90,41 +147,5 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
     {
         try { return loc.GetFormattedText(); }
         catch (Exception) { return ""; }
-    }
-
-    private Task<SwordId?> PickSword(PlayerChoiceContext ctx, IReadOnlyList<SwordId> candidates) =>
-        SwordAcquisition.PickSword(Owner, candidates, ctx, canSkip: true,
-            new LocString("card_selection", "MAGICSWORDSMAN-CHOOSE_SWORD_TO_FORGE"));
-
-    private async Task<ForgeMode?> PickMode(PlayerChoiceContext ctx, int level)
-    {
-        var canon = new List<CardModel> { ModelDb.Card<ForgeSafeToken>() };
-        if (SwordForge.IsAllowed(ForgeMode.GamblePlus2, level)) canon.Add(ModelDb.Card<ForgeGamble2Token>());
-        if (SwordForge.IsAllowed(ForgeMode.GamblePlus3, level)) canon.Add(ModelDb.Card<ForgeGamble3Token>());
-
-        var tokens = ChoiceTokenCard.CreateForSelection(Owner, canon);
-        try
-        {
-            var picked = await CardSelectCmd.FromChooseACardScreen(ctx, tokens, Owner, canSkip: true);
-            return (picked as ForgeModeToken)?.Mode;
-        }
-        finally
-        {
-            ChoiceTokenCard.DisposeSelection(Owner, tokens);
-        }
-    }
-
-    private async Task ShowResult(PlayerChoiceContext ctx, ForgeOutcome outcome)
-    {
-        var tokens = ChoiceTokenCard.CreateForSelection(Owner, [ModelDb.Card<ForgeResultToken>()]);
-        try
-        {
-            if (tokens[0] is ForgeResultToken result) result.Outcome = outcome;
-            await CardSelectCmd.FromChooseACardScreen(ctx, tokens, Owner, canSkip: true);
-        }
-        finally
-        {
-            ChoiceTokenCard.DisposeSelection(Owner, tokens);
-        }
     }
 }
