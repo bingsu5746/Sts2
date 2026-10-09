@@ -58,6 +58,7 @@ public static class UnionMotion
         try
         {
             Last[player.NetId] = (card, Time.GetTicksMsec());
+            Sfx.Union();
             SwordVisuals.PlayMotion(player, card.BodyClip);
             SwordVisuals.PlayUnion(player, card.Motion, card.Primary, card.Partner, target, card.Impact);
         }

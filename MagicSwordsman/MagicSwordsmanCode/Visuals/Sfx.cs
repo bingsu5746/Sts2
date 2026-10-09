@@ -85,6 +85,17 @@ public static class Sfx
 
     public static void BossKill() => Play("bosskill", -7f);
 
+    // event sounds (2026-10-09). Callers only play them for the local player where that matters.
+    public static void Block() => Play("block", -16f, 0.96f + 0.08f * Random.Shared.NextSingle());
+    public static void Guard() => Play("guard", -12f, 0.94f + 0.12f * Random.Shared.NextSingle());
+    public static void ForgeUp() => Play("forge_up", -9f);
+    public static void ForgeBreak() => Play("forge_break", -9f);
+    public static void Curse() => Play("curse", -12f);
+    public static void Union() => Play("union", -10f);
+    public static void Pair() => Play("pair", -14f);
+    public static void Mastery() => Play("mastery", -8f);
+    public static void Talk() => Play("talk", -18f, 0.95f + 0.1f * Random.Shared.NextSingle());
+
     private static AudioStream? Load(string name)
     {
         if (Cache.TryGetValue(name, out var s)) return s;

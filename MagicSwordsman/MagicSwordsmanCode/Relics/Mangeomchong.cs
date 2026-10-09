@@ -348,6 +348,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     /// <summary>Adds a curse (or any canonical card) to the deck with the standard preview.</summary>
     public async Task AddCurse(CardModel canonicalCurse)
     {
+        if (LocalContext.IsMe(Owner)) Visuals.Sfx.Curse();
         if (canonicalCurse.Type == CardType.Curse)
         {
             await CardPileCmd.AddCursesToDeck([canonicalCurse], Owner);

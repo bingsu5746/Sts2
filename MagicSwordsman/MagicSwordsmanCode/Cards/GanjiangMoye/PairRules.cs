@@ -51,6 +51,7 @@ public static class PairRules
 
         if (triggers)
         {
+            Visuals.Sfx.Pair();
             var power = player.Creature.GetPower<MoyesSacrificePower>();
             if (power != null) await power.OnPairTriggered();
             var dragons = player.Creature.GetPower<TwinDragonsPower>();

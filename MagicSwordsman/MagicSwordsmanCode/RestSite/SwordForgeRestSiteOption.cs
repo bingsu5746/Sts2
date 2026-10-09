@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Context;
 using MagicSwordsman.MagicSwordsmanCode.Extensions;
 using BaseLib.Abstracts;
 using MagicSwordsman.MagicSwordsmanCode.Cards.Tokens;
@@ -82,6 +83,11 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
             relic.Flash();
             MainFile.Logger.Info($"[Forge] {sword} {modes[modeIdx]}: {result.Outcome}");
 
+            if (LocalContext.IsMe(Owner))
+            {
+                if (result.Outcome.Kind == ForgeOutcomeKind.Success) Visuals.Sfx.ForgeUp();
+                else if (result.Outcome.Kind is ForgeOutcomeKind.Shatter or ForgeOutcomeKind.ShatterReset) Visuals.Sfx.ForgeBreak();
+            }
             var (title, text) = ResultText(result);
             if (!masteredBefore && SwordMastery.IsClaimed(relic, sword))
                 text += MasteryResultText(sword); // reached level 5: the legend card (popup shown by SwordMastery)

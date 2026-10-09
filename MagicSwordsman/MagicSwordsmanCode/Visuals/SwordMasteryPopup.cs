@@ -23,7 +23,7 @@ public static class SwordMasteryPopup
 
     public static void Show(SwordId sword, CardModel legendCard)
     {
-        try { ShowInner(SwordRegistry.GroupLeader(sword), legendCard); }
+        try { Sfx.Mastery(); ShowInner(SwordRegistry.GroupLeader(sword), legendCard); }
         catch (Exception e) { MainFile.Logger.Warn($"[SwordMasteryPopup] failed: {e.Message}"); }
     }
 

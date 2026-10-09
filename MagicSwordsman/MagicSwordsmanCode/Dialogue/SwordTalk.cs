@@ -326,6 +326,7 @@ public static class SwordTalk
                 var anchor = SwordVisuals.SpeechAnchor(player, s);
                 if (anchor == null) return false;
                 bubble = NSpeechBubbleVfx.Create(text, DialogueSide.Left, anchor.Value, seconds, ColorOf(s));
+                Visuals.Sfx.Talk();
             }
             else
             {

@@ -222,3 +222,34 @@ summons = {
 }
 for name, x in summons.items():
     write('summon_' + name, x, tail=0.5, mix=0.22)
+
+# ------------------------------------------------------------------ more events (2026-10-09: "효과음 마저 채우기")
+# gaining Block: a soft rising shimmer with a faint ward hum
+write('block', at(hum(0.45, 196, 0.2) * 0.35, 0, 0.6) + at(chime(0.45, 1175, 4.0) * 0.25, 0.04, 0.6)
+      + bandpass(rng.standard_normal(int(0.6 * SR)), 3000, 7000) * env(0.6, 0.08, 0.5, 3) * 0.08, tail=0.35, mix=0.2)
+# a hit fully stopped by Block: muffled metal clank + low thump, no flesh
+write('guard', at(metal(0.3, 410, decay=(12, 15, 18, 22, 26)) * 0.5, 0, 0.5) + at(thud(0.3, 120, 60, 12) * 0.6, 0, 0.5)
+      + lowpass(rng.standard_normal(int(0.5 * SR)), 1800) * env(0.5, 0.002, 0.12, 7) * 0.35, tail=0.25, mix=0.12)
+# forge success: hammer on anvil twice, then the blade sings
+write('forge_up', at(metal(0.35, 690, decay=(10, 12, 15, 18, 20)) * 0.6, 0, 1.4) + at(metal(0.35, 700, decay=(10, 12, 15, 18, 20)) * 0.6, 0.22, 1.4)
+      + at(shing(0.9, 1560, 0.03) * 0.5, 0.42, 1.4) + at(chime(0.8, 1318, 2.4) * 0.25, 0.5, 1.4), tail=0.6, mix=0.25)
+# forge failure / shatter: a crack, falling fragments, dull drop
+frag = sum(at(metal(0.15, f, decay=(20, 25, 30, 35, 40)) * a, s, 1.0)
+           for f, a, s in ((1900, 0.3, 0.08), (2450, 0.22, 0.17), (1600, 0.25, 0.26), (2900, 0.15, 0.33), (2100, 0.12, 0.41)))
+write('forge_break', at(highpass(rng.standard_normal(int(0.08 * SR)), 1500) * env(0.08, 0.001, 0.07, 6) * 0.9, 0, 1.0)
+      + at(metal(0.25, 1300, decay=(14, 18, 22, 26, 30)) * 0.5, 0.0, 1.0) + frag + at(thud(0.4, 90, 40, 8) * 0.5, 0.3, 1.0), tail=0.4, mix=0.18)
+# a sword curse added: dissonant low drone and a whisper of noise
+write('curse', at((np.sin(2 * np.pi * 73.4 * t_(1.0)) + 0.8 * np.sin(2 * np.pi * 77.8 * t_(1.0)) + 0.4 * np.sin(2 * np.pi * 103.8 * t_(1.0)))
+                  * env(1.0, 0.25, 0.75, 2.5) * 0.4, 0, 1.1)
+      + at(bandpass(rng.standard_normal(int(0.9 * SR)), 1500, 4000) * env(0.9, 0.3, 0.6, 3) * 0.12, 0.1, 1.1), tail=0.6, mix=0.3)
+# combo card: two blades ring together in a fifth + a chime
+write('union', at(shing(0.8, 1320, 0.02) * 0.5, 0, 1.0) + at(shing(0.8, 1980, 0.02) * 0.4, 0.05, 1.0)
+      + at(chime(0.8, 2637, 2.8) * 0.2, 0.12, 1.0) + at(base_whoosh, 0, 1.0), tail=0.5, mix=0.25)
+# 【짝】 triggered: a quick low/high pair of pings
+write('pair', at(chime(0.4, 880, 5) * 0.4, 0, 0.6) + at(chime(0.4, 1320, 5) * 0.35, 0.08, 0.6), tail=0.3, mix=0.2)
+# level 5 mastery: rising arpeggio ending on a bright held chord
+mast = sum(at(chime(0.9, f, 2.2) * 0.25, 0.09 * i, 1.6) for i, f in enumerate((523, 659, 784, 1046, 1318)))
+write('mastery', mast + at(shing(1.1, 2093, 0.02) * 0.3, 0.45, 1.6) + at(hum(1.2, 131, 0.3) * 0.3, 0.2, 1.6), tail=0.8, mix=0.3)
+# speech bubble: a very soft pop
+write('talk', chime(0.18, 1046, 14) * 0.3 + lowpass(rng.standard_normal(int(0.18 * SR)), 2500) * env(0.18, 0.002, 0.05, 8) * 0.15,
+      tail=0.0)

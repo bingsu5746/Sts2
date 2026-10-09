@@ -75,14 +75,17 @@ public static class MotionDirector
         }
     }
 
-    public static void OnBlockGained(Player player, decimal amount) =>
+    public static void OnBlockGained(Player player, decimal amount)
+    {
         Play(player, amount >= 15 ? "Block_Big" : Pick(Blocks));
+        Sfx.Block();
+    }
 
     public static void OnDamageReceived(Player player, int unblocked, bool fullyBlocked)
     {
         var creature = player.Creature;
         if (creature.IsDead) return;
-        if (fullyBlocked) { Play(player, "Hit_Guarded"); return; }
+        if (fullyBlocked) { Play(player, "Hit_Guarded"); Sfx.Guard(); return; }
         if (unblocked <= 0) return;
         var heavy = unblocked >= Math.Max(15, creature.MaxHp / 5);
         Play(player, heavy ? "Hit_Heavy" : unblocked >= 8 ? "Hit_Stagger" : unblocked <= 3 ? "Hit_Light" : "Hit");
