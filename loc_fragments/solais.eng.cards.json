@@ -1,0 +1,10 @@
+{
+  "MAGICSWORDSMAN-SOLAIS_FIR_BOLG.title": "Fir Bolg",
+  "MAGICSWORDSMAN-SOLAIS_FIR_BOLG.description": "Deal {Damage:diff()} damage.\nGain {SolaisLightPower} [gold]Light[/gold].\n[gold]Claíomh Solais[/gold] level {SwordLevel} (+1 damage per level).",
+  "MAGICSWORDSMAN-SOLAIS_USCIAS.title": "Uscias",
+  "MAGICSWORDSMAN-SOLAIS_USCIAS.description": "Gain {SolaisLightPower} [gold]Light[/gold].\n[gold]Claíomh Solais[/gold] level {SwordLevel}.",
+  "MAGICSWORDSMAN-SOLAIS_RESHEATHE.title": "Resheathe",
+  "MAGICSWORDSMAN-SOLAIS_RESHEATHE.description": "[gold]Draw-cut[/gold]: Consume all [gold]Light[/gold]. This card's damage ignores [gold]Block[/gold].\nDeal {Damage:diff()} damage + {PerLight} per Light.\nThen gain {SolaisLightPower} [gold]Light[/gold].\n[gold]Claíomh Solais[/gold] level {SwordLevel} (+1 damage per level; damage per Light 4/5/5/6/6/7).",
+  "MAGICSWORDSMAN-SOLAIS_SWORD_OF_LIGHT.title": "Sword of Light",
+  "MAGICSWORDSMAN-SOLAIS_SWORD_OF_LIGHT.description": "Whenever you end your turn with [gold]Claíomh Solais[/gold] current, deal {PerLight} damage per [gold]Light[/gold] to ALL enemies (Light is not consumed).\n[gold]Claíomh Solais[/gold] level {SwordLevel} (3 damage per Light from level 3)."
+}
