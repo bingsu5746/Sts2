@@ -11,12 +11,14 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 
 /// <summary>
-/// 그람 (starting sword).
+/// 그람. Since 2026-10-09 an ordinary sword: no longer the fixed first sword of a run (that is random, see
+/// Mangeomchong.GrantStartingSword) and offered by every acquisition pool like the others.
 /// Spec §7: current-sword effect "공격 피해 +강화 단계" [확정]; Kusanagi inherits "+강화 단계의 절반".
 /// Cost [확정]: on reaching level 5, curse "니벨룽의 보물" (content doc §3.2 / §0.4 #18: only the FIRST time
 /// level 5 is reached in a run, one card per run).
 /// Forge failure curse: 오딘이 꺾은 칼날 (content doc §3.1).
-/// Shatter at the rest site returns Gram to level 0 instead of losing it (SwordDefinition.CanBeLost = false).
+/// Shatter at the rest site returns Gram to level 0 instead of losing it (SwordDefinition.CanBeLost = false) — its
+/// legend (broken by Odin, re-forged by Regin), kept as a Gram trait. It can still be released by choice.
 /// Card cost thresholds (레긴의 재단조, 발뭉·노퉁) are applied here via <see cref="GramCard.CostAtLevel"/>.
 /// </summary>
 public sealed class GramBehavior : SwordBehavior
@@ -26,8 +28,10 @@ public sealed class GramBehavior : SwordBehavior
 
     public override SwordId Id => SwordId.Gram;
 
-    // Gram's cards come from the starting deck (부서진 칼날), so no starter cards on acquisition.
-    public override IEnumerable<CardModel> StarterCards => [];
+    // Like every sword: 2 Basic cards granted with the sword (first acquisition / random first sword). 부서진 칼날 used to
+    // be in the fixed starting deck while Gram was the starting sword (until 2026-10-09).
+    public override IEnumerable<CardModel> StarterCards =>
+        [ModelDb.Card<Cards.Basic.BrokenBlade>(), ModelDb.Card<GramKeptShards>()];
 
     public override CardModel? FailureCurse => ModelDb.Card<OdinsBrokenBlade>();
 

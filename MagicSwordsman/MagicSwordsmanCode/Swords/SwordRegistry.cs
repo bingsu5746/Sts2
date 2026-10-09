@@ -20,7 +20,9 @@ public static class SwordRegistry
 
     private static readonly Dictionary<SwordId, SwordDefinition> Definitions = new()
     {
-        [SwordId.Gram] = new SwordDefinition { Id = SwordId.Gram, CanBeLost = false, OfferedByAcquisition = false },
+        // Gram: an ordinary sword in every pool since 2026-10-09 (no longer the fixed first sword). CanBeLost = false is
+        // its legend (broken and re-forged), not a starting-sword rule: a shatter resets it to 0 ("부서진 그람").
+        [SwordId.Gram] = new SwordDefinition { Id = SwordId.Gram, CanBeLost = false },
         [SwordId.Ganjiang] = new SwordDefinition { Id = SwordId.Ganjiang, Partners = [SwordId.Moye] },
         [SwordId.Moye] = new SwordDefinition
         {
@@ -150,6 +152,13 @@ public static class SwordRegistry
 
         return result;
     }
+
+    /// <summary>
+    /// Swords that can be the random first sword of a run (사용자 결정 2026-10-09): every offerable sword, pairs as their
+    /// leader (간장·막야 -> Ganjiang), i.e. all 10 swords. Sorted by id so every client builds the same list.
+    /// </summary>
+    public static List<SwordId> StartingSwordCandidates() =>
+        AllSwords.Where(id => GetDefinition(id).OfferedByAcquisition).Select(GroupLeader).Distinct().ToList();
 
     /// <summary>Resolves a canonical card model from a type (for content that stores card types).</summary>
     public static CardModel CanonicalCard(Type cardType) => ModelDb.GetById<CardModel>(ModelDb.GetId(cardType));

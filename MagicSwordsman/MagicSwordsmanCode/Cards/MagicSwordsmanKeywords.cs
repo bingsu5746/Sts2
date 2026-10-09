@@ -83,6 +83,7 @@ public static class MagicSwordsmanKeywords
         [typeof(Cards.Gram.GramBladeBetween)] = [Combo],
         [typeof(Cards.Gram.GramFafnirsHeart)] = [CurrentSword],
         [typeof(Cards.Gram.GramFleeceCutter)] = [Combo],
+        [typeof(Cards.Gram.GramKeptShards)] = [Combo],
         [typeof(Cards.Onimaru.OnimaruFirstAmongFive)] = [Command],
         [typeof(Cards.Onimaru.OnimaruLeapFromSheath)] = [Command, Combo],
         [typeof(Cards.Onimaru.OnimaruOniHunt)] = [Command],

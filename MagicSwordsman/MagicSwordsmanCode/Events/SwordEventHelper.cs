@@ -14,7 +14,8 @@ public static class SwordEventHelper
     public static Mangeomchong? Tomb(Player player) => player.GetRelic<Mangeomchong>();
 
     /// <summary>
-    /// Swords an event may offer: offerable (not Gram, not Moye — the pair is offered as Ganjiang) and not owned.
+    /// Swords an event may offer: offerable (every sword incl. Gram since 2026-10-09; not Moye — the pair is offered as
+    /// Ganjiang) and not owned.
     /// Unlike <see cref="SwordRegistry.RollAcquisitionCandidates"/> this ignores free slots on purpose: content doc §6.1
     /// lets the player release a sword when Mangeomchong is full.
     /// </summary>

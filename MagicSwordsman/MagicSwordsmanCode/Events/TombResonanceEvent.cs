@@ -2,7 +2,9 @@ using BaseLib.Abstracts;
 using MagicSwordsman.MagicSwordsmanCode.Cards.Tokens;
 using MagicSwordsman.MagicSwordsmanCode.RestSite;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
+using MagicSwordsman.MagicSwordsmanCode.Visuals;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
@@ -56,7 +58,11 @@ public sealed class TombResonanceEvent : CustomEventModel
 
     private int ActIndex => Owner?.RunState.CurrentActIndex ?? 1;
 
-    /// <summary>Run start (act index 0): pick 1 of 3 swords next to Gram, no PASS (사용자 결정 2026-10-04).</summary>
+    /// <summary>
+    /// Run start (act index 0): pick 1 of 3 swords next to the run's random first sword, no PASS (사용자 결정 2026-10-04;
+    /// the first sword is random since 2026-10-09, see Mangeomchong.GrantStartingSword). The page names the first sword
+    /// and shows its "new sword" popup, because the sword itself was granted before any UI existed.
+    /// </summary>
     private bool IsStart => ActIndex == 0;
 
     /// <summary>After the act 2 boss (entering the 3rd act, index 2) the "deep" text and exit are used.</summary>
@@ -75,8 +81,16 @@ public sealed class TombResonanceEvent : CustomEventModel
         var tomb = SwordEventHelper.Tomb(Owner!);
         var full = tomb != null && _candidates.Count > 0 && !_candidates.Any(tomb.CanAcquire);
         desc.Add("FullNote", full ? SwordLore.Generic("FULL_NOTE") : SwordLore.Generic("EMPTY"));
+        if (IsStart)
+            desc.Add("FirstSword", FirstSword(tomb) is { } first ? SwordLore.Name(first) : SwordLore.Generic("EMPTY"));
         return desc;
     }
+
+    /// <summary>The run's random first sword (older runs: the first owned sword).</summary>
+    private static SwordId? FirstSword(Relics.Mangeomchong? tomb) =>
+        tomb == null
+            ? null
+            : tomb.StartingSword ?? tomb.OwnedSwords.Select(SwordRegistry.GroupLeader).Cast<SwordId?>().FirstOrDefault();
 
     protected override Task BeforeEventStarted(bool isPreFinished)
     {
@@ -86,6 +100,12 @@ public sealed class TombResonanceEvent : CustomEventModel
             // The event Rng is seeded only by run seed + event id, so mix in the act: act 1 and act 2 roll differently.
             var rng = new Rng(Rng.Seed, $"tomb_resonance_act{ActIndex}");
             _candidates = SwordEventHelper.Roll(tomb, CandidateCount, rng);
+
+            // Run start: introduce the random first sword with the same "new sword" popup an acquisition shows
+            // (presentation only, local player only, header "가장 먼저 깨어난 마검").
+            if (IsStart && !isPreFinished && tomb.GetRunCounter(DoneKey(0)) == 0 && LocalContext.IsMe(Owner) &&
+                FirstSword(tomb) is { } first)
+                SwordAcquiredPopup.Show(first, "POPUP_HEADER_FIRST");
         }
 
         return Task.CompletedTask;
