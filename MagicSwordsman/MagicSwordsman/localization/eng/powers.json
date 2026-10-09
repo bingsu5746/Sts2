@@ -184,5 +184,8 @@
   "MAGICSWORDSMAN-SOLAIS_SWORD_OF_LIGHT_POWER.smartDescription": "When you end your turn with [gold]Claíomh Solais[/gold] current, deal 2 (3 from level 3) x{Amount} damage per [gold]Light[/gold] to ALL enemies (Light is not consumed).",
   "MAGICSWORDSMAN-TYRFING_BERSERKERS_POWER.title": "Twelve Berserkers",
   "MAGICSWORDSMAN-TYRFING_BERSERKERS_POWER.description": "At the start of each of your turns, lose 2 HP (1 from [gold]Tyrfing[/gold] level 3) and your [gold]Tyrfing[/gold] card attacks deal more damage this combat.",
-  "MAGICSWORDSMAN-TYRFING_BERSERKERS_POWER.smartDescription": "At the start of each of your turns, lose 2 HP (1 from [gold]Tyrfing[/gold] level 3) and your [gold]Tyrfing[/gold] card attacks deal {Amount} more damage this combat."
+  "MAGICSWORDSMAN-TYRFING_BERSERKERS_POWER.smartDescription": "At the start of each of your turns, lose 2 HP (1 from [gold]Tyrfing[/gold] level 3) and your [gold]Tyrfing[/gold] card attacks deal {Amount} more damage this combat.",
+  "MAGICSWORDSMAN-UNION_RELIC_GRACE_POWER.title": "Relic's Grace",
+  "MAGICSWORDSMAN-UNION_RELIC_GRACE_POWER.description": "Until your next turn, enemy attacks deal less damage per hit. Does not stack with [gold]Durandal[/gold]'s own effect.",
+  "MAGICSWORDSMAN-UNION_RELIC_GRACE_POWER.smartDescription": "Until your next turn, enemy attacks deal {Amount} less damage per hit. Does not stack with [gold]Durandal[/gold]'s own effect."
 }
