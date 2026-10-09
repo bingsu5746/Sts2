@@ -41,6 +41,7 @@ public static class SwordCardPick
 
     public static async Task Offer(Player player, SwordId sword, PlayerChoiceContext choiceContext)
     {
+        await WaitForPopups();
         sword = SwordRegistry.GroupLeader(sword);
         var pool = ModelDb.CardPool<MagicSwordsmanCardPool>();
         var filter = FilterFor(sword);
@@ -70,5 +71,33 @@ public static class SwordCardPick
                 .Add(new CardChoiceHistoryEntry(card, wasPicked: false));
         MainFile.Logger.Info($"[SwordCardPick] {sword}: offered {string.Join(",", cards.Select(c => c.Id))}, " +
                              $"picked {chosen?.Id.ToString() ?? "nothing"}");
+    }
+
+    private static readonly string[] PopupNames =
+        ["MagicSwordAcquiredPopup", "MagicSwordUnionUnlockedPopup", "MagicSwordMasteryPopup", "MagicSwordUnionPopupWaiter"];
+
+    /// <summary>
+    /// The new-sword / new-combo / mastery popups sit on a higher canvas layer than the choose-a-card screen, so the
+    /// pick waits until they are closed (or at most 60 s) instead of opening underneath them. Presentation only: the
+    /// popups exist only on the acquiring player's client, so other clients go straight on to wait for the choice.
+    /// </summary>
+    private static async Task WaitForPopups()
+    {
+        try
+        {
+            if (Godot.Engine.GetMainLoop() is not Godot.SceneTree tree) return;
+            for (var waited = 0.0; waited < 60.0; waited += 0.1)
+            {
+                var open = false;
+                foreach (var n in PopupNames)
+                    if (tree.Root.GetNodeOrNull(n) is { } node && !node.IsQueuedForDeletion()) { open = true; break; }
+                if (!open) return;
+                await tree.ToSignal(tree.CreateTimer(0.1), Godot.SceneTreeTimer.SignalName.Timeout);
+            }
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordCardPick] popup wait: {e.Message}");
+        }
     }
 }
