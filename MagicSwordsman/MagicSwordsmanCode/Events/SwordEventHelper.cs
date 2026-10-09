@@ -53,12 +53,15 @@ public static class SwordEventHelper
     /// release (their cards go to storage, spec §2 [확정]; Gram can be released too since 2026-10-09). Releases are applied only when the
     /// acquisition is certain (see <see cref="SwordAcquisition.AcquireWithRelease"/>). Returns false when the player
     /// cancels or nothing can make room; in that case no sword was lost.
+    /// A successful acquisition then offers 1 of 3 of the sword's cards (SwordCardPick) unless
+    /// <paramref name="offerCardPick"/> is false.
     /// </summary>
-    public static async Task<bool> Acquire(Player player, SwordId sword, PlayerChoiceContext choiceContext)
+    public static async Task<bool> Acquire(Player player, SwordId sword, PlayerChoiceContext choiceContext,
+        bool offerCardPick = true)
     {
         var tomb = Tomb(player);
         if (tomb == null) return false;
-        return await SwordAcquisition.AcquireWithRelease(player, tomb, sword, choiceContext);
+        return await SwordAcquisition.AcquireWithRelease(player, tomb, sword, choiceContext, offerCardPick);
     }
 
     /// <summary>"{Tagline}\n대가: {Cost}" — description of a sword button (content doc §6.1 / §6.3).</summary>

@@ -241,7 +241,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     /// <summary>
     /// Removes the sword (and partners) from Mangeomchong and moves all of their cards from the deck into storage.
     /// The level is reset to 0 ([Claude] decision: a lost/shattered sword comes back un-upgraded).
-    /// Gram is not lost by a shatter (SwordDefinition.CanBeLost, handled by SwordForge), but this method does not block it.
+    /// A forge shatter calls this for every sword, Gram included (its protection was removed, 사용자 결정 2026-10-09).
     /// </summary>
     public async Task LoseSword(SwordId sword)
     {
@@ -440,7 +440,9 @@ public class Mangeomchong : MagicSwordsmanRelic
     /// between the players of a multiplayer run, is identical on every client, and advances no game Rng.
     /// The run is still being created here (no room, no UI), so this works like Player.PopulateStartingDeck: the sword's
     /// StarterCards (the same cards an acquisition grants: 2 per sword or pair) go straight into the deck without
-    /// commands or previews, and OnAcquiredAsStartingSword applies the acquisition cost (간장·막야 Max HP).
+    /// commands or previews, and OnAcquiredAsStartingSword runs the run-level part of OnAcquired (currently nothing: the
+    /// 간장·막야 Max HP cost is waived for the random first sword, 사용자 결정 2026-10-09).
+    /// The sword's 1-of-3 card pick (SwordCardPick) needs a synced screen, so it is offered by the run-start pick instead.
     /// The presentation (popup + the text naming the sword) is the run-start pick (TombResonanceEvent START page).
     /// Saved through OwnedSwordIds / EverOwnedIds / RunCounters like every other acquisition.
     /// </summary>

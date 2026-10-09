@@ -190,14 +190,37 @@ public sealed class TombResonanceEvent : CustomEventModel
         }
 
         var firstTime = !tomb.EverOwned(sword);
-        if (!await SwordEventHelper.Acquire(Owner!, sword, new BlockingPlayerChoiceContext()))
+        var choiceContext = new BlockingPlayerChoiceContext();
+        // Run start: the card picks are offered here (first sword, then the chosen one), not inside Acquire.
+        if (!await SwordEventHelper.Acquire(Owner!, sword, choiceContext, offerCardPick: !IsStart))
         {
             ShowStart(); // release cancelled: back to the three swords
             return;
         }
 
+        if (IsStart) await OfferStartCardPicks(tomb, sword, choiceContext);
+
         MarkDone();
         SetEventFinished(IsStart ? SwordEventHelper.StartAcquiredText(sword) : SwordEventHelper.AcquiredText(sword, firstTime));
+    }
+
+    /// <summary>Run counter: the random first sword's card pick was offered (once per run).</summary>
+    public const string FirstSwordPickKey = "start.first_sword_pick";
+
+    /// <summary>
+    /// 사용자 결정 2026-10-09: every acquisition offers 1 of 3 of the sword's cards (SwordCardPick). The random first sword
+    /// is granted while the run is created (no UI, no synced choice possible), so its pick is offered here, right after the
+    /// run-start choice, before the chosen sword's own pick. Guarded by a run counter so it never repeats.
+    /// </summary>
+    private async Task OfferStartCardPicks(Relics.Mangeomchong tomb, SwordId chosen, PlayerChoiceContext choiceContext)
+    {
+        if (tomb.StartingSword is { } first && tomb.Owns(first) && tomb.GetRunCounter(FirstSwordPickKey) == 0)
+        {
+            tomb.SetRunCounter(FirstSwordPickKey, 1);
+            await SwordCardPick.Offer(Owner!, first, choiceContext);
+        }
+
+        await SwordCardPick.Offer(Owner!, chosen, choiceContext);
     }
 
     /// <summary>
