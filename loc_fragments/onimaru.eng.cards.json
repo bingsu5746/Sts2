@@ -1,0 +1,10 @@
+{
+  "MAGICSWORDSMAN-ONIMARU_FALLING_BLADE.title": "Falling Blade",
+  "MAGICSWORDSMAN-ONIMARU_FALLING_BLADE.description": "Whatever its current kind, [gold]Onimaru[/gold] makes 1 [gold]Iai[/gold] on the target ({IaiDamage} damage). The kind does not change.\n[gold]Fatal[/gold]: If this kills the enemy, gain {Energy} energy.\n[gold]Onimaru[/gold] level {SwordLevel} (its auto attack grows).",
+  "MAGICSWORDSMAN-ONIMARU_NIGHT_WATCH.title": "Night Watch",
+  "MAGICSWORDSMAN-ONIMARU_NIGHT_WATCH.description": "Whatever its current kind, [gold]Onimaru[/gold] guards once with [gold]Goei[/gold] ({AutoBlock} [gold]Block[/gold]). The kind does not change.\nDraw {Cards:diff()} card.\n[gold]Onimaru[/gold] level {SwordLevel} (its auto attack grows).",
+  "MAGICSWORDSMAN-ONIMARU_LEAP_FROM_SHEATH.title": "Leap from the Sheath",
+  "MAGICSWORDSMAN-ONIMARU_LEAP_FROM_SHEATH.description": "[gold]Command[/gold]: [gold]Onimaru[/gold] immediately makes 1 auto attack of its current kind ({IaiDamage} damage with Iai).\n[gold]Combo[/gold]: [gold]Command[/gold] once more.\n[gold]Onimaru[/gold] level {SwordLevel} (its auto attack grows).",
+  "MAGICSWORDSMAN-ONIMARU_FIVE_STANCES.title": "Five Stances",
+  "MAGICSWORDSMAN-ONIMARU_FIVE_STANCES.description": "[gold]Onimaru[/gold] strikes once with each kind: [gold]Goei[/gold], [gold]Taima[/gold], [gold]Iai[/gold], [gold]Ranbu[/gold] and [gold]Giri[/gold] (Taima and Iai hit the target). The kind does not change.\n[gold]Onimaru[/gold] level {SwordLevel} (its auto attack grows)."
+}

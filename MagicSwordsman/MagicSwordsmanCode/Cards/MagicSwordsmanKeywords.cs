@@ -78,6 +78,7 @@ public static class MagicSwordsmanKeywords
         [typeof(Cards.Gram.GramBalmungNothung)] = [CurrentSword],
         [typeof(Cards.Gram.GramFleeceCutter)] = [Combo],
         [typeof(Cards.Onimaru.OnimaruFirstAmongFive)] = [Command],
+        [typeof(Cards.Onimaru.OnimaruLeapFromSheath)] = [Command, Combo],
         [typeof(Cards.Onimaru.OnimaruOniHunt)] = [Command],
         [typeof(Cards.Onimaru.OnimaruOniSlash)] = [Command],
         [typeof(Cards.Onimaru.OnimaruTaiheiki)] = [Command],
