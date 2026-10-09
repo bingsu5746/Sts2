@@ -1,6 +1,6 @@
 {
   "MAGICSWORDSMAN-MANGEOMCHONG.title": "Tomb of Ten Thousand Swords",
-  "MAGICSWORDSMAN-MANGEOMCHONG.description": "The first time you summon a sword each combat, gain {Block:diff()} [gold]Block[/gold] and draw {Cards:diff()} card.{SwordList}",
+  "MAGICSWORDSMAN-MANGEOMCHONG.description": "The first time you summon a sword each combat, gain {Block:diff()} [gold]Block[/gold] and draw {Cards:diff()} {Cards:plural:card|cards}.{SwordList}",
   "MAGICSWORDSMAN-MANGEOMCHONG.flavor": "A tomb where countless swords sleep. Call, and a blade awakens.",
   "MAGICSWORDSMAN-BRANSTOCK.title": "Branstock",
   "MAGICSWORDSMAN-BRANSTOCK.description": "You can hold [gold]1[/gold] more magic sword.",
@@ -9,7 +9,7 @@
   "MAGICSWORDSMAN-WOODEN_PLAQUE.description": "Upon pickup, heal [green]{Heal}[/green] HP.\nYou can hold [gold]1[/gold] more magic sword.",
   "MAGICSWORDSMAN-WOODEN_PLAQUE.flavor": "Only a wooden plaque remains at the sword grave.",
   "MAGICSWORDSMAN-REGINS_ANVIL.title": "Regin's Anvil",
-  "MAGICSWORDSMAN-REGINS_ANVIL.description": "[gold]Gamble Upgrade[/gold] success chance +{Bonus}%p (taken from the failure chance; the shatter chance is unchanged).",
+  "MAGICSWORDSMAN-REGINS_ANVIL.description": "[gold]Gamble Upgrade[/gold] success chance +{Bonus}% (taken from the failure chance; the shatter chance is unchanged).",
   "MAGICSWORDSMAN-REGINS_ANVIL.flavor": "Regin forged the two pieces anew. The new Gram split the anvil in two.",
   "MAGICSWORDSMAN-BLACK_LACQUER_SHEATH.title": "Black Lacquer Sheath",
   "MAGICSWORDSMAN-BLACK_LACQUER_SHEATH.description": "The next [gold]Shatter[/gold] becomes a normal upgrade failure instead. Then the sheath is empty.",
@@ -18,9 +18,9 @@
   "MAGICSWORDSMAN-SWORD_RACK.description": "The first time your current sword changes each turn, gain {Block:diff()} [gold]Block[/gold].",
   "MAGICSWORDSMAN-SWORD_RACK.flavor": "A sword on the rack can be taken up at any moment.",
   "MAGICSWORDSMAN-THREE_HUNDRED_BELLOWS.title": "Three Hundred Bellows",
-  "MAGICSWORDSMAN-THREE_HUNDRED_BELLOWS.description": "The second time you summon a magic sword each combat, also gain {Block:diff()} [gold]Block[/gold] and draw {Cards:diff()} card.",
+  "MAGICSWORDSMAN-THREE_HUNDRED_BELLOWS.description": "The second time you summon a magic sword each combat, also gain {Block:diff()} [gold]Block[/gold] and draw {Cards:diff()} {Cards:plural:card|cards}.",
   "MAGICSWORDSMAN-THREE_HUNDRED_BELLOWS.flavor": "Three hundred children worked the bellows, and the swords were finished after three years.",
   "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.title": "Opened Tomb of Ten Thousand Swords",
-  "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.description": "The first time you summon a sword each combat, gain {Block:diff()} [gold]Block[/gold] and draw {Cards:diff()} cards.{SwordList}",
+  "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.description": "The first time you summon a sword each combat, gain {Block:diff()} [gold]Block[/gold] and draw {Cards:diff()} {Cards:plural:card|cards}.{SwordList}",
   "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.flavor": "The tomb's gate stands wide open. The sleeping swords reach out first."
 }
