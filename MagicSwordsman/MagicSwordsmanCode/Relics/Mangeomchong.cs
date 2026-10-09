@@ -228,6 +228,7 @@ public class Mangeomchong : MagicSwordsmanRelic
         if (results.Count > 0) CardCmd.PreviewCardPileAdd(results);
 
         foreach (var s in group) await SwordRegistry.Get(s).OnAcquired(Owner, firstTime[s]);
+        if (!firstTime[sword]) SwordTalk.OnReacquired(Owner, sword); // back in the tomb: maybe a line (Dialogue)
 
         Flash();
         // First acquisition in the run: a short "new sword" card (presentation only, local player only).
@@ -260,6 +261,7 @@ public class Mangeomchong : MagicSwordsmanRelic
 
         foreach (var s in group) await SwordRegistry.Get(s).OnLost(Owner);
         Flash();
+        SwordTalk.OnReleased(Owner, sword); // farewell line (Dialogue/SwordTalk.cs)
         MainFile.Logger.Info($"[Mangeomchong] lost {string.Join(",", group)}; stored {toStore.Count} cards");
     }
 
@@ -349,6 +351,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     public async Task AddCurse(CardModel canonicalCurse)
     {
         if (LocalContext.IsMe(Owner)) Visuals.Sfx.Curse();
+        SwordTalk.OnCursed(Owner, canonicalCurse); // the sword that cursed him may speak (Dialogue/SwordTalk.cs)
         if (canonicalCurse.Type == CardType.Curse)
         {
             await CardPileCmd.AddCursesToDeck([canonicalCurse], Owner);
