@@ -49,12 +49,13 @@ class Clip:
         return s
     def hand(s,side,t,scale,a,col=PURPLE):
         """Palm magic circle(s): side 'L', 'R' or 'LR'."""
-        for h in side: s.key(HAND[h]+':scale',t,V(scale,scale)); s.key(HAND[h]+':modulate',t,C(*col,a))
+        # colour comes from the current sword at runtime (HandX/Tint, SwordVisuals); clips only drive size + alpha
+        for h in side: s.key(HAND[h]+':scale',t,V(scale,scale)); s.key(HAND[h]+':modulate',t,C(1,1,1,a))
         return s
 REST={**{JOINTS[j]+':rotation':'0.0000' for j in JOINTS},'Visuals:position':V(0,REST_Y),'Visuals:rotation':'0.0000',
       'Visuals:scale':V(1,1),'Visuals:modulate':C(1,1,1),'Circle:modulate':C(*PURPLE,0),
       'Shield:modulate':C(1,1,1,0),'Visuals/Rig/Sigil:modulate':C(1,1,1,0.4),'Visuals/Rig/Sigil:scale':V(1,1),
-      **{HAND[h]+':scale':V(HAND_REST[0],HAND_REST[0]) for h in HAND},**{HAND[h]+':modulate':C(*PURPLE,HAND_REST[1]) for h in HAND}}
+      **{HAND[h]+':scale':V(HAND_REST[0],HAND_REST[0]) for h in HAND},**{HAND[h]+':modulate':C(1,1,1,HAND_REST[1]) for h in HAND}}
 def emit(clip,aid):
     tracks=dict(clip.tr)
     for k,v in REST.items():  # every clip resets what it does not animate
@@ -276,11 +277,12 @@ spin=[]
 for h,(part,(hx,hy)) in PALM.items():
     piv=PARTS[part]['pivot']; par=HAND[h]; fore=par.rsplit('/',1)[0]
     nodes+=f'[node name="Hand{h}" type="Node2D" parent="{fore}"]\nmodulate = {C(*PURPLE,HAND_REST[1])}\nposition = {V(hx-piv[0],hy-piv[1])}\nscale = {V(HAND_REST[0],HAND_REST[0])}\n\n'
+    nodes+=f'[node name="Tint" type="Node2D" parent="{par}"]\nmodulate = {C(*PURPLE)}\n\n'
     for ln,tex,tilt,sq,turns in LAYERS:
-        nodes+=f'[node name="{ln}Tilt" type="Node2D" parent="{par}"]\nrotation = {tilt}\nscale = {V(1,sq)}\n\n'
+        nodes+=f'[node name="{ln}Tilt" type="Node2D" parent="{par}/Tint"]\nrotation = {tilt}\nscale = {V(1,sq)}\n\n'
         sc=0.45 if ln=='Core' else 0.62 if ln=='Glyph' else 1.0
-        nodes+=f'[node name="{ln}" type="Sprite2D" parent="{par}/{ln}Tilt"]\nmaterial = SubResource("add")\nscale = {V(sc,sc)}\ntexture = ExtResource("{tex}")\n\n'
-        if turns: spin.append((f'{par}/{ln}Tilt/{ln}',turns if h=='R' else -turns))  # the two hands spin mirrored
+        nodes+=f'[node name="{ln}" type="Sprite2D" parent="{par}/Tint/{ln}Tilt"]\nmaterial = SubResource("add")\nscale = {V(sc,sc)}\ntexture = ExtResource("{tex}")\n\n'
+        if turns: spin.append((f'{par}/Tint/{ln}Tilt/{ln}',turns if h=='R' else -turns))  # the two hands spin mirrored
 spin_tracks=[]
 for i,(path,turns) in enumerate(spin):
     spin_tracks.append(f'''tracks/{i}/type = "value"

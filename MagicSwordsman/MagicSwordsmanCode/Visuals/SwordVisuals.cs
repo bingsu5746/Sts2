@@ -152,6 +152,7 @@ public static class SwordVisuals
 
         rig.Current = state.Current;
         Layout(rig);
+        ApplyPalmCircles(player, state.Current);
     }
 
     private static void Layout(Rig rig)
@@ -319,6 +320,205 @@ public static class SwordVisuals
         blade.AddChild(motes);
     }
 
+    private static float PointAt(Vector2 from, Vector2 to)
+    {
+        var d = to - from;
+        return Mathf.Atan2(d.Y, d.X) + Mathf.Pi / 2; // art points up
+    }
+
+    /// <summary>
+    /// Each sword flies its own way (user request 2026-10-09). All flights reach the target within ~0.15 s (the game
+    /// deals the damage 0.15 s after the Attack trigger) and leave fading afterimages in the sword's colour.
+    /// </summary>
+    private static void StrikeStyle(Tween tw, Node2D node, SwordId sword, Vector2 home, Vector2 aim)
+    {
+        var col = ColorOf(sword);
+        var dir = (aim - home).Normalized();
+        var hit = aim - dir * 40f;
+        var side = new Vector2(-dir.Y, dir.X);
+        Trail(node, sword == SwordId.ClaiomhSolais ? 0.35 : 0.5, col);
+        switch (sword)
+        {
+            case SwordId.Gram: // rises, then slams down onto the target
+            {
+                var up = new Vector2((home.X + aim.X) / 2, Math.Min(home.Y, aim.Y) - 260);
+                tw.TweenProperty(node, "position", up, 0.07).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+                tw.Parallel().TweenProperty(node, "rotation", PointAt(up, hit), 0.07);
+                tw.TweenProperty(node, "position", hit, 0.07).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
+                tw.Parallel().TweenProperty(node, "scale", Vector2.One * 1.45f, 0.07);
+                tw.TweenInterval(0.08);
+                tw.TweenProperty(node, "position", home, 0.35).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+                tw.Parallel().TweenProperty(node, "rotation", Mathf.Tau, 0.35);
+                tw.Parallel().TweenProperty(node, "scale", Vector2.One * 1.15f, 0.35);
+                tw.TweenCallback(Callable.From(() => node.Rotation = 0));
+                break;
+            }
+            case SwordId.Ganjiang or SwordId.Moye: // two quick crossing cuts
+            {
+                var a1 = hit + side * 70; var a2 = hit - side * 70;
+                tw.TweenProperty(node, "rotation", PointAt(home, a1), 0.04);
+                tw.TweenProperty(node, "position", a1, 0.06);
+                tw.TweenProperty(node, "position", a2, 0.06).SetTrans(Tween.TransitionType.Sine);
+                tw.Parallel().TweenProperty(node, "rotation", PointAt(a1, a2), 0.06);
+                tw.TweenProperty(node, "position", hit, 0.05);
+                tw.TweenProperty(node, "position", home, 0.3).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+                tw.Parallel().TweenProperty(node, "rotation", 0f, 0.3);
+                break;
+            }
+            case SwordId.Kusanagi: // spinning boomerang along a curve
+            {
+                var mid = (home + aim) / 2 + side * 160;
+                tw.TweenMethod(Callable.From<float>(t => node.Position = Bezier(home, mid, hit, t)), 0f, 1f, 0.14);
+                tw.Parallel().TweenProperty(node, "rotation", Mathf.Tau * 2, 0.14);
+                var back = (home + aim) / 2 - side * 160;
+                tw.TweenMethod(Callable.From<float>(t => node.Position = Bezier(hit, back, home, t)), 0f, 1f, 0.4);
+                tw.Parallel().TweenProperty(node, "rotation", Mathf.Tau * 4, 0.4);
+                tw.TweenCallback(Callable.From(() => node.Rotation = 0));
+                break;
+            }
+            case SwordId.Dainsleif: // three rapid stabs
+            {
+                tw.TweenProperty(node, "rotation", PointAt(home, hit), 0.04);
+                for (var k = 0; k < 3; k++)
+                {
+                    tw.TweenProperty(node, "position", hit + side * (k - 1) * 30, 0.045).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
+                    tw.TweenProperty(node, "position", hit - dir * 90, 0.04);
+                }
+                tw.TweenProperty(node, "position", home, 0.3).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+                tw.Parallel().TweenProperty(node, "rotation", 0f, 0.3);
+                break;
+            }
+            case SwordId.Durandal: // vanishes, appears above the target and drops straight down
+            {
+                var above = aim + new Vector2(0, -300);
+                tw.TweenProperty(node, "modulate:a", 0f, 0.04);
+                tw.TweenCallback(Callable.From(() => { node.Position = above; node.Rotation = Mathf.Pi; }));
+                tw.TweenProperty(node, "modulate:a", 1f, 0.03);
+                tw.TweenProperty(node, "position", aim + new Vector2(0, -30), 0.07).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
+                tw.Parallel().TweenProperty(node, "scale", Vector2.One * 1.5f, 0.07);
+                tw.TweenInterval(0.12);
+                tw.TweenProperty(node, "modulate:a", 0f, 0.1);
+                tw.TweenCallback(Callable.From(() => { node.Position = home; node.Rotation = 0; node.Scale = Vector2.One * 1.15f; }));
+                tw.TweenProperty(node, "modulate:a", 1f, 0.2);
+                break;
+            }
+            case SwordId.Skofnung: // a ghost: fades out, reappears beside the target, cuts, fades home
+            {
+                var beside = aim - dir * 160 + side * 60;
+                tw.TweenProperty(node, "modulate", new Color(0.7f, 0.9f, 1f, 0f), 0.05);
+                tw.TweenCallback(Callable.From(() => { node.Position = beside; node.Rotation = PointAt(beside, hit); }));
+                tw.TweenProperty(node, "modulate", new Color(0.8f, 0.95f, 1f, 0.9f), 0.04);
+                tw.TweenProperty(node, "position", hit + dir * 60, 0.06);
+                tw.TweenProperty(node, "modulate:a", 0f, 0.12);
+                tw.TweenCallback(Callable.From(() => { node.Position = home; node.Rotation = 0; }));
+                tw.TweenProperty(node, "modulate", Colors.White, 0.25);
+                break;
+            }
+            case SwordId.Onimaru: // blink: gone and through the target in one frame, a flash line left behind
+            {
+                tw.TweenProperty(node, "rotation", PointAt(home, hit), 0.03);
+                tw.TweenInterval(0.08);
+                tw.TweenCallback(Callable.From(() => node.Position = hit + dir * 120));
+                tw.TweenInterval(0.15);
+                tw.TweenProperty(node, "modulate:a", 0f, 0.08);
+                tw.TweenCallback(Callable.From(() => { node.Position = home; node.Rotation = 0; }));
+                tw.TweenProperty(node, "modulate:a", 1f, 0.15);
+                break;
+            }
+            case SwordId.ClaiomhSolais: // a beam of light: stretches into a long shaft as it shoots
+            {
+                tw.TweenProperty(node, "rotation", PointAt(home, hit), 0.03);
+                tw.TweenProperty(node, "scale", new Vector2(0.8f, 2.6f), 0.05);
+                tw.Parallel().TweenProperty(node, "modulate", new Color(1.6f, 1.6f, 1.3f), 0.05);
+                tw.TweenProperty(node, "position", hit, 0.06).SetTrans(Tween.TransitionType.Expo).SetEase(Tween.EaseType.In);
+                tw.TweenProperty(node, "scale", Vector2.One * 1.15f, 0.12);
+                tw.Parallel().TweenProperty(node, "modulate", Colors.White, 0.12);
+                tw.TweenProperty(node, "position", home, 0.3).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+                tw.Parallel().TweenProperty(node, "rotation", 0f, 0.3);
+                break;
+            }
+            case SwordId.Caladbolg: // grows huge and sweeps across the target
+            {
+                var a1 = aim + new Vector2(-60, -220);
+                tw.TweenProperty(node, "scale", Vector2.One * 2.4f, 0.07);
+                tw.Parallel().TweenProperty(node, "position", a1, 0.07);
+                tw.Parallel().TweenProperty(node, "rotation", -0.6f, 0.07);
+                tw.TweenProperty(node, "rotation", 2.2f, 0.09).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
+                tw.Parallel().TweenProperty(node, "position", aim + new Vector2(40, -80), 0.09);
+                tw.TweenInterval(0.08);
+                tw.TweenProperty(node, "scale", Vector2.One * 1.15f, 0.3);
+                tw.Parallel().TweenProperty(node, "position", home, 0.3).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+                tw.Parallel().TweenProperty(node, "rotation", 0f, 0.3);
+                break;
+            }
+            default: // Tyrfing and anything else: a straight burning dash
+            {
+                tw.TweenProperty(node, "rotation", PointAt(home, hit), 0.05).SetTrans(Tween.TransitionType.Quad);
+                tw.TweenProperty(node, "position", hit, 0.09).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
+                tw.TweenInterval(0.06);
+                tw.TweenProperty(node, "position", home, 0.28).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+                tw.Parallel().TweenProperty(node, "rotation", 0f, 0.28);
+                break;
+            }
+        }
+    }
+
+    private static Vector2 Bezier(Vector2 a, Vector2 b, Vector2 c, float t) =>
+        (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * c;
+
+    /// <summary>Fading copies of the sword left behind while it flies.</summary>
+    private static void Trail(Node2D node, double duration, Color col)
+    {
+        if (node.GetParent() is not Node2D parent) return;
+        var timer = new Godot.Timer { WaitTime = 0.025, Autostart = true };
+        var elapsed = 0.0;
+        timer.Timeout += () =>
+        {
+            elapsed += timer.WaitTime;
+            if (elapsed > duration || !GodotObject.IsInstanceValid(node)) { timer.QueueFree(); return; }
+            if (node.GetNodeOrNull<Node2D>("Blade") is not { } blade) return;
+            var ghost = new Node2D { Position = node.Position, Rotation = node.Rotation, Scale = node.Scale, ZIndex = node.ZIndex - 1 };
+            foreach (var child in blade.GetChildren())
+                if (child is Sprite2D sp && sp.Name != "Aura")
+                    ghost.AddChild(new Sprite2D { Texture = sp.Texture, Scale = sp.Scale, Position = sp.Position, Rotation = sp.Rotation,
+                        RegionEnabled = sp.RegionEnabled, RegionRect = sp.RegionRect });
+            ghost.Modulate = new Color(col.Lightened(0.3f), 0.45f);
+            ghost.Material = new CanvasItemMaterial { BlendMode = CanvasItemMaterial.BlendModeEnum.Add };
+            foreach (var c in ghost.GetChildren()) if (c is CanvasItem ci) ci.UseParentMaterial = true;
+            parent.AddChild(ghost);
+            var fade = ghost.CreateTween();
+            fade.TweenProperty(ghost, "modulate:a", 0f, 0.22);
+            fade.TweenCallback(Callable.From(ghost.QueueFree));
+        };
+        parent.AddChild(timer);
+    }
+
+    private static readonly Color PalmDefault = new(0.85f, 0.65f, 1f);
+
+    /// <summary>
+    /// Ensifer's palm circles take the current sword's colour and centre glyph (images/vfx/glyph_&lt;sword&gt;.png,
+    /// tools/gen_hand_glyphs.py). The clips only animate their size and alpha (HandL/HandR); colour lives on the
+    /// HandX/Tint node below them, so the two never fight.
+    /// </summary>
+    private static void ApplyPalmCircles(Player player, SwordId? current)
+    {
+        var visuals = NCombatRoom.Instance?.GetCreatureNode(player.Creature)?.Visuals;
+        if (visuals == null) return;
+        var color = current is { } c ? ColorOf(c).Lightened(0.2f) : PalmDefault;
+        Texture2D? glyph = null;
+        if (current is { } cs)
+        {
+            var path = $"{MainFile.ResPath}/images/vfx/glyph_{cs.ToString().ToLowerInvariant()}.png";
+            if (ResourceLoader.Exists(path)) glyph = GD.Load<Texture2D>(path);
+        }
+        foreach (var hand in new[] { "Visuals/Rig/UpperL/ForeL/HandL/Tint", "Visuals/Rig/UpperR/ForeR/HandR/Tint" })
+        {
+            if (visuals.GetNodeOrNull<Node2D>(hand) is not { } tint) continue;
+            tint.Modulate = color;
+            if (glyph != null && tint.GetNodeOrNull<Sprite2D>("GlyphTilt/Glyph") is { } g) g.Texture = glyph;
+        }
+    }
+
     private static void ShowTip(Control owner, SwordId sword, Player player)
     {
         try
@@ -351,7 +551,8 @@ public static class SwordVisuals
     private static readonly Dictionary<Node2D, ulong> LastStrike = new();
 
     /// <summary>
-    /// The current sword (else any present one) flies to <paramref name="target"/> and back (user request 2026-10-08:
+    /// The current sword (else any present one) flies to <paramref name="target"/> and back in its own style
+    /// (<see cref="StrikeStyle"/>; user request 2026-10-08:
     /// "공격하면 소환된 칼이 직접 날아가서 공격"). The game deals the damage 0.15 s after the Attack trigger, so the
     /// flight reaches the target on the hit. A second call within the same flight is ignored.
     /// </summary>
@@ -370,7 +571,7 @@ public static class SwordVisuals
             var targetNode = target != null ? room?.GetCreatureNode(target) : null;
             Vector2 aim;
             if (targetNode != null) aim = rig.Root.ToLocal(targetNode.GlobalPosition + new Vector2(0, -130));
-            else aim = node.Position + new Vector2(520, 40); // no single target: thrust toward the enemy side
+            else aim = (rig.Slots.TryGetValue(sword, out var hs) ? hs : node.Position) + new Vector2(520, 40); // no single target
 
             // a sword summoned by this very card is still flying out of Ensifer: put it on its slot first so the strike
             // starts from there (bug report 2026-10-09: it looked like a swing from his hand)
@@ -379,17 +580,10 @@ public static class SwordVisuals
             node.Position = home;
             node.Scale = Vector2.One * 1.15f;
             node.Modulate = Colors.White;
-            var dir = aim - home;
-            var angle = Mathf.Atan2(dir.Y, dir.X) + Mathf.Pi / 2; // art points up
-            // stop a little short so the blade tip, not the hilt, meets the target
-            var hit = aim - dir.Normalized() * 40f;
 
             var tw = node.CreateTween();
-            tw.TweenProperty(node, "rotation", angle, 0.06).SetTrans(Tween.TransitionType.Quad);
-            tw.TweenProperty(node, "position", hit, 0.11).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
-            tw.TweenInterval(0.06);
-            tw.TweenProperty(node, "position", home, 0.28).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
-            tw.Parallel().TweenProperty(node, "rotation", 0f, 0.28);
+            rig.Moves[sword] = tw; // a later strike / layout takes over cleanly instead of fighting this tween
+            StrikeStyle(tw, node, sword, home, aim);
             tw.TweenCallback(Callable.From(() => Layout(rig)));
         }
         catch (Exception e)
