@@ -1,6 +1,7 @@
 using MagicSwordsman.MagicSwordsmanCode.Extensions;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
+using MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 using MegaCrit.Sts2.Core.Commands.Builders;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -25,6 +26,11 @@ namespace MagicSwordsman.MagicSwordsmanCode.Powers;
 ///   MAGICSWORDSMAN-CURRENT_SWORD_POWER.&lt;SWORD&gt;.title / .description / .smartDescription
 ///   (SWORD = SwordId upper-case, e.g. GRAM, CLAIOMHSOLAIS) with variables {Level}, {HalfLevel}, {SwordName},
 ///   {InheritedName}, {Amount}. In combat the game shows smartDescription (vars come from DynamicVars).
+///
+/// Onimaru (user 2026-10-10 "같은 모양의 검으로 두 개 있는데 하나로 병합해줘"): while Onimaru is the current sword this
+/// power also shows its stance — key ONIMARU_&lt;KIND&gt; (e.g. "현재 검: 오니마루 — 거합 자세") with the auto-attack vars
+/// {AutoDamage} {AutoHits} {AutoBlock} {AutoWeak} {IaiBonus}, and the icon current_sword_onimaru_&lt;kind&gt;.png — and the
+/// separate stance power (OnimaruKindPower) is hidden, so only one katana icon is on screen.
 /// </summary>
 public sealed class CurrentSwordPower : MagicSwordsmanPower
 {
@@ -42,6 +48,11 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         new DynamicVar(HalfLevelVar, 0m),
         new StringVar(SwordNameVar, "-"),
         new StringVar(InheritedNameVar, "-"),
+        new DynamicVar("AutoDamage", 0m),
+        new DynamicVar("AutoHits", 0m),
+        new DynamicVar("AutoBlock", 0m),
+        new DynamicVar("AutoWeak", 0m),
+        new DynamicVar("IaiBonus", 0m),
     ];
 
     private Player? OwnerPlayer => IsMutable ? Owner?.Player : null;
@@ -53,8 +64,34 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
 
     public override string CustomBigIconPath => IconFile().BigPowerImagePath();
 
-    private string IconFile() =>
-        CurrentSword is { } s ? $"current_sword_{s.ToString().ToLowerInvariant()}.png" : "current_sword_power.png";
+    private string IconFile()
+    {
+        if (StanceKind() is { } kind)
+        {
+            var stance = $"current_sword_onimaru_{kind.ToString().ToLowerInvariant()}.png";
+            if (Godot.ResourceLoader.Exists(stance.PowerImagePath())) return stance;
+        }
+
+        return CurrentSword is { } s ? $"current_sword_{s.ToString().ToLowerInvariant()}.png" : "current_sword_power.png";
+    }
+
+    /// <summary>Onimaru's stance while Onimaru is the current sword, else null.</summary>
+    private OnimaruKind? StanceKind() =>
+        CurrentSword == SwordId.Onimaru && OwnerPlayer is { } p ? OnimaruAttack.GetKind(p) : null;
+
+    /// <summary>Loc sub-key of the current sword: ONIMARU_&lt;KIND&gt; for Onimaru (stance merged in), else the sword.</summary>
+    private string? TextKey(string field)
+    {
+        if (CurrentSword is not { } s) return null;
+        if (StanceKind() is { } kind)
+        {
+            var k = $"{Id.Entry}.ONIMARU_{kind.ToString().ToUpperInvariant()}.{field}";
+            if (LocString.Exists("powers", k)) return k;
+        }
+
+        var key = SwordKey(s, field);
+        return LocString.Exists("powers", key) ? key : null;
+    }
 
     private static readonly System.Reflection.FieldInfo? ResolvedBigIcon =
         HarmonyLib.AccessTools.Field(typeof(PowerModel), "_resolvedBigIconPath");
@@ -96,9 +133,7 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
     {
         get
         {
-            if (CurrentSword is { } s && LocString.Exists("powers", SwordKey(s, "title")))
-                return new LocString("powers", SwordKey(s, "title"));
-            return base.Title;
+            return TextKey("title") is { } k ? new LocString("powers", k) : base.Title;
         }
     }
 
@@ -106,11 +141,7 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
     {
         get
         {
-            LocString loc;
-            if (CurrentSword is { } s && LocString.Exists("powers", SwordKey(s, "description")))
-                loc = new LocString("powers", SwordKey(s, "description"));
-            else
-                loc = base.Description;
+            var loc = TextKey("description") is { } k ? new LocString("powers", k) : base.Description;
             AddSwordVars(loc);
             return loc;
         }
@@ -122,9 +153,7 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         get
         {
             UpdateVars();
-            if (CurrentSword is { } s && LocString.Exists("powers", SwordKey(s, "smartDescription")))
-                return SwordKey(s, "smartDescription");
-            return base.SmartDescriptionLocKey;
+            return TextKey("smartDescription") ?? base.SmartDescriptionLocKey;
         }
     }
 
@@ -143,6 +172,15 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
             : null;
         if (DynamicVars[InheritedNameVar] is StringVar inh)
             inh.StringValue = inherited != null ? SwordRegistry.DisplayName(inherited.Value) : "-";
+        if (player != null && StanceKind() is { } kind)
+        {
+            var n = OnimaruAttack.Compute(player, kind);
+            DynamicVars["AutoDamage"].BaseValue = n.PerHit;
+            DynamicVars["AutoHits"].BaseValue = n.Hits;
+            DynamicVars["AutoBlock"].BaseValue = n.Block;
+            DynamicVars["AutoWeak"].BaseValue = n.Weak;
+            DynamicVars["IaiBonus"].BaseValue = OnimaruAttack.IaiBonus(player);
+        }
     }
 
     private string SwordKey(SwordId sword, string field) => $"{Id.Entry}.{sword.ToString().ToUpperInvariant()}.{field}";
@@ -159,6 +197,12 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
             ? SwordRegistry.Get(sword.Value).GetInheritedSword(SwordCombat.ContextFor(player, sword.Value))
             : null;
         loc.Add("InheritedName", inherited != null ? SwordRegistry.DisplayName(inherited.Value) : "-");
+        var n = player != null && StanceKind() is { } kind ? OnimaruAttack.Compute(player, kind) : default;
+        loc.Add("AutoDamage", n.PerHit);
+        loc.Add("AutoHits", n.Hits);
+        loc.Add("AutoBlock", n.Block);
+        loc.Add("AutoWeak", n.Weak);
+        loc.Add("IaiBonus", player != null ? OnimaruAttack.IaiBonus(player) : 0);
     }
 
     /// <summary>Called after a switch so the icon number / tooltip update.</summary>

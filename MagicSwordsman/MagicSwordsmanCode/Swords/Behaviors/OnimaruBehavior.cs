@@ -128,6 +128,14 @@ public static class OnimaruAttack
                     await PowerCmd.Apply<OnimaruGoeiPower>(choiceContext, creature, 1, creature, null);
                 break;
         }
+
+        // presentation: while Onimaru is current the stance shows on the current-sword power (one katana icon)
+        if (creature.GetPower<CurrentSwordPower>() is { } current)
+        {
+            current.Refresh();
+            current.RefreshIcon();
+        }
+        OnimaruKindPower.SyncVisibility(player);
     }
 
     // ------------------------------------------------------------------ numbers (pure: also used for previews)

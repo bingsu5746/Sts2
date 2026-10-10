@@ -69,7 +69,17 @@ public static class EventChoiceScreen
         center.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         root.AddChild(center);
 
-        var panel = new PanelContainer { CustomMinimumSize = new Vector2(1440, 760), MouseFilter = Control.MouseFilterEnum.Ignore };
+        // Layout (2026-10-10 fix, "마검 강화 누른 건데 UI가 저렇게 뜨네"): the old option button set its minimum height in
+        // Ready from its labels, measured before they had a width, so autowrap broke every character onto its own line:
+        // one option grew taller than the screen, pushed the panel off screen and the picture (centred in the art
+        // panel) with it. Now the panel has a fixed size that fits the viewport, every option is a PanelContainer that
+        // takes its height from its wrapped text, the options sit in a ScrollContainer (the panel can never grow), and
+        // the picture fills the art panel.
+        var view = tree.Root.GetVisibleRect().Size;
+        // canvas_items stretch: the visible rect is at least the 1920x1080 base; guard against an unsized viewport
+        if (view.X < 1000f || view.Y < 700f) view = new Vector2(1920f, 1080f);
+        var panelSize = new Vector2(Math.Min(1440f, view.X - 60f), Math.Min(820f, view.Y - 60f));
+        var panel = new PanelContainer { CustomMinimumSize = panelSize, MouseFilter = Control.MouseFilterEnum.Ignore };
         panel.AddThemeStyleboxOverride("panel", Box(PanelBg, new Color(accent, 0.85f), 3, 16, 26));
         center.AddChild(panel);
 
@@ -77,28 +87,64 @@ public static class EventChoiceScreen
         row.AddThemeConstantOverride("separation", 30);
         panel.AddChild(row);
 
-        // ---- picture
-        var art = new PanelContainer { CustomMinimumSize = new Vector2(520, 700), MouseFilter = Control.MouseFilterEnum.Ignore };
-        art.AddThemeStyleboxOverride("panel", Box(new Color(accent.Darkened(0.88f), 1f), new Color(accent, 0.6f), 2, 10, 0,
+        // ---- picture (fills the art panel, aspect kept)
+        var art = new PanelContainer
+        {
+            CustomMinimumSize = new Vector2(Math.Min(520f, panelSize.X * 0.36f), 0),
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill, MouseFilter = Control.MouseFilterEnum.Ignore,
+        };
+        art.AddThemeStyleboxOverride("panel", Box(new Color(accent.Darkened(0.88f), 1f), new Color(accent, 0.6f), 2, 10, 18,
             new Color(accent, 0.25f), 36));
-        if (imagePath != null && ResourceLoader.Exists(imagePath))
+        var tex = imagePath != null && ResourceLoader.Exists(imagePath) ? GD.Load<Texture2D>(imagePath) : null;
+        if (tex == null && imagePath != null) MainFile.Logger.Warn($"[EventChoiceScreen] missing picture {imagePath}");
+        if (tex != null)
         {
             art.AddChild(new TextureRect
             {
-                Texture = GD.Load<Texture2D>(imagePath), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered, MouseFilter = Control.MouseFilterEnum.Ignore,
+                Texture = tex, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+                MouseFilter = Control.MouseFilterEnum.Ignore,
             });
         }
         row.AddChild(art);
 
-        // ---- text + options
-        var col = new VBoxContainer { CustomMinimumSize = new Vector2(820, 0), MouseFilter = Control.MouseFilterEnum.Ignore };
-        col.AddThemeConstantOverride("separation", 12);
+        // ---- title, story, options (scrolling), back
+        var col = new VBoxContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+        };
+        col.AddThemeConstantOverride("separation", 14);
         row.AddChild(col);
         col.AddChild(Rich($"[b]{Esc(title)}[/b]", 40, accent.Lightened(0.35f), true));
-        var story = Rich(Bb(body), 23, Text, false);
-        story.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
-        col.AddChild(story);
+        if (!string.IsNullOrWhiteSpace(body)) col.AddChild(Rich(Bb(body), 23, Text, false));
+
+        var rule = new ColorRect
+        {
+            Color = new Color(accent, 0.35f), CustomMinimumSize = new Vector2(0, 2), MouseFilter = Control.MouseFilterEnum.Ignore,
+        };
+        col.AddChild(rule);
+
+        var scroll = new ScrollContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+            HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled, FollowFocus = true,
+            MouseFilter = Control.MouseFilterEnum.Pass,
+        };
+        col.AddChild(scroll);
+        var list = new VBoxContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, MouseFilter = Control.MouseFilterEnum.Ignore,
+        };
+        list.AddThemeConstantOverride("separation", 10);
+        var gutter = new MarginContainer // room for the scroll bar
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, MouseFilter = Control.MouseFilterEnum.Ignore,
+        };
+        gutter.AddThemeConstantOverride("margin_right", 16);
+        gutter.AddChild(list);
+        scroll.AddChild(gutter);
 
         var closing = false;
         void Finish(int i)
@@ -117,12 +163,15 @@ public static class EventChoiceScreen
         for (var i = 0; i < options.Count; i++)
         {
             var idx = i;
-            col.AddChild(OptionButton(options[i], accent, () => Finish(idx)));
+            list.AddChild(OptionButton(options[i], accent, () => Finish(idx)));
         }
 
         if (backLabel != null)
         {
-            var back = new Button { Text = backLabel, CustomMinimumSize = new Vector2(220, 52), SizeFlagsHorizontal = Control.SizeFlags.ShrinkEnd };
+            var back = new Button
+            {
+                Text = backLabel, CustomMinimumSize = new Vector2(220, 52), SizeFlagsHorizontal = Control.SizeFlags.ShrinkEnd,
+            };
             StyleButton(back, new Color(0.25f, 0.42f, 0.48f), 24);
             back.Pressed += () => Finish(-1);
             col.AddChild(back);
@@ -134,21 +183,42 @@ public static class EventChoiceScreen
         return done.Task;
     }
 
+    /// <summary>
+    /// One option: a PanelContainer whose height comes from its wrapped text. A flat Button below the text fills it and
+    /// takes the clicks (and draws the normal / hover / pressed / disabled frames); the labels on top ignore the mouse.
+    /// </summary>
     private static Control OptionButton(Option o, Color accent, Action onPress)
     {
-        var b = new Button { CustomMinimumSize = new Vector2(820, 84), Disabled = !o.Enabled, ClipText = true };
+        var holder = new PanelContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ShrinkBegin,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+        };
+        holder.AddThemeStyleboxOverride("panel", new StyleBoxEmpty());
+
+        var b = new Button
+        {
+            Disabled = !o.Enabled, FocusMode = Control.FocusModeEnum.All,
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill,
+        };
         StyleButton(b, accent, 0);
-        var box = new VBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
-        box.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        box.OffsetLeft = 18; box.OffsetRight = -18; box.OffsetTop = 8; box.OffsetBottom = -8;
-        box.AddThemeConstantOverride("separation", 2);
-        box.AddChild(Rich($"[b]{Esc(o.Label)}[/b]", 25, o.Enabled ? new Color(1f, 0.92f, 0.7f) : Muted, true));
-        if (!string.IsNullOrWhiteSpace(o.Description)) box.AddChild(Rich(Bb(o.Description), 19, o.Enabled ? Text : Muted, false));
-        b.AddChild(box);
         b.Pressed += onPress;
-        // grow to the text
-        b.Ready += () => b.CustomMinimumSize = new Vector2(820, Math.Max(84, box.GetCombinedMinimumSize().Y + 16));
-        return b;
+        holder.AddChild(b);
+
+        var pad = new MarginContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        pad.AddThemeConstantOverride("margin_left", 22);
+        pad.AddThemeConstantOverride("margin_right", 22);
+        pad.AddThemeConstantOverride("margin_top", 12);
+        pad.AddThemeConstantOverride("margin_bottom", 12);
+        holder.AddChild(pad);
+
+        var box = new VBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore };
+        box.AddThemeConstantOverride("separation", 4);
+        pad.AddChild(box);
+        box.AddChild(Rich($"[b]{Esc(o.Label)}[/b]", 25, o.Enabled ? new Color(1f, 0.92f, 0.7f) : Muted, true));
+        if (!string.IsNullOrWhiteSpace(o.Description))
+            box.AddChild(Rich(Bb(o.Description), 19, o.Enabled ? Text : Muted, false));
+        return holder;
     }
 
     private static void StyleButton(Button b, Color accent, int fontSize)
@@ -173,6 +243,7 @@ public static class EventChoiceScreen
         {
             BbcodeEnabled = true, Text = bbcode, FitContent = true, ScrollActive = false,
             AutowrapMode = TextServer.AutowrapMode.WordSmart, MouseFilter = Control.MouseFilterEnum.Ignore,
+            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ShrinkBegin,
         };
         l.AddThemeFontSizeOverride("normal_font_size", size);
         l.AddThemeFontSizeOverride("bold_font_size", size);

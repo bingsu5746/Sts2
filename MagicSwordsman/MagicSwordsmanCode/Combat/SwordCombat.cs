@@ -358,12 +358,14 @@ public static class SwordCombat
         if (state?.Current == null)
         {
             if (power != null) await PowerCmd.Remove(power);
+            OnimaruKindPower.SyncVisibility(player);
             return;
         }
 
         if (power == null)
             power = await PowerCmd.Apply<CurrentSwordPower>(choiceContext, creature, 1, creature, null);
         power?.Refresh();
+        OnimaruKindPower.SyncVisibility(player); // Onimaru current -> its stance shows on this power instead
     }
 
     /// <summary>Models of this player that want sword events (powers, relics, cards in combat piles).</summary>
