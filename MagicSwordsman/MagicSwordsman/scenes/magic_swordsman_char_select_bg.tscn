@@ -142,26 +142,26 @@ stretch_mode = 6
 
 [node name="Glow0" type="Sprite2D" parent="FX"]
 material = SubResource("add")
-position = Vector2(516, 708)
-scale = Vector2(2.6, 2.6)
+position = Vector2(1712, 740)
+scale = Vector2(2.4, 2.4)
 texture = ExtResource("2_glow")
 
 [node name="Glow1" type="Sprite2D" parent="FX"]
 material = SubResource("add")
-position = Vector2(1330, 260)
-scale = Vector2(2.2, 2.2)
+position = Vector2(1715, 320)
+scale = Vector2(1.6, 1.6)
 texture = ExtResource("2_glow")
 
 [node name="Glow2" type="Sprite2D" parent="FX"]
 material = SubResource("add")
-position = Vector2(576, 668)
+position = Vector2(1712, 870)
 scale = Vector2(1.2, 1.2)
 texture = ExtResource("2_glow")
 
 [node name="Glow3" type="Sprite2D" parent="FX"]
 material = SubResource("add")
-position = Vector2(930, 470)
-scale = Vector2(0.9, 0.9)
+position = Vector2(760, 720)
+scale = Vector2(0.8, 0.8)
 texture = ExtResource("2_glow")
 
 [node name="Fire" type="Sprite2D" parent="FX"]

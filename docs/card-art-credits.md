@@ -402,3 +402,7 @@ The combat rig parts (`images/character/parts/*`) and `images/character/magic_sw
 ## Potion and relic icons (2026-10-09)
 
 10 potion icons (`images/potions/*.png` + `outline/`) and the 9 new relics (`images/relics/*`): AI Horde txt2img (AlbedoBase XL), background removed with rembg, sized and outlined by `tools/item_art/export_icons.py`.
+
+## Character select v3 (2026-10-10)
+
+`images/character/char_select_bg.jpg`: a distant hooded figure before a pillar of violet light in a ruined valley — AI Horde txt2img (AlbedoBase XL, 1024×576, RealESRGAN ×2 upscale; prompt in `tools/charselect_art/jobs_v3.json`, seed 3), then the ring of floating swords was composited from the mod's own sword sprites (`images/swords/`) with a drawn violet glow and ground ring.
