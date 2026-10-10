@@ -104,16 +104,10 @@ public static class SwordAffinity
     }
 
     /// <summary>
-    /// An affinity GAIN from play (cards, victories, upgrades, items): <see cref="Add"/> plus the flat bonus of relics
-    /// implementing <see cref="IAffinityGainModifier"/> (검수 매듭 +1). Use <see cref="Add"/> for raw adjustments.
+    /// An affinity gain from play (cards, victories, upgrades). Affinity only changes what the swords SAY: no item,
+    /// card or rule reads it for damage, block or any other game effect (user decision 2026-10-10).
     /// </summary>
-    public static (int Before, int After) Gain(Player player, SwordId sword, int amount)
-    {
-        if (amount > 0)
-            foreach (var m in player.Relics.OfType<IAffinityGainModifier>())
-                amount += m.ModifyAffinityGain(player, sword, amount);
-        return Add(player, sword, amount);
-    }
+    public static (int Before, int After) Gain(Player player, SwordId sword, int amount) => Add(player, sword, amount);
 
     // ------------------------------------------------------------------ text
 
@@ -132,11 +126,4 @@ public static class SwordAffinity
             return "";
         }
     }
-}
-
-/// <summary>Implement on a relic to add to every positive affinity gain (<see cref="SwordAffinity.Gain"/>).</summary>
-public interface IAffinityGainModifier
-{
-    /// <summary>Extra points added to a gain of <paramref name="amount"/> (&gt; 0).</summary>
-    int ModifyAffinityGain(Player player, SwordId sword, int amount);
 }

@@ -17,79 +17,11 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace MagicSwordsman.MagicSwordsmanCode.Relics;
 
-// Second batch of 마검사 relics (user request 2026-10-09 "포션 좋다 유물이나"): items tied to 친밀도
-// (Dialogue/SwordAffinity.cs: 경계 0 / 익숙 1 / 신뢰 2 / 각별 3), switching, 【조합】 cards and the sword legends.
+// Second batch of 마검사 relics (user request 2026-10-09 "포션 좋다 유물이나"): items tied to
+// switching, 【조합】 cards and the sword legends. No item reads 친밀도 (affinity drives dialogue only; 2026-10-10).
 // Pool registration: MagicSwordsmanRelic carries [Pool(typeof(MagicSwordsmanRelicPool))].
 // The game has no Boss relic rarity (RelicRarity: Starter, Common, Uncommon, Rare, Shop, Event, Ancient); its
 // trade-off relics (Sozu, VelvetChoker…) are Ancient and only Ancients offer them, so the trade-off relic here is Rare.
-
-/// <summary>
-/// 검수 매듭 (Common): every affinity gain is 1 higher (<see cref="IAffinityGainModifier"/>). Upon pickup, every owned
-/// sword gains 5 affinity. Small run-long accelerator (a card play gives 2 instead of 1, a victory 4 instead of 3).
-/// </summary>
-public sealed class SwordTassel : MagicSwordsmanRelic, IAffinityGainModifier
-{
-    public override RelicRarity Rarity => RelicRarity.Common;
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        [new DynamicVar("Bonus", 1m), new DynamicVar("Affinity", 5m)];
-
-    public int ModifyAffinityGain(Player player, SwordId sword, int amount) =>
-        player == Owner ? DynamicVars["Bonus"].IntValue : 0;
-
-    public override async Task AfterObtained()
-    {
-        await base.AfterObtained();
-        if (Owner.GetRelic<Mangeomchong>() is not { } tomb) return;
-        foreach (var sword in tomb.OwnedSwords)
-            SwordAffinity.Add(Owner, sword, DynamicVars["Affinity"].IntValue); // raw: the pickup gift is not boosted
-    }
-}
-
-/// <summary>
-/// 손때 묻은 손잡이 (Uncommon): whenever you summon a sword at 신뢰 or higher, draw 1 card; at 각별 also gain 1 energy.
-/// Summons happen once per sword per combat, so this is ~1-3 triggers a fight. Base comparison: Lantern (Common,
-/// 1 energy on turn 1) for the energy part; 삼백 개의 풀무 (Uncommon) for the per-summon draw.
-/// </summary>
-public sealed class WornGrip : MagicSwordsmanRelic, ISwordListener
-{
-    private const int TrustTier = 2;
-    private const int DevotedTier = 3;
-
-    public override RelicRarity Rarity => RelicRarity.Uncommon;
-
-    protected override IEnumerable<DynamicVar> CanonicalVars => [new CardsVar(1), new EnergyVar(1)];
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.ForEnergy(this)];
-
-    public async Task AfterSwordSummoned(Player player, SwordId sword, PlayerChoiceContext choiceContext)
-    {
-        if (player != Owner) return;
-        var tier = SwordAffinity.Tier(player, sword);
-        if (tier < TrustTier) return;
-        Flash();
-        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.IntValue, Owner);
-        if (tier >= DevotedTier) await PlayerCmd.GainEnergy(DynamicVars.Energy.BaseValue, Owner);
-    }
-}
-
-/// <summary>
-/// 마음의 칼집 (Rare): during combat, swords at 신뢰 or higher count as 1 level higher (max 5)
-/// (<see cref="ISwordLevelModifier"/>, read by SwordCombat.LevelOf). Raises the current-sword effect and every card of
-/// that sword at once. Base comparison: Vajra (Common, Strength 1) — a permanent +1 to one sword's numbers that must
-/// first be earned (신뢰 = 35 affinity), so Rare.
-/// </summary>
-public sealed class HeartboundScabbard : MagicSwordsmanRelic, ISwordLevelModifier
-{
-    private const int TrustTier = 2;
-
-    public override RelicRarity Rarity => RelicRarity.Rare;
-
-    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("Levels", 1m)];
-
-    public int CombatLevelBonus(Player player, SwordId sword) =>
-        player == Owner && SwordAffinity.Tier(player, sword) >= TrustTier ? DynamicVars["Levels"].IntValue : 0;
-}
 
 /// <summary>
 /// 날밑 (Uncommon): whenever the current sword changes (no sword -> first sword counts, content doc §0.3), deal 3
@@ -218,29 +150,4 @@ public sealed class CooledFurnace : MagicSwordsmanRelic
 
     public override decimal ModifyMaxEnergy(Player player, decimal amount) =>
         player != Owner ? amount : amount + DynamicVars.Energy.BaseValue;
-}
-
-/// <summary>
-/// 검총의 등불 (Shop): at the start of each combat (your first turn), the owned sword with the highest affinity that is
-/// not out yet is summoned (not made current). As a summon it fires 만검총's first-summon bonus right away and every
-/// "when summoned" effect. Ties: lowest SwordId (deterministic on every client).
-/// </summary>
-public sealed class TombLantern : MagicSwordsmanRelic
-{
-    public override RelicRarity Rarity => RelicRarity.Shop;
-
-    public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
-    {
-        if (player != Owner || Owner.PlayerCombatState is not { TurnNumber: 1 }) return;
-        if (Owner.GetRelic<Mangeomchong>() is not { } tomb || SwordCombat.Get(Owner) is not { } state) return;
-        var pick = tomb.OwnedSwords
-            .Where(s => !state.Present.Contains(s) && !state.Summoned.Contains(s) && !state.ReturnedToVault.Contains(s))
-            .OrderByDescending(s => SwordAffinity.Points(Owner, s))
-            .ThenBy(s => (int)s)
-            .Cast<SwordId?>()
-            .FirstOrDefault();
-        if (pick is not { } sword) return;
-        Flash();
-        await SwordCombat.Summon(Owner, sword, choiceContext);
-    }
 }

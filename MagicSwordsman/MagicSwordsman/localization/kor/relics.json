@@ -23,15 +23,6 @@
   "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.title": "열린 만검총",
   "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.description": "전투마다 처음 마검을 소환하면 [gold]방어도[/gold]를 {Block:diff()} 얻고 카드를 {Cards:diff()}장 뽑습니다.{SwordList}",
   "MAGICSWORDSMAN-OPENED_MANGEOMCHONG.flavor": "문이 활짝 열린 만검총. 잠든 검들이 먼저 손을 내민다.",
-  "MAGICSWORDSMAN-SWORD_TASSEL.title": "검수 매듭",
-  "MAGICSWORDSMAN-SWORD_TASSEL.description": "마검의 친밀도를 얻을 때마다 {Bonus} 더 얻습니다.\n얻을 때 보유한 모든 마검의 친밀도가 {Affinity} 오릅니다.",
-  "MAGICSWORDSMAN-SWORD_TASSEL.flavor": "칼자루 끝에 매단 붉은 매듭. 오래 쥔 손의 온기가 배어 있다.",
-  "MAGICSWORDSMAN-WORN_GRIP.title": "손때 묻은 손잡이",
-  "MAGICSWORDSMAN-WORN_GRIP.description": "친밀도가 [gold]신뢰[/gold] 이상인 마검을 소환하면 카드를 {Cards}장 뽑습니다. [gold]각별[/gold]이면 {Energy:energyIcons()}도 얻습니다.",
-  "MAGICSWORDSMAN-WORN_GRIP.flavor": "몇 번을 갈아 끼워도, 손은 이 손잡이를 먼저 찾는다.",
-  "MAGICSWORDSMAN-HEARTBOUND_SCABBARD.title": "마음의 칼집",
-  "MAGICSWORDSMAN-HEARTBOUND_SCABBARD.description": "전투 중 친밀도가 [gold]신뢰[/gold] 이상인 마검은 단계를 {Levels} 높게 취급합니다(최대 5).",
-  "MAGICSWORDSMAN-HEARTBOUND_SCABBARD.flavor": "믿는 손에 쥐인 검은 스스로 한 치 더 날카로워진다.",
   "MAGICSWORDSMAN-TSUBA.title": "날밑",
   "MAGICSWORDSMAN-TSUBA.description": "[gold]현재 검[/gold]이 바뀔 때마다 무작위 적에게 피해를 {Damage} 줍니다.",
   "MAGICSWORDSMAN-TSUBA.flavor": "칼과 칼이 엇갈리는 순간, 날밑이 먼저 울린다.",
@@ -46,8 +37,5 @@
   "MAGICSWORDSMAN-SILVER_HAND.flavor": "전투에서 팔을 잃은 누아다에게 디안 케흐트는 은으로 된 팔을 만들어 주었다.",
   "MAGICSWORDSMAN-COOLED_FURNACE.title": "식은 용광로",
   "MAGICSWORDSMAN-COOLED_FURNACE.description": "매 턴 시작 시 {Energy:energyIcons()}를 얻습니다.\n휴식처에서 [gold]마검 강화[/gold]를 할 수 없습니다.",
-  "MAGICSWORDSMAN-COOLED_FURNACE.flavor": "석 달이 지나도 쇠는 녹지 않았다. 불을 꺼 버린 자에게 남은 것은 그 열기뿐.",
-  "MAGICSWORDSMAN-TOMB_LANTERN.title": "검총의 등불",
-  "MAGICSWORDSMAN-TOMB_LANTERN.description": "전투를 시작하면 아직 나오지 않은 보유 마검 중 친밀도가 가장 높은 검을 소환합니다(현재 검은 바뀌지 않습니다).",
-  "MAGICSWORDSMAN-TOMB_LANTERN.flavor": "등불을 들면 가장 가까운 검이 먼저 깨어난다."
+  "MAGICSWORDSMAN-COOLED_FURNACE.flavor": "석 달이 지나도 쇠는 녹지 않았다. 불을 꺼 버린 자에게 남은 것은 그 열기뿐."
 }

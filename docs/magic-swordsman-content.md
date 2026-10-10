@@ -801,15 +801,11 @@ K = 1.1 표의 "빛 1당 피해"(4,5,5,6,6,7). 빛 상한 없음.
 | `BlackLacquerSheath` | 흑칠 칼집 | Common | 다음 박살 1번을 실패로 바꾼다. 쓰면 빈 칼집이 됨(효과 없음) | 「거의 밀폐된 흑칠 나무 칼집 … 2,500년 동안 녹이 거의 슬지 않았다」(월왕 구천검) | 1회용 보험 |
 | `SwordRack` | 검 받침대 | Common | 매 턴 처음 현재 검이 바뀔 때 방어도 3 | Anchor·BronzeScales 수준 | 전환 템포 지원 |
 | `ThreeHundredBellows` | 삼백 개의 풀무 | Uncommon | 전투에서 두 번째로 검을 소환할 때도 만검총 효과(방어도 3 + 카드 1장) | 「아이 300명이 풀무질을 해」 | 만검총 [확정] 효과는 그대로, 유물이 더함 |
-| `SwordTassel` | 검수 매듭 | Common | 친밀도를 얻을 때마다 +1(`IAffinityGainModifier`). 얻을 때 보유 검 전부 친밀도 +5 | — | 2026-10-09 추가 (`Relics/SwordItemRelics.cs`) |
-| `WornGrip` | 손때 묻은 손잡이 | Uncommon | 신뢰 이상 검을 소환하면 카드 1장, 각별이면 에너지 1도 | Lantern / 삼백 개의 풀무 | 2026-10-09 추가 |
-| `HeartboundScabbard` | 마음의 칼집 | Rare | 전투 중 신뢰 이상 검은 단계 +1 취급(최대 5, `ISwordLevelModifier`) | Vajra | 2026-10-09 추가 |
 | `Tsuba` | 날밑 | Uncommon | 현재 검이 바뀔 때마다 무작위 적에게 피해 3 | LetterOpener | 2026-10-09 추가 |
 | `TwinScabbard` | 두 자루 칼집 | Uncommon | 매 턴 처음 【조합】 카드를 쓰면 에너지 1 | Nunchaku | 2026-10-09 추가 |
 | `Olifant` | 올리판트 | Uncommon | 전투마다 처음 피해로 HP 50% 이하가 되면 방어도 10 + 카드 2장 | 롤랑의 뿔피리 / CentennialPuzzle·MeatOnTheBone | 2026-10-09 추가 |
 | `SilverHand` | 은의 손 | Uncommon | 저주 카드를 뽑을 때마다 카드 1장 | 누아다의 은팔 / IterationPower | 2026-10-09 추가 |
 | `CooledFurnace` | 식은 용광로 | Rare | 매 턴 에너지 +1, 휴식처 마검 강화 불가 | 간장의 녹지 않는 쇠 / Sozu(Ancient) | 대가 유물. Boss 희귀도가 없어 Rare |
-| `TombLantern` | 검총의 등불 | Shop | 전투 시작(첫 턴) 시 아직 안 나온 보유 검 중 친밀도 최고인 검 소환(전환 없음) | — | 2026-10-09 추가 |
 
 - `RelicRarity`에는 Boss가 없다(`None, Starter, Common, Uncommon, Rare, Shop, Event, Ancient`). 설계안 C의 Boss 유물은 Rare/Event로 바꿔야 해서 대신 A·B의 상한 유물 둘을 썼다.
 
@@ -828,7 +824,6 @@ K = 1.1 표의 "빛 1당 피해"(4,5,5,6,6,7). 빛 상한 없음.
 | `WhetstoneOil` | 숫돌 기름 | Common | 자신 | 이번 전투 현재 검 단계 +1 취급 + 카드 1장 | FlexPotion·StrengthPotion 대응. 2026-10-09 추가 (`Potions/SwordItemPotions.cs`) |
 | `RallyingIncense` | 검부름 향 | Common | 자신 | 아직 안 나온 보유 검 하나를 무작위로 소환·전환 + 카드 2장 | SwiftPotion(3장) 대응 |
 | `TombEcho` | 검총의 메아리 | Uncommon | 자신 | 보유하지 않은 검의 카드 3장 중 1장(이번 턴 비용 0) | AttackPotion 대응. 오니마루·【조합】 제외 |
-| `HeartToHeartTea` | 정담의 차 | Uncommon | 자신 | 현재 검 친밀도 +12, 카드 (1 + 친밀도 단계)장 | SwiftPotion 대응 |
 | `SealingSalt` | 봉인 소금 | Uncommon | 자신 | 손·뽑을·버린 더미의 마검 저주 전부 소멸(전투 중만), 1장당 방어도 4 | Ashwater 대응 |
 | `TwinCupWine` | 합환주 | Rare | 자신 | 이번 턴 【짝】 항상 발동 + 다음 카드 2번 발동(DuplicationPower) | Duplicator(Uncommon) 대응 |
 

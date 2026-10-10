@@ -22,8 +22,8 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace MagicSwordsman.MagicSwordsmanCode.Potions;
 
-// Second batch of 마검사 potions (user request 2026-10-09 "포션 좋다 유물이나"): items tied to the swords and to 친밀도
-// (Dialogue/SwordAffinity.cs). All combat-only and self-targeted, like the first batch (CommonPotions.cs).
+// Second batch of 마검사 potions (user request 2026-10-09 "포션 좋다 유물이나"): items tied to the swords. No potion reads
+// or changes 친밀도 (affinity drives dialogue only; 2026-10-10). All combat-only and self-targeted, like the first batch (CommonPotions.cs).
 
 /// <summary>
 /// 숫돌 기름 (Common): this combat, the current sword (none: choose an owned sword) counts as 1 level higher (max 5);
@@ -122,32 +122,6 @@ public sealed class TombEcho : MagicSwordsmanPotion
         if (card == null) return;
         card.SetToFreeThisTurn();
         await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand, Owner);
-    }
-}
-
-/// <summary>
-/// 정담의 차 (Uncommon): the current sword gains 12 affinity (a "gain": 검수 매듭 adds to it), then draw 1 card per
-/// affinity tier after the gain, plus 1 (경계 1 · 익숙 2 · 신뢰 3 · 각별 4). Base comparison: SwiftPotion (Common, draw
-/// 3) — draws 1..4 and also moves the run-level affinity (12 = exactly the 익숙 threshold from 0).
-/// </summary>
-public sealed class HeartToHeartTea : MagicSwordsmanPotion
-{
-    public override PotionRarity Rarity => PotionRarity.Uncommon;
-    public override PotionUsage Usage => PotionUsage.CombatOnly;
-    public override TargetType TargetType => TargetType.Self;
-
-    protected override IEnumerable<DynamicVar> CanonicalVars => [new DynamicVar("Affinity", 12m), new CardsVar(1)];
-
-    public override bool PassesCustomUsabilityCheck =>
-        CombatManager.Instance.IsInProgress && Owner != null && SwordCombat.CurrentSword(Owner) != null;
-
-    protected override async Task OnUse(PlayerChoiceContext choiceContext, Creature? target)
-    {
-        var player = Owner;
-        if (SwordCombat.CurrentSword(player) is not { } sword) return;
-        var (before, after) = SwordAffinity.Gain(player, sword, DynamicVars["Affinity"].IntValue);
-        MainFile.Logger.Info($"[HeartToHeartTea] {sword} affinity tier {before} -> {after}");
-        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.IntValue + after, player);
     }
 }
 
