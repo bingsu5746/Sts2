@@ -1,6 +1,7 @@
 using Godot;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
+using MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
@@ -17,13 +18,22 @@ namespace MagicSwordsman.MagicSwordsmanCode.Visuals;
 /// current sword takes the right slot. New swords fly out of the character; a sword that leaves shrinks back into it.
 /// No tomb object (removed by user decision). Art: drop <c>images/swords/&lt;sword id lowercase&gt;.png</c>
 /// (blade pointing up) to replace the drawn placeholder shapes. TODO(art): real art, VFX on summon.
-/// UNVERIFIED in game: node offsets relative to the creature node, z-ordering against the creature body.
+/// Draw order (bug report 2026-10-10 "현재 장착 검이 아닌 애들도 주위에 떠돌아다녀야 하는데 표현이 안 되고 있어"): the
+/// rig sits under the creature node, which lives in NCombatRoom's SceneContainer (z_index -10, together with the
+/// room background). The non-current swords used to get z_index -1, i.e. absolute -11: drawn BELOW the background,
+/// so they were never visible. Now no sword node has a negative z: the rig is moved to be the creature's first child
+/// (before NCreature.Visuals, like the game's own NSovereignBladeVfx does to go behind the Regent) so z 0 draws
+/// behind the body but in front of the room, z 1 in front of the body, z 2 for a sword in flight.
+/// UNVERIFIED in game: node offsets relative to the creature node.
 /// </summary>
 public static partial class SwordVisuals
 {
     private sealed class Rig
     {
         public required Node2D Root;
+        public required Player Player;
+        /// <summary>The death choreography took the swords over: nothing else moves them any more.</summary>
+        public bool Dead;
         public readonly Dictionary<SwordId, Node2D> Swords = new();
         /// <summary>Where each sword rests (set by Layout): strikes start from here, never from the summon point.</summary>
         public readonly Dictionary<SwordId, Vector2> Slots = new();
@@ -39,15 +49,18 @@ public static partial class SwordVisuals
 
     // Layout (사용자 스케치 2026-10-04): swords float upright around the character — left, above the head, right.
     // The current sword always takes the right slot (in front, toward the enemy). The character only gestures.
+    // Creature space: feet at y 0, head top about y -390, body about x -128..128 (scenes/magic_swordsman_combat.tscn).
     private static readonly Vector2 SpawnPos = new(0, -220);      // swords appear from / vanish into the character
-    private static readonly Vector2 CurrentPos = new(150, -200);  // right of the character
+    private static readonly Vector2 CurrentPos = new(160, -215);  // right of the character, in front of him
     private static readonly Vector2[] IdleSlots =
     {
-        new(-150, -200),  // left of the character
-        new(0, -400),     // above the head
-        new(-110, -360),  // extra slots (sword cap raised by relics)
-        new(110, -360),
+        new(-190, -235),  // left of the character (clear of his left arm)
+        new(-10, -490),   // above the head (clear of it: the head ends about y -390)
+        new(-165, -430),  // extra slots (sword cap raised by relics)
+        new(150, -445),
     };
+
+    private const int ZBack = 0, ZFront = 1, ZFlying = 2;
 
     // ------------------------------------------------------------------ entry points
 
@@ -85,6 +98,13 @@ public static partial class SwordVisuals
         {
             MainFile.Logger.Warn($"[SwordVisuals] PlayMotion {clip} failed: {e.Message}");
         }
+    }
+
+    /// <summary>Name of the clip the character is playing ("" when none); null outside combat. Never throws.</summary>
+    public static string? CurrentClip(Player player)
+    {
+        try { return MainAnimationPlayer(player)?.CurrentAnimation.ToString(); }
+        catch (Exception) { return null; }
     }
 
     /// <summary>
@@ -126,6 +146,11 @@ public static partial class SwordVisuals
     {
         Rigs.Remove(player);
         MotionDirector.Clear(player);
+        LastGuard.Remove(player.NetId);
+        // per-node bookkeeping of nodes that died with the combat room
+        foreach (var dict in new[] { LastStrike, GuardAt, UnionBusyUntil })
+            foreach (var dead in dict.Keys.Where(n => !GodotObject.IsInstanceValid(n)).ToList())
+                dict.Remove(dead);
     }
 
     // ------------------------------------------------------------------ internals
@@ -135,7 +160,7 @@ public static partial class SwordVisuals
         var state = SwordCombat.Get(player);
         if (state == null) return;
         var rig = GetRig(player, create: state.Present.Count > 0 || state.ReturnedToVault.Count > 0);
-        if (rig == null) return;
+        if (rig == null || rig.Dead) return;
 
         // swords that left -> shrink back into the character
         foreach (var gone in rig.Swords.Keys.Where(s => !state.Present.Contains(s)).ToList())
@@ -167,14 +192,15 @@ public static partial class SwordVisuals
             var node = CreateSword(sword, player);
             rig.Root.AddChild(node);
             node.Position = SpawnPos;
-            node.Scale = new Vector2(0.3f, 0.3f);
+            node.Scale = new Vector2(0.85f, 0.85f);
+            node.Modulate = new Color(1, 1, 1, 0); // SwordFx.Summon sets the real starting pose
             rig.Swords[sword] = node;
             appeared.Add(sword);
         }
 
         var previous = rig.Current;
         rig.Current = state.Current;
-        Layout(rig);
+        Layout(rig, appeared);
         ApplyPalmCircles(player, state.Current);
         PlaySyncFx(rig, appeared, previous);
     }
@@ -199,23 +225,86 @@ public static partial class SwordVisuals
 
     private const string BornMeta = "ms_fx_born";
 
-    private static void Layout(Rig rig)
+    /// <summary>
+    /// Sends every sword to its resting place: the current sword to the front-right slot, the others to the idle
+    /// slots around him (behind the body), Onimaru to the pose of its stance (<see cref="OnimaruPose"/>).
+    /// <paramref name="fresh"/>: swords summoned this very sync rise slowly to their place (SwordFx.Summon).
+    /// <paramref name="only"/>: a choreography (strike, guard, union) handing one sword back — the others are left
+    /// alone so a sword still in flight is not yanked home.
+    /// </summary>
+    private static void Layout(Rig rig, ICollection<SwordId>? fresh = null, SwordId? only = null)
     {
+        if (rig.Dead) return;
         var slot = 0;
         foreach (var (sword, node) in rig.Swords.OrderBy(kv => (int)kv.Key))
         {
+            if (!GodotObject.IsInstanceValid(node)) continue;
             var isCurrent = rig.Current == sword;
-            var pos = isCurrent ? CurrentPos : IdleSlots[slot++ % IdleSlots.Length];
+            var stance = sword == SwordId.Onimaru ? OnimaruPose(rig.Player, isCurrent) : null;
+            var pos = stance?.Pos ?? (isCurrent ? CurrentPos : IdleSlots[slot++ % IdleSlots.Length]);
             rig.Slots[sword] = pos;
+            if (only != null && only != sword) continue;
+            // a full re-layout (Sync) leaves a sword in the middle of a choreography alone: its own end calls
+            // Layout(only: it), which reads the slot computed here
+            if (only == null && (IsUnionBusy(node) || InFlight(node))) continue;
             if (rig.Moves.TryGetValue(sword, out var old) && GodotObject.IsInstanceValid(old)) old.Kill();
+            var born = fresh?.Contains(sword) == true;
+            var dur = born ? 0.85 : 0.4;
             var t = node.CreateTween().SetParallel();
             rig.Moves[sword] = t;
-            t.TweenProperty(node, "position", pos, 0.35).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
-            t.TweenProperty(node, "scale", isCurrent ? new Vector2(1.15f, 1.15f) : new Vector2(0.8f, 0.8f), 0.3);
-            t.TweenProperty(node, "rotation", 0f, 0.3);
-            t.TweenProperty(node, "modulate", isCurrent ? Colors.White : new Color(0.75f, 0.75f, 0.8f, 0.9f), 0.3);
-            node.ZIndex = isCurrent ? 1 : -1;
+            if (born)
+                t.TweenProperty(node, "position", pos, dur).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
+            else
+                t.TweenProperty(node, "position", pos, dur).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+            var scale = stance?.Scale ?? (isCurrent ? 1.15f : 0.85f);
+            t.TweenProperty(node, "scale", new Vector2(scale, scale), dur * 0.8);
+            t.TweenProperty(node, "rotation", stance?.Rot ?? 0f, dur * 0.8).SetTrans(Tween.TransitionType.Sine);
+            t.TweenProperty(node, "modulate", isCurrent ? Colors.White : new Color(0.82f, 0.82f, 0.88f, 0.95f), dur * 0.8);
+            node.ZIndex = stance?.Z ?? (isCurrent ? ZFront : ZBack);
+            if (stance?.Orbit == true) t.Chain().TweenCallback(Callable.From(() => StartRanbuOrbit(rig, sword, node)));
         }
+    }
+
+    /// <summary>
+    /// Onimaru's resting pose by stance (user request 2026-10-10 "오니마루는 자세마다 소환되어서 있는 모션이나 위치, 각도
+    /// 등등을 좀 바꿔줘"): 호위 stands guard in front of him, 거합 rests at his hip like a sheathed blade, 퇴마 is raised
+    /// high point up, 베기 is held level pointing at the enemy, 난무 circles him quickly (<see cref="StartRanbuOrbit"/>).
+    /// Art points up, so rotation is the angle of the tip from "up", clockwise. A stance change re-runs Layout
+    /// (OnimaruAttack.SetKind calls Sync), which tweens the katana from the old pose to the new one.
+    /// </summary>
+    private static (Vector2 Pos, float Rot, float Scale, int Z, bool Orbit)? OnimaruPose(Player player, bool isCurrent)
+    {
+        OnimaruKind kind;
+        try { kind = OnimaruAttack.GetKind(player); }
+        catch (Exception) { kind = OnimaruKind.Iai; }
+        var k = isCurrent ? 1.12f : 1f;
+        return kind switch
+        {
+            OnimaruKind.Goei => (new Vector2(70, -225), 0f, 1.1f * k, ZFront, false),
+            OnimaruKind.Taima => (new Vector2(70, -575), 0f, 1f * k, ZBack, false),
+            OnimaruKind.Giri => (new Vector2(215, -350), Mathf.Pi / 2, 0.95f * k, ZFront, false),
+            OnimaruKind.Ranbu => (RanbuAt(0f), RanbuRot(0f), 0.85f * k, ZFront, true),
+            _ => (new Vector2(30, -165), -1.95f, 0.9f * k, ZFront, false), // Iai: hilt forward, blade back and down
+        };
+    }
+
+    private static readonly Vector2 RanbuCenter = new(0, -255);
+    private static Vector2 RanbuAt(float th) => RanbuCenter + new Vector2(Mathf.Cos(th) * 215f, Mathf.Sin(th) * 70f);
+    // blade along the direction of travel
+    private static float RanbuRot(float th) => PointAt(RanbuAt(th), RanbuAt(th + 0.1f));
+
+    /// <summary>난무: Onimaru circles him fast, passing in front of and behind the body.</summary>
+    private static void StartRanbuOrbit(Rig rig, SwordId sword, Node2D node)
+    {
+        if (rig.Dead || !GodotObject.IsInstanceValid(node)) return;
+        var t = node.CreateTween().SetLoops();
+        rig.Moves[sword] = t;
+        t.TweenMethod(Callable.From<float>(th =>
+        {
+            node.Position = RanbuAt(th);
+            node.Rotation = RanbuRot(th);
+            node.ZIndex = Mathf.Sin(th) > 0 ? ZFront : ZBack; // lower half of the ellipse = nearer the camera
+        }), 0f, Mathf.Tau, 1.3);
     }
 
     private static Rig? GetRig(Player player, bool create)
@@ -229,8 +318,9 @@ public static partial class SwordVisuals
 
         var root = new Node2D { Name = "MagicSwordsRig" };
         creatureNode.AddChild(root);
+        creatureNode.MoveChild(root, 0); // before NCreature.Visuals: z 0 = behind the body, never behind the room
 
-        rig = new Rig { Root = root };
+        rig = new Rig { Root = root, Player = player };
         Rigs[player] = rig;
         MainAnimationPlayer(player);
         return rig;
@@ -252,7 +342,8 @@ public static partial class SwordVisuals
 
     private static readonly Color AuraColor = new(0.62f, 0.4f, 1f);
 
-    private static Node2D CreateSword(SwordId sword, Player player)
+    /// <param name="spectral">a temporary copy (guard / death choreography): no tooltip box, no idle float</param>
+    private static Node2D CreateSword(SwordId sword, Player player, bool spectral = false)
     {
         var holder = new Node2D { Name = $"Sword_{sword}" };
         var blade = new Node2D { Name = "Blade" };
@@ -299,6 +390,12 @@ public static partial class SwordVisuals
             });
         }
 
+        if (spectral)
+        {
+            holder.AddChild(blade);
+            return holder;
+        }
+
         // hover box exactly over the drawn sword (moves with the bob): name, level and effect in the game's tooltip
         var hover = new Control
         {
@@ -318,6 +415,10 @@ public static partial class SwordVisuals
         var sway = blade.CreateTween().SetLoops();
         sway.TweenProperty(blade, "rotation", 0.05f, period * 1.3).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
         sway.TweenProperty(blade, "rotation", -0.05f, period * 1.3).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
+        // and a gentle sideways drift on a third rhythm, so the swords seem to hang in the air rather than on rails
+        var drift = blade.CreateTween().SetLoops();
+        drift.TweenProperty(blade, "position:x", 7f, period * 1.9).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
+        drift.TweenProperty(blade, "position:x", -7f, period * 1.9).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
         return holder;
     }
 
@@ -458,15 +559,15 @@ public static partial class SwordVisuals
                 tw.TweenProperty(node, "modulate", Colors.White, 0.25);
                 break;
             }
-            case SwordId.Onimaru: // blink: gone and through the target in one frame, a flash line left behind
-            {
+            case SwordId.Onimaru: // a drawing cut straight through the target, back on an arc (the old one-frame blink
+            {                     // was invisible in game, bug report 2026-10-10)
+                var end = aim + dir * 140;
                 tw.TweenProperty(node, "rotation", PointAt(home, hit), 0.03);
-                tw.TweenInterval(0.08);
-                tw.TweenCallback(Callable.From(() => node.Position = hit + dir * 120));
-                tw.TweenInterval(0.15);
-                tw.TweenProperty(node, "modulate:a", 0f, 0.08);
-                tw.TweenCallback(Callable.From(() => { node.Position = home; node.Rotation = 0; }));
-                tw.TweenProperty(node, "modulate:a", 1f, 0.15);
+                tw.TweenProperty(node, "position", end, 0.09).SetTrans(Tween.TransitionType.Expo).SetEase(Tween.EaseType.In);
+                tw.TweenInterval(0.1);
+                var mid = (end + home) / 2 + new Vector2(0, -170);
+                tw.TweenMethod(Callable.From<float>(t => node.Position = Bezier(end, mid, home, t)), 0f, 1f, 0.34);
+                tw.Parallel().TweenProperty(node, "rotation", 0f, 0.34);
                 break;
             }
             case SwordId.ClaiomhSolais: // a beam of light: stretches into a long shaft as it shoots
@@ -521,7 +622,7 @@ public static partial class SwordVisuals
             elapsed += timer.WaitTime;
             if (elapsed > duration || !GodotObject.IsInstanceValid(node)) { timer.QueueFree(); return; }
             if (node.GetNodeOrNull<Node2D>("Blade") is not { } blade) return;
-            var ghost = new Node2D { Position = node.Position, Rotation = node.Rotation, Scale = node.Scale, ZIndex = node.ZIndex - 1 };
+            var ghost = new Node2D { Position = node.Position, Rotation = node.Rotation, Scale = node.Scale, ZIndex = Math.Max(ZBack, node.ZIndex - 1) };
             foreach (var child in blade.GetChildren())
                 if (child is Sprite2D sp && sp.Name != "Aura")
                     ghost.AddChild(new Sprite2D { Texture = sp.Texture, Scale = sp.Scale, Position = sp.Position, Rotation = sp.Rotation,
@@ -597,6 +698,11 @@ public static partial class SwordVisuals
 
     private static readonly Dictionary<Node2D, ulong> LastStrike = new();
 
+    /// <summary>A strike / Onimaru attack (0.45 s) or a guard (0.6 s) is moving this sword right now.</summary>
+    private static bool InFlight(Node2D node) =>
+        (LastStrike.TryGetValue(node, out var t0) && Time.GetTicksMsec() - t0 < 450) ||
+        (GuardAt.TryGetValue(node, out var g0) && Time.GetTicksMsec() - g0 < 600);
+
     /// <summary>
     /// The current sword (else any present one) flies to <paramref name="target"/> and back in its own style
     /// (<see cref="StrikeStyle"/>; user request 2026-10-08:
@@ -608,7 +714,7 @@ public static partial class SwordVisuals
         try
         {
             var rig = GetRig(player, create: false);
-            if (rig == null || rig.Swords.Count == 0) return;
+            if (rig == null || rig.Dead || rig.Swords.Count == 0) return;
             var sword = rig.Current is { } c && rig.Swords.ContainsKey(c) ? c : rig.Swords.Keys.First();
             var node = rig.Swords[sword];
             if (IsUnionBusy(node)) return; // a 【조합】 choreography is moving it (SwordVisuals.Union.cs)
@@ -628,12 +734,13 @@ public static partial class SwordVisuals
             node.Position = home;
             node.Scale = Vector2.One * 1.15f;
             node.Modulate = Colors.White;
+            node.ZIndex = ZFlying;
 
             var tw = node.CreateTween();
             rig.Moves[sword] = tw; // a later strike / layout takes over cleanly instead of fighting this tween
             StrikeStyle(tw, node, sword, home, aim);
             Sfx.Whoosh(sword);
-            tw.TweenCallback(Callable.From(() => Layout(rig)));
+            tw.TweenCallback(Callable.From(() => Layout(rig, only: sword)));
         }
         catch (Exception e)
         {

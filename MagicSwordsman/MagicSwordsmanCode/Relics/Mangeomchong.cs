@@ -639,7 +639,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     {
         if (target == Owner.Creature && result.UnblockedDamage > 0) SwordTalk.OnOwnerDamaged(Owner);
         if (target == Owner.Creature && dealer != target && !props.HasFlag(ValueProp.SkipHurtAnim))
-            MotionDirector.OnDamageReceived(Owner, result.UnblockedDamage, result.WasFullyBlocked);
+            MotionDirector.OnDamageReceived(Owner, result.UnblockedDamage, result.WasFullyBlocked, dealer);
         else if (dealer == Owner.Creature && target != Owner.Creature && props.HasFlag(ValueProp.Move))
             MotionDirector.OnDealtDamage(Owner, target);
         return Task.CompletedTask;

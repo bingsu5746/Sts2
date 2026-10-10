@@ -27,7 +27,7 @@ func _init():
 	DirAccess.make_dir_recursive_absolute(OUT)
 	# scenario timeline (60 fps fixed): each scenario builds at its start frame, shots at start + t*60
 	var f := 2
-	f = scenario(f, "summon", [0.08, 0.18, 0.3, 0.5])
+	f = scenario(f, "summon", [0.15, 0.35, 0.55, 0.8])
 	f = scenario(f, "switch", [0.16, 0.26, 0.4])
 	f = scenario(f, "impact", [0.05, 0.12, 0.25])
 	f = scenario(f, "cutin_tyrfing", [0.12, 0.3, 0.5, 0.85, 1.1])
@@ -64,8 +64,9 @@ func build(name: String):
 			if name == "summon":
 				node.position = Vector2(0, -220 + 220) # SpawnPos relative to slot (slot = origin here)
 				node.scale = Vector2(0.3, 0.3)
+				node.scale = Vector2(1.15, 1.15)
 				summon(cell, node, SWORDS[i], Vector2.ZERO)
-				layout(node, Vector2.ZERO)
+				layout_born(node, Vector2.ZERO)
 			else:
 				node.position = Vector2(-150, -10); node.scale = Vector2(0.8, 0.8); node.modulate = Color(0.75, 0.75, 0.8, 0.9)
 				layout(node, Vector2.ZERO)
@@ -102,6 +103,12 @@ func layout(node: Node2D, slot: Vector2):
 	t.tween_property(node, "rotation", 0.0, 0.3)
 	t.tween_property(node, "modulate", Color.WHITE, 0.3)
 
+## SwordVisuals.Layout for a sword summoned this sync (slow sine rise, no overshoot)
+func layout_born(node: Node2D, slot: Vector2):
+	var t := node.create_tween().set_parallel()
+	t.tween_property(node, "position", slot, 0.85).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(node, "modulate", Color.WHITE, 0.68)
+
 # ------------------------------------------------------------------ SwordFx mirror
 
 func T(n: String) -> Texture2D:
@@ -112,7 +119,7 @@ func T(n: String) -> Texture2D:
 	texs[n] = t; return t
 
 func fxroot(p: Node2D, pos: Vector2, life: float, z: int) -> Node2D:
-	var n := Node2D.new(); n.position = pos; n.z_index = z; p.add_child(n)
+	var n := Node2D.new(); n.position = pos; n.z_index = max(0, z); p.add_child(n)
 	if z < 0: p.move_child(n, 0)
 	var t := n.create_tween(); t.tween_interval(life); t.tween_callback(n.queue_free); return n
 
@@ -287,65 +294,102 @@ func twin(p, pos, radius, dur, moye_first):
 		t.tween_callback(func(): tr.emitting = false)
 		t.tween_property(s, "modulate:a", 0.0, 0.15)
 
-func summon(rig: Node2D, node: Node2D, sword: String, slot: Vector2):
-	var col: Color = COLORS[sword]
-	var fx := fxroot(rig, slot, 0.9, 2); var back := fxroot(rig, slot, 0.9, -1)
-	match sword:
-		"tyrfing":
-			pose(node, slot + Vector2(0, 30), 0.2, 0, Color(1.8, 0.9, 0.5, 0.4))
-			flare(back, Vector2.ZERO, col, 260, 0.45)
-			burst(fx, Vector2.ZERO, ramp(Color(1, 0.85, 0.4), Color(1, 0.3, 0.08)), "fx_spark", 40, 0.55, 150, 420, Vector2(0, -320), 180, 0.25, 0.55, true, {"radius": 20, "alignY": true})
-			burst(back, Vector2(0, -10), ramp(Color(0.22, 0.12, 0.1, 0.5)), "fx_smoke", 8, 0.6, 30, 90, Vector2(0, -120), 70, 0.5, 0.9, false, {"dir": -90, "radius": 30})
-			ring(back, Vector2(0, 95), Color(1, 0.45, 0.15), 30, 170, 0.4, 0, 0.35)
-		"skofnung":
-			pose(node, slot, 1.6, 0, Color(0.7, 0.9, 1, 0))
-			burst(back, Vector2.ZERO, ramp(Color(0.75, 0.9, 1, 0.55)), "fx_smoke", 18, 0.45, 0, 10, Vector2.ZERO, 180, 0.5, 0.9, true, {"circle": 170, "radial": -1400})
-			burst(fx, Vector2.ZERO, ramp(Color(0.85, 0.95, 1, 0.8)), "fx_glow", 14, 0.4, 0, 0, Vector2.ZERO, 180, 0.08, 0.16, true, {"circle": 130, "radial": -1100})
-			flare(back, Vector2.ZERO, col, 190, 0.35, 0.25)
-		"durandal":
-			pose(node, slot + Vector2(0, -340), 1.15, 0, Color(1.3, 1.25, 1.1, 0.3))
-			pillar(back, Vector2(0, -120), Color(1, 0.92, 0.65), 560, 110, 0.55)
-			burst(fx, Vector2(0, -300), ramp(Color(1, 0.95, 0.75)), "fx_glow", 16, 0.5, 20, 60, Vector2(0, 420), 25, 0.06, 0.12, true, {"dir": 90, "rect": Vector2(45, 30)})
-			ring(back, Vector2(0, 100), Color(1, 0.9, 0.6), 40, 160, 0.4, 0.25, 0.3)
-			flare(fx, Vector2.ZERO, col, 200, 0.3, 0.27)
-		"kusanagi":
-			pose(node, slot + Vector2(-60, 40), 0.5, -TAU, Color.WHITE)
-			burst(fx, Vector2.ZERO, ramp(Color(0.5, 0.85, 0.45), Color(0.75, 0.95, 0.5)), "fx_leaf", 22, 0.55, 60, 90, Vector2.ZERO, 180, 0.5, 0.9, false, {"circle": 95, "radial": -60, "tangential": 700, "spin": 360})
-			arc(back, Vector2.ZERO, 115, 200, 520, Color(0.6, 0.95, 0.65, 0.75), 9, 0.45)
-			arc(back, Vector2(10, -20), 80, 30, 330, Color(0.75, 1, 0.75, 0.6), 6, 0.4, false, 0.06)
+## SwordFx.Summon: the quiet, classical summon (2026-10-10)
+func fade_ramp(a: Color, b: Color) -> Gradient:
+	var g := Gradient.new(); g.set_color(0, cola(a, 0)); g.set_color(1, cola(b, 0)); g.add_point(0.25, a); g.add_point(0.65, b); return g
+func motes(p, pos, rmp: Gradient, tex, amount, life, grav, smin, smax, additive, rect := Vector2.ZERO, circle := 0.0, radial := 0.0, spin := 0.0, delay := 0.0):
+	var c := CPUParticles2D.new(); c.position = pos; c.amount = amount; c.lifetime = life; c.one_shot = true; c.explosiveness = 0.3; c.randomness = 0.4
+	c.texture = T(tex); c.direction = Vector2.UP; c.spread = 180; c.gravity = grav; c.initial_velocity_min = 4; c.initial_velocity_max = 16
+	c.scale_amount_min = smin; c.scale_amount_max = smax; c.color_ramp = rmp; c.damping_min = 4; c.damping_max = 10
+	c.angle_min = -180; c.angle_max = 180; c.angular_velocity_min = -spin; c.angular_velocity_max = spin; c.radial_accel_min = radial; c.radial_accel_max = radial
+	if circle > 0: c.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE_SURFACE; c.emission_sphere_radius = circle
+	elif rect != Vector2.ZERO: c.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE; c.emission_rect_extents = rect
+	if additive: c.material = add_mat
+	p.add_child(c)
+	if delay <= 0: c.emitting = true
+	else: c.create_tween().tween_interval(delay).finished.connect(func(): c.emitting = true)
+func motes_c(p, pos, col: Color, tex, amount, life, grav, smin, smax, additive, rect := Vector2.ZERO, circle := 0.0, radial := 0.0, spin := 0.0, delay := 0.0):
+	motes(p, pos, fade_ramp(col, col), tex, amount, life, grav, smin, smax, additive, rect, circle, radial, spin, delay)
+func enso(p: Node2D, center: Vector2, radius: float, col: Color, width: float, dur: float, additive := true, from_deg := 200.0, delay := 0.0):
+	var line := Line2D.new(); line.position = center; line.width = width; line.default_color = col; line.modulate = Color(1, 1, 1, 0)
+	line.joint_mode = Line2D.LINE_JOINT_ROUND; line.begin_cap_mode = Line2D.LINE_CAP_ROUND; line.end_cap_mode = Line2D.LINE_CAP_ROUND; line.antialiased = true
+	if additive: line.material = add_mat
+	var wc := Curve.new(); wc.add_point(Vector2(0, 0.7)); wc.add_point(Vector2(0.12, 1)); wc.add_point(Vector2(0.75, 0.7)); wc.add_point(Vector2(1, 0.15)); line.width_curve = wc
+	p.add_child(line); line.points = PackedVector2Array([Vector2.ZERO, Vector2.ZERO])
+	var draw := func(k: float):
+		var n: int = max(2, int(40 * k) + 1); var pts := PackedVector2Array()
+		for i in n:
+			var a: float = deg_to_rad(from_deg + 325.0 * k * i / (n - 1))
+			var r: float = radius * (1.0 + 0.035 * sin(a * 2.0 + 0.7))
+			pts.append(Vector2(cos(a), sin(a)) * r)
+		line.points = pts
+	var t := line.create_tween()
+	if delay > 0: t.tween_interval(delay)
+	t.tween_property(line, "modulate:a", 1.0, dur * 0.15)
+	t.parallel().tween_method(draw, 0.02, 1.0, dur * 0.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	t.tween_interval(dur * 0.15)
+	t.tween_property(line, "modulate:a", 0.0, dur * 0.45).set_trans(Tween.TRANS_SINE)
+func shaft(p, pos, col: Color, height, width, alpha, dur):
+	var s := sprite(p, "fx_pillar", cola(col, 0), true, pos)
+	var k := Vector2(width / 128.0, height / 512.0); s.scale = Vector2(k.x * 0.6, k.y)
+	var t := s.create_tween()
+	t.tween_property(s, "modulate:a", alpha, dur * 0.4).set_trans(Tween.TRANS_SINE)
+	t.parallel().tween_property(s, "scale:x", k.x, dur * 0.5).set_trans(Tween.TRANS_SINE)
+	t.tween_property(s, "modulate:a", 0.0, dur * 0.6).set_trans(Tween.TRANS_SINE)
+	t.parallel().tween_property(s, "scale:x", k.x * 0.5, dur * 0.6)
+func sigil(p, pos, sw: String, col: Color, alpha, dur):
+	var path := R + "/images/vfx/glyph_%s.png" % sw
+	if not ResourceLoader.exists(path): return
+	var tex: Texture2D = load(path)
+	var s := Sprite2D.new(); s.texture = tex; s.position = pos; s.modulate = cola(col, 0); s.material = add_mat
+	var k: float = 150.0 / max(1, tex.get_width()); s.scale = Vector2.ONE * k * 0.96; p.add_child(s)
+	var t := s.create_tween()
+	t.tween_property(s, "modulate:a", alpha, dur * 0.4).set_trans(Tween.TRANS_SINE)
+	t.parallel().tween_property(s, "scale", Vector2.ONE * k, dur).set_trans(Tween.TRANS_SINE)
+	t.parallel().tween_property(s, "rotation", 0.14, dur).set_trans(Tween.TRANS_SINE)
+	t.tween_property(s, "modulate:a", 0.0, dur * 0.5).set_trans(Tween.TRANS_SINE)
+func muted(c: Color) -> Color: return c.lerp(Color(0.78, 0.75, 0.72), 0.35)
+
+func summon(rig: Node2D, node: Node2D, sw: String, slot: Vector2):
+	var col: Color = COLORS[sw]; var soft := muted(col)
+	var fx := fxroot(rig, slot, 1.4, 2); var back := fxroot(rig, slot, 1.4, -1)
+	node.position = slot + Vector2(0, 46); node.rotation = 0; node.modulate = cola(soft.lightened(0.3), 0)
+	shaft(back, Vector2(0, -10), soft.lightened(0.25), 330, 70, 0.28, 0.95)
+	sigil(back, Vector2.ZERO, sw, soft, 0.32, 0.95)
+	match sw:
 		"onimaru":
-			pose(node, slot + Vector2(-25, 25), 1.15, 0, Color(0.45, 0.35, 0.55, 0))
-			stroke(back, Vector2(-170, 110), -0.62, Color(0.1, 0.05, 0.14, 0.95), 400, 90, 0.55, false)
-			stroke(fx, Vector2(-160, 100), -0.62, Color(0.65, 0.45, 0.95, 0.55), 380, 26, 0.4, true, 0.03)
-			burst(back, Vector2(60, -40), ramp(Color(0.12, 0.06, 0.16, 0.9)), "fx_ink", 10, 0.5, 120, 300, Vector2(0, 500), 50, 0.1, 0.25, false, {"dir": -40})
+			enso(back, Vector2.ZERO, 92, Color(0.13, 0.08, 0.18, 0.85), 7, 0.9, false)
+			stroke(back, Vector2(-110, 66), 0.0, Color(0.14, 0.09, 0.2, 0.5), 220, 9, 0.9, false, 0.25)
+			motes_c(fx, Vector2.ZERO, Color(0.2, 0.14, 0.26, 0.7), "fx_ink", 6, 0.9, Vector2(0, 30), 0.06, 0.12, false, Vector2(70, 60), 0, 0, 0, 0.2)
+		"durandal":
+			shaft(back, Vector2(0, -60), Color(1, 0.95, 0.8), 520, 90, 0.35, 0.95)
+			enso(back, Vector2.ZERO, 96, cola(soft, 0.55), 4, 0.9)
+			motes_c(fx, Vector2(0, -150), Color(1, 0.96, 0.85, 0.7), "fx_glow", 9, 1.0, Vector2(0, 40), 0.04, 0.08, true, Vector2(30, 40))
+		"tyrfing":
+			enso(back, Vector2.ZERO, 92, cola(soft, 0.55), 4, 0.9)
+			motes(fx, Vector2(0, -40), fade_ramp(Color(1, 0.6, 0.3, 0.75), Color(0.45, 0.4, 0.38, 0.5)), "fx_glow", 10, 1.0, Vector2(0, -25), 0.04, 0.08, true, Vector2(45, 80))
+		"kusanagi":
+			enso(back, Vector2.ZERO, 92, cola(soft, 0.55), 4, 0.9)
+			motes_c(fx, Vector2(-70, -40), Color(0.55, 0.75, 0.5, 0.85), "fx_leaf", 5, 1.1, Vector2(40, 18), 0.3, 0.45, false, Vector2(30, 70), 0, 0, 60)
+		"skofnung":
+			enso(back, Vector2.ZERO, 92, cola(soft, 0.5), 4, 0.9)
+			motes_c(back, Vector2.ZERO, Color(0.8, 0.9, 1, 0.22), "fx_smoke", 6, 1.0, Vector2.ZERO, 0.4, 0.6, true, Vector2.ZERO, 80, -40)
 		"dainsleif":
-			pose(node, slot + Vector2(0, -140), Vector2(0.5, 1.4), 0, Color(0.9, 0.3, 0.35, 0.3))
-			flare(back, Vector2.ZERO, Color(0.6, 0.08, 0.14), 170, 0.5)
-			burst(fx, Vector2(0, 10), ramp(Color(0.55, 0.03, 0.08, 0.95)), "fx_drop", 12, 0.5, 20, 80, Vector2(0, 900), 10, 0.3, 0.5, false, {"dir": 90, "rect": Vector2(8, 70), "alignY": true, "delay": 0.12})
-			blot(back, Vector2(0, 105), Color(0.4, 0.02, 0.06, 0.85), 30, 120, 0.55, 0.2)
+			enso(back, Vector2.ZERO, 92, Color(0.5, 0.1, 0.14, 0.7), 5, 0.9, false)
+			motes_c(fx, Vector2(0, 40), Color(0.5, 0.05, 0.1, 0.75), "fx_drop", 4, 0.9, Vector2(0, 160), 0.18, 0.26, false, Vector2(6, 30), 0, 0, 0, 0.35)
 		"claiomhsolais":
-			pose(node, slot, 1.4, 0, Color(2, 2, 1.6, 0))
-			flare(back, Vector2.ZERO, Color(1, 0.97, 0.8), 300, 0.35)
-			rays(fx, Vector2.ZERO, Color(1, 0.95, 0.7), 10, 230, 0.45)
-			burst(fx, Vector2.ZERO, ramp(Color(1, 1, 0.85)), "fx_glow", 16, 0.5, 80, 220, Vector2.ZERO, 180, 0.05, 0.1, true)
-			ring(back, Vector2.ZERO, Color(1, 0.95, 0.7), 30, 190, 0.4)
-		"caladbolg":
-			pose(node, slot + Vector2(-270, 60), 0.6, -1.2, Color.WHITE)
-			arc(back, Vector2(-135, 40), 135, 180, 360, Color.WHITE, 16, 0.6, true)
-			burst(fx, Vector2.ZERO, ramp(Color(0.6, 1, 1), Color(0.9, 0.7, 1)), "fx_glow", 18, 0.5, 60, 200, Vector2.ZERO, 180, 0.05, 0.1, true, {"delay": 0.25})
-			ring(back, Vector2.ZERO, col, 30, 160, 0.35, 0.25)
+			shaft(back, Vector2(0, -40), Color(1, 0.97, 0.85), 420, 80, 0.3, 0.95)
+			enso(back, Vector2.ZERO, 96, cola(soft, 0.5), 4, 0.9)
+			motes_c(fx, Vector2(0, -20), Color(1, 1, 0.9, 0.7), "fx_glow", 9, 1.0, Vector2(0, -30), 0.04, 0.07, true, Vector2(40, 90))
 		"gram":
-			pose(node, slot, 1.0, 0, Color(1.5, 1.3, 0.8, 0))
-			converge(fx, Vector2.ZERO, Color(1, 0.85, 0.5), 7, 160, 0.22)
-			flare(back, Vector2.ZERO, col, 230, 0.35, 0.22)
-			ring(back, Vector2.ZERO, col, 30, 170, 0.35, 0.22)
-			burst(fx, Vector2.ZERO, ramp(Color(1, 0.9, 0.5), Color(1, 0.5, 0.15)), "fx_spark", 30, 0.45, 200, 450, Vector2(0, 600), 180, 0.2, 0.45, true, {"alignY": true, "delay": 0.22})
+			enso(back, Vector2.ZERO, 94, cola(soft, 0.55), 4, 0.9)
+			motes_c(fx, Vector2(0, 40), Color(1, 0.85, 0.5, 0.75), "fx_glow", 8, 1.0, Vector2(0, -45), 0.04, 0.07, true, Vector2(30, 60))
 		"ganjiang", "moye":
-			pose(node, slot, 0.5, 0, Color(1, 1, 1, 0))
-			twin(fx, Vector2.ZERO, 130, 0.3, sword == "moye")
-			flare(back, Vector2.ZERO, Color(0.85, 0.6, 0.95), 220, 0.3, 0.26)
-			ring(back, Vector2.ZERO, COLORS["ganjiang"], 30, 150, 0.3, 0.26)
-			ring(back, Vector2.ZERO, COLORS["moye"], 20, 120, 0.3, 0.29)
+			enso(back, Vector2.ZERO, 96, cola(muted(COLORS["ganjiang"]), 0.55), 4, 0.9)
+			enso(back, Vector2.ZERO, 84, cola(muted(COLORS["moye"]), 0.55), 4, 0.9, true, 30, 0.08)
+		_:
+			enso(back, Vector2.ZERO, 94, cola(soft, 0.55), 4, 0.9)
+			motes_c(fx, Vector2.ZERO, cola(soft.lightened(0.3), 0.6), "fx_glow", 7, 1.0, Vector2(0, -20), 0.04, 0.07, true, Vector2(40, 80))
 
 func switch_fx(rig: Node2D, sword: String, pos: Vector2):
 	var col: Color = COLORS[sword]
