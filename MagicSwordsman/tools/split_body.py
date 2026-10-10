@@ -1,6 +1,6 @@
 """Splits the full-body Ensifer art into animation parts with Godot pivots.
 Input: the background-removed full-body PNG of the game-style Ensifer (side-on, facing right; 776x1216 — source:
-AI Horde side-view i2 (img2img of the previous body, head turned toward the enemy), see docs/card-art-credits.md). Output: MagicSwordsman/images/character/parts/*.png
+AI Horde side-view i2 of round 2 (2026-10-10: young face matching the cards, flat boots; img2img of the previous body), see docs/card-art-credits.md). Output: MagicSwordsman/images/character/parts/*.png
 and parts.json (pivot + offset per part, in output pixels). The base 'body' has the moving parts inpainted out so no
 hole shows when an arm or coat flap swings. The painted magic swirls of the source are removed (the rig draws its
 own palm circles). Usage: python3 tools/split_body.py body_cut.png
@@ -15,7 +15,7 @@ S=800/1216  # output scale (parts are 800 px tall; the scene shows them at 0.5)
 PARTS={  # name: (polygon in source px, pivot = joint the part rotates around)
  'head':([(268,22),(432,22),(432,118),(402,172),(372,192),(330,198),(296,150),(268,100)],(352,192)),
  'upper_r':([(398,212),(452,212),(502,326),(532,418),(502,462),(458,420),(418,322),(398,268)],(428,240)),
- 'fore_r':([(468,398),(560,416),(642,436),(732,466),(732,562),(640,562),(588,522),(518,482),(468,460)],(494,430)),
+ 'fore_r':([(468,398),(560,416),(642,436),(745,462),(748,605),(640,600),(588,530),(518,482),(468,460)],(494,430)),
  'upper_l':([(204,214),(262,228),(252,330),(202,440),(150,482),(118,450),(168,330)],(230,250)),
  'fore_l':([(108,430),(192,452),(170,562),(122,642),(104,702),(14,702),(6,612),(58,520)],(154,462)),
  'coat_l':([(130,600),(238,520),(290,700),(262,900),(180,940),(128,800)],(248,540)),
@@ -23,7 +23,7 @@ PARTS={  # name: (polygon in source px, pivot = joint the part rotates around)
 }
 ARMS=('upper_l','fore_l','upper_r','fore_r')
 DISCARD=()
-HANDS=[(4,596,134,712),(586,436,734,566)]  # glowing hands: keep their magenta glow
+HANDS=[(4,548,138,712),(584,448,748,604)]  # glowing hands: keep their magenta glow
 im=Image.open(SRC).convert('RGBA'); W,H=im.size
 a=np.array(im); yy,xx=np.mgrid[0:H,0:W]
 # painted magic swirls / wisps: magenta strokes outside the hands, and faint semi-transparent smoke
@@ -36,13 +36,14 @@ a[mag&~keep,3]=0
 a[a[...,3]<90,3]=0
 # the painted grey smoke around the hands and coat hem: light, unsaturated pixels (the figure itself is dark)
 rgb=a[...,:3].astype(int); light=(rgb.min(-1)>120)&((rgb.max(-1)-rgb.min(-1))<40)
-a[light,3]=0
-a[(yy>1120)&(xx>405),3]=0  # cast shadow beside the front boot
+a[light&~keep,3]=0  # (the face is pale: keep it and the hands)
+a[(yy>1068)&(xx>428),3]=0  # cast shadow beside the front boot
+a[(yy>1068)&(yy<1125)&(xx>405),3]=0
 grey=(rgb.min(-1)>55)&((rgb.max(-1)-rgb.min(-1))<32)
 for x0,y0,x1,y1 in ((560,420,776,680),(0,540,160,740),(420,740,700,880)):  # darker smoke near the hands and hem
-    z=np.zeros((H,W),bool); z[y0:y1,x0:x1]=True; a[z&grey,3]=0
+    z=np.zeros((H,W),bool); z[y0:y1,x0:x1]=True; a[z&grey&~keep,3]=0
 # ground shadow under the boots
-a[(yy>1100)&((xx<280)|(xx>440)),3]=0
+a[(yy>1068)&((xx<300)|(xx>428)),3]=0
 n,lab,st,_=cv2.connectedComponentsWithStats((a[...,3]>0).astype(np.uint8),8)
 a[lab!=1+np.argmax(st[1:,4])]=0
 im=Image.fromarray(a)
