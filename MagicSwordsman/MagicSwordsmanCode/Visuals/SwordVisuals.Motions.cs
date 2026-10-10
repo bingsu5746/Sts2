@@ -58,10 +58,12 @@ public static partial class SwordVisuals
         if (attacker != null && room?.GetCreatureNode(attacker) is { } enemy && room.GetCreatureNode(player.Creature) is { } me)
             side = enemy.GlobalPosition.X >= me.GlobalPosition.X ? 1f : -1f;
 
-        var cross = new Vector2(side * 185f, -265f);       // in front of his chest, on the attacker's side
-        var meet = cross + new Vector2(side * 48f, -4f);   // pushed forward to meet the blow
-        var arrive = hit ? 0.09 : 0.14;
-
+        // Seen from the side (feedback 2026-10-10 "옆에서 보는 입장이니까 자연스러운 모션으로"): the two blades swing in on
+        // curved paths, the second a beat after the first, and cross in front of his chest with a little depth (one
+        // in front of the body, one just behind it). On a blocked hit they take the blow and are knocked back a
+        // little with a decaying wobble; when he only gains Block they push forward to meet it. They drift home on a
+        // soft arc that overshoots slightly and settles.
+        var center = new Vector2(side * 150f, -268f);
         for (var i = 0; i < 2; i++)
         {
             var real = i < free.Count;
@@ -79,7 +81,7 @@ public static partial class SwordVisuals
                 // only one sword out: its spectral twin makes the other half of the X
                 node = CreateSword(sword, player, spectral: true);
                 rig.Root.AddChild(node);
-                home = free[0].Value.Position;
+                home = free[0].Value.Position + new Vector2(-side * 30f, 20f);
                 node.Position = home;
                 node.Scale = free[0].Value.Scale;
                 node.Modulate = new Color(0.75f, 0.85f, 1f, 0f);
@@ -87,36 +89,80 @@ public static partial class SwordVisuals
 
             GuardAt[node] = now; // in flight: a Sync during the guard leaves it alone (a strike may still take it over)
             var homeZ = real && rig.Current != sword ? node.ZIndex : ZFront;
-            node.ZIndex = Math.Max(homeZ, ZBack); // passes behind him on the way if it rests behind him
-            var rot = (i == 0 ? 0.62f : -0.62f) * side;
+            var front = i == 0;                      // the first blade crosses in front of his body, the second behind
+            var lag = front ? 0.0 : 0.045;
+            var cross = center + new Vector2(front ? side * 10f : -side * 6f, front ? -6f : 6f);
+            var rot = (front ? 0.58f : -0.52f) * side;  // tips forward and up, crossing
+            var startRot = node.Rotation;
+            var startPos = node.Position;
+            // control point: lift the path up and out so it arcs instead of sliding straight
+            var ctrl = (startPos + cross) * 0.5f + new Vector2(side * 30f, -70f);
+            var arrive = hit ? 0.12 : 0.18;
             var look = real ? Colors.White : new Color(0.75f, 0.85f, 1f, 0.6f);
+
             var tw = node.CreateTween();
             if (real) rig.Moves[sword] = tw;
-            tw.TweenProperty(node, "position", cross, arrive).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
-            tw.Parallel().TweenProperty(node, "rotation", rot, arrive);
-            tw.Parallel().TweenProperty(node, "scale", Vector2.One * 1.05f, arrive);
-            tw.Parallel().TweenProperty(node, "modulate", look, arrive);
-            tw.TweenCallback(Callable.From(() => node.ZIndex = ZFlying));
-            tw.TweenProperty(node, "position", meet, 0.08).SetTrans(Tween.TransitionType.Expo).SetEase(Tween.EaseType.In);
-            if (i == 0)
+            if (lag > 0) tw.TweenInterval(lag);
+            tw.TweenCallback(Callable.From(() => node.ZIndex = front ? ZFlying : ZBack));
+            tw.TweenMethod(Callable.From<float>(u =>
             {
-                var col = ColorOf(sword);
-                var root = rig.Root;
-                tw.TweenCallback(Callable.From(() => SwordFx.Clash(root, meet + new Vector2(side * 14f, -10f), col)));
+                if (!GodotObject.IsInstanceValid(node)) return;
+                var q = 1 - u;
+                node.Position = q * q * startPos + 2 * q * u * ctrl + u * u * cross;
+                node.Rotation = Mathf.LerpAngle(startRot, rot, Mathf.SmoothStep(0, 1, u));
+            }), 0f, 1f, arrive).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+            tw.Parallel().TweenProperty(node, "modulate", look, arrive);
+
+            if (hit)
+            {
+                // the blow lands on the X: knocked back toward him, a short wobble, then steady
+                var back = cross - new Vector2(side * 24f, -3f);
+                if (front)
+                {
+                    var col = ColorOf(sword);
+                    var root = rig.Root;
+                    tw.TweenCallback(Callable.From(() => SwordFx.Clash(root, cross + new Vector2(side * 22f, -14f), col)));
+                }
+                tw.TweenProperty(node, "position", back, 0.07).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+                tw.Parallel().TweenProperty(node, "rotation", rot - side * 0.16f * (front ? 1 : -1), 0.07);
+                tw.TweenProperty(node, "rotation", rot + side * 0.07f * (front ? 1 : -1), 0.08).SetTrans(Tween.TransitionType.Sine);
+                tw.Parallel().TweenProperty(node, "position", cross, 0.14).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+                tw.TweenProperty(node, "rotation", rot, 0.07).SetTrans(Tween.TransitionType.Sine);
             }
-            tw.TweenProperty(node, "position", cross + new Vector2(side * 14f, 0), 0.1).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
-            tw.TweenInterval(0.06);
-            tw.TweenCallback(Callable.From(() => node.ZIndex = homeZ));
+            else
+            {
+                // gaining Block: a small step forward into the guard, held for a breath
+                var meet = cross + new Vector2(side * 30f, -2f);
+                tw.TweenProperty(node, "position", meet, 0.09).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
+                if (front)
+                {
+                    var col = ColorOf(sword);
+                    var root = rig.Root;
+                    tw.TweenCallback(Callable.From(() => SwordFx.Clash(root, meet + new Vector2(side * 18f, -12f), col)));
+                }
+                tw.TweenInterval(0.08);
+                tw.TweenProperty(node, "position", cross, 0.08).SetTrans(Tween.TransitionType.Sine);
+            }
+
+            // home on an arc that dips below the straight line, overshooting a little before it settles
+            var from = cross;
+            var homeCtrl = (cross + home) * 0.5f + new Vector2(0, 45f);
+            tw.TweenCallback(Callable.From(() => { if (GodotObject.IsInstanceValid(node)) node.ZIndex = homeZ; }));
             if (real)
             {
-                tw.TweenProperty(node, "position", home, 0.22).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
-                tw.Parallel().TweenProperty(node, "rotation", 0f, 0.22);
+                tw.TweenMethod(Callable.From<float>(u =>
+                {
+                    if (!GodotObject.IsInstanceValid(node)) return;
+                    var q = 1 - u;
+                    node.Position = q * q * from + 2 * q * u * homeCtrl + u * u * home;
+                    node.Rotation = Mathf.LerpAngle(rot, 0f, u);
+                }), 0f, 1f, 0.32).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
                 tw.TweenCallback(Callable.From(() => Layout(rig, only: sword)));
             }
             else
             {
-                tw.TweenProperty(node, "position", home, 0.22).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
-                tw.Parallel().TweenProperty(node, "modulate:a", 0f, 0.22);
+                tw.TweenProperty(node, "position", home, 0.26).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+                tw.Parallel().TweenProperty(node, "modulate:a", 0f, 0.26);
                 tw.TweenCallback(Callable.From(node.QueueFree));
             }
         }

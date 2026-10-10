@@ -47,7 +47,8 @@ public static partial class SwordVisuals
     /// <summary>On-screen height (px, before the rig's per-sword scale) of a sword drawn from images/swords art.</summary>
     private const float SwordSpriteHeight = 190f;
 
-    // Layout (사용자 스케치 2026-10-04): swords float upright around the character — left, above the head, right.
+    // Layout (사용자 스케치 2026-10-04, revised 2026-10-10): swords float upright around the character — left, behind his
+    // body (partly hidden by it), right.
     // The current sword always takes the right slot (in front, toward the enemy). The character only gestures.
     // Creature space: feet at y 0, head top about y -390, body about x -128..128 (scenes/magic_swordsman_combat.tscn).
     private static readonly Vector2 SpawnPos = new(0, -220);      // swords appear from / vanish into the character
@@ -55,9 +56,9 @@ public static partial class SwordVisuals
     private static readonly Vector2[] IdleSlots =
     {
         new(-190, -235),  // left of the character (clear of his left arm)
-        new(-10, -490),   // above the head (clear of it: the head ends about y -390)
-        new(-165, -430),  // extra slots (sword cap raised by relics)
-        new(150, -445),
+        new(-70, -290),   // behind his body, partly hidden by it (feedback 2026-10-10: not above the head)
+        new(55, -305),    // behind his body on the other side (sword cap raised by relics)
+        new(-205, -420),  // left and higher
     };
 
     private const int ZBack = 0, ZFront = 1, ZFlying = 2;
@@ -701,7 +702,7 @@ public static partial class SwordVisuals
     /// <summary>A strike / Onimaru attack (0.45 s) or a guard (0.6 s) is moving this sword right now.</summary>
     private static bool InFlight(Node2D node) =>
         (LastStrike.TryGetValue(node, out var t0) && Time.GetTicksMsec() - t0 < 450) ||
-        (GuardAt.TryGetValue(node, out var g0) && Time.GetTicksMsec() - g0 < 600);
+        (GuardAt.TryGetValue(node, out var g0) && Time.GetTicksMsec() - g0 < 800);
 
     /// <summary>
     /// The current sword (else any present one) flies to <paramref name="target"/> and back in its own style
