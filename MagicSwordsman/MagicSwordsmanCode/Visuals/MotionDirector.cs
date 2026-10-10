@@ -33,7 +33,6 @@ public static class MotionDirector
     private static readonly string[] Fidgets =
         ["Idle_Look", "Idle_Flex", "Idle_Weave", "Idle_Breath", "Idle_Shift", "Idle_Glance", "Idle_Wrist",
          "Idle_Roll", "Idle_Ready", "Idle_Gem", "Idle_Hair"];
-    private static readonly string[] Deaths = ["Dead", "Dead_Kneel"];
 
     private static readonly Random Rng = new();
 
@@ -75,23 +74,49 @@ public static class MotionDirector
         }
     }
 
+    /// <summary>Block gained: he braces while two swords cross into an X in front of him (SwordVisuals.Guard).</summary>
     public static void OnBlockGained(Player player, decimal amount)
     {
         Play(player, amount >= 15 ? "Block_Big" : Pick(Blocks));
         Sfx.Block();
+        SwordVisuals.Guard(player, null, hit: false);
     }
 
-    public static void OnDamageReceived(Player player, int unblocked, bool fullyBlocked)
+    public static void OnDamageReceived(Player player, int unblocked, bool fullyBlocked, Creature? dealer = null)
     {
         var creature = player.Creature;
         if (creature.IsDead) return;
-        if (fullyBlocked) { Play(player, "Hit_Guarded"); Sfx.Guard(); return; }
+        if (fullyBlocked)
+        {
+            Play(player, "Hit_Guarded");
+            Sfx.Guard();
+            SwordVisuals.Guard(player, dealer, hit: true); // the crossed swords take the blow
+            return;
+        }
         if (unblocked <= 0) return;
         var heavy = unblocked >= Math.Max(15, creature.MaxHp / 5);
         Play(player, heavy ? "Hit_Heavy" : unblocked >= 8 ? "Hit_Stagger" : unblocked <= 3 ? "Hit_Light" : "Hit");
     }
 
     public static void OnSummoned(Player player, SwordId sword) => Play(player, "Summon_" + sword);
+
+    /// <summary>
+    /// Onimaru attacks on its own (OnimaruAttack.Perform: 【명령】, auto attacks, kind cards — no "Attack" trigger from the
+    /// game): Ensifer gives the command with a flick of the hand while the katana flies (SwordVisuals.OnimaruStrike).
+    /// </summary>
+    public static void OnOnimaruAttack(Player player)
+    {
+        try
+        {
+            var anim = SwordVisuals.CurrentClip(player);
+            if (anim is "Attack_Onimaru" or null || anim.StartsWith("Dead")) return; // 난무: one gesture for the volley
+            Play(player, "Attack_Onimaru");
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[MotionDirector] Onimaru motion failed: {e.Message}");
+        }
+    }
 
     /// <summary>A switch usually happens inside a card play: only gesture if nothing else is playing.</summary>
     public static void OnSwitched(Player player) => Play(player, Pick(Swaps), onlyIfIdle: true);
@@ -155,7 +180,10 @@ public static class MotionDirector
                     SwordVisuals.Strike(player, target);
                     return AttackVariant(player);
                 case "Dead":
-                    return Pick(Deaths);
+                    // the only death: his swords turn on him (SwordVisuals.DeathBetrayal + body clip Dead_Swords). "Dead"
+                    // itself is the same clip, so the body is right even if this redirect never happens.
+                    SwordVisuals.DeathBetrayal(player);
+                    return "Dead_Swords";
                 default:
                     return null;
             }

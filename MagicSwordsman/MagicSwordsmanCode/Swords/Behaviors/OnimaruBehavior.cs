@@ -2,6 +2,7 @@ using MagicSwordsman.MagicSwordsmanCode.Cards.Onimaru;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Curses;
 using MagicSwordsman.MagicSwordsmanCode.Powers;
+using MagicSwordsman.MagicSwordsmanCode.Visuals;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -91,6 +92,7 @@ public static class OnimaruAttack
         if (state == null) return;
         state.SetCounter(SwordId.Onimaru, KindKey, (int)kind);
         if (iaiAdd > 0) state.AddCounter(SwordId.Onimaru, IaiBonusKey, iaiAdd);
+        SwordVisuals.Sync(player); // presentation only: the katana takes the stance's pose
 
         var creature = player.Creature;
         foreach (var other in creature.Powers.OfType<OnimaruKindPower>().Where(p => p.Kind != kind).ToList())
@@ -249,6 +251,7 @@ public static class OnimaruAttack
             {
                 var t = target != null && enemies.Contains(target) ? target : rng.NextItem(enemies);
                 if (t == null) return;
+                Present(player, kind, [t]);
                 VfxCmd.PlayOnCreature(t, "vfx/vfx_attack_slash");
                 await CreatureCmd.Damage(choiceContext, t, n.PerHit, ValueProp.Unpowered, creature, source);
                 if (n.Weak > 0 && t.IsAlive)
@@ -261,14 +264,22 @@ public static class OnimaruAttack
                     var alive = combatState.HittableEnemies.ToList();
                     var t = rng.NextItem(alive);
                     if (t == null) break;
+                    Present(player, kind, [t]);
                     VfxCmd.PlayOnCreature(t, "vfx/vfx_attack_slash");
                     await CreatureCmd.Damage(choiceContext, t, n.PerHit, ValueProp.Unpowered, creature, source);
                 }
                 break;
             case OnimaruKind.Giri:
+                Present(player, kind, enemies);
                 VfxCmd.PlayOnCreatures(enemies, "vfx/vfx_attack_slash");
                 await CreatureCmd.Damage(choiceContext, enemies, n.PerHit, ValueProp.Unpowered, creature, source);
                 break;
         }
+    }
+
+    /// <summary>Presentation only (never throws): the katana flies at the targets and Ensifer gestures the command.</summary>
+    private static void Present(Player player, OnimaruKind kind, IReadOnlyList<Creature> targets)
+    {
+        if (SwordVisuals.OnimaruStrike(player, kind, targets)) MotionDirector.OnOnimaruAttack(player);
     }
 }

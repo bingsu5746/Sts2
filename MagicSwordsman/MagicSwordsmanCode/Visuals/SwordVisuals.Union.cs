@@ -44,7 +44,7 @@ public static partial class SwordVisuals
         Creature? target, float t)
     {
         var rig = GetRig(player, create: false);
-        if (rig == null) return;
+        if (rig == null || rig.Dead) return;
         var primaryGroup = SwordRegistry.WithPartners(primary);
         var a = ClaimBlades(rig, primaryGroup);
         var b = ClaimBlades(rig, SwordRegistry.WithPartners(partner).Where(s => !primaryGroup.Contains(s)));
@@ -126,7 +126,8 @@ public static partial class SwordVisuals
         {
             UnionBusyUntil[x.Node] = busy;
             GoHome(x);
-            x.Tw.TweenCallback(Callable.From(() => Layout(rig)));
+            var sw = x.Sword;
+            x.Tw.TweenCallback(Callable.From(() => Layout(rig, only: sw)));
         }
     }
 
@@ -145,6 +146,7 @@ public static partial class SwordVisuals
             node.Rotation = 0;
             node.Scale = Vector2.One * 1.15f;
             node.Modulate = Colors.White;
+            node.ZIndex = ZFlying;
             var tw = node.CreateTween();
             rig.Moves[s] = tw;
             list.Add(new UnionBlade(s, node, home, tw));
