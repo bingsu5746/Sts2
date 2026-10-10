@@ -30,6 +30,7 @@ public static class MotionDirector
     private static readonly string[] Powers = ["Power_Rise", "Power_Focus", "Power_Burst"];
     private static readonly string[] Blocks = ["Block", "Block_Cross", "Block_Brace", "Block_Palm"];
     private static readonly string[] Swaps = ["Swap_1", "Swap_2", "Swap_3"];
+    private static readonly string[] SummonGestures = ["Summon_Raise", "Summon_Beckon", "Summon_Chest"];
     private static readonly string[] Fidgets =
         ["Idle_Look", "Idle_Flex", "Idle_Weave", "Idle_Breath", "Idle_Shift", "Idle_Glance", "Idle_Wrist",
          "Idle_Roll", "Idle_Ready", "Idle_Gem", "Idle_Hair"];
@@ -98,7 +99,13 @@ public static class MotionDirector
         Play(player, heavy ? "Hit_Heavy" : unblocked >= 8 ? "Hit_Stagger" : unblocked <= 3 ? "Hit_Light" : "Hit");
     }
 
-    public static void OnSummoned(Player player, SwordId sword) => Play(player, "Summon_" + sword);
+    /// <summary>
+    /// A summon gesture (user request 2026-10-10 "검들 소환 모션도 좀 더 늘려줘"): the sword's own palm-up call half the
+    /// time, else one of the generic gestures — a hand raised high, a beckoning draw out of the air, or the palm laid
+    /// over the chest gem and opened outward (tools/gen_combat_scene.py). No body scaling in any of them.
+    /// </summary>
+    public static void OnSummoned(Player player, SwordId sword) =>
+        Play(player, Rng.NextDouble() < 0.45 ? "Summon_" + sword : Pick(SummonGestures));
 
     /// <summary>
     /// Onimaru attacks on its own (OnimaruAttack.Perform: 【명령】, auto attacks, kind cards — no "Attack" trigger from the
@@ -177,7 +184,7 @@ public static class MotionDirector
                     LastTarget.TryGetValue(player.NetId, out var target);
                     LastCard.TryGetValue(player.NetId, out var last);
                     if (UnionMotion.TryHandleAttackTrigger(player, last, target, out var unionClip)) return unionClip;
-                    SwordVisuals.Strike(player, target);
+                    SwordVisuals.Strike(player, target, HintFor(player));
                     return AttackVariant(player);
                 case "Dead":
                     // the only death: his swords turn on him (SwordVisuals.DeathBetrayal + body clip Dead_Swords). "Dead"
@@ -207,6 +214,21 @@ public static class MotionDirector
         return roll < 0.12 ? "Attack_Double" : roll < 0.2 ? "Attack_Flurry" : Pick(Attacks);
     }
 
+    /// <summary>Which strike variants the last attack card favours (SwordVisuals.Strikes.cs).</summary>
+    private static StrikeHint HintFor(Player player)
+    {
+        try
+        {
+            if (!LastCard.TryGetValue(player.NetId, out var card)) return StrikeHint.Auto;
+            if (card.TargetType == TargetType.AllEnemies) return StrikeHint.All;
+            return card.EnergyCost.GetResolved() >= 2 ? StrikeHint.Heavy : StrikeHint.Single;
+        }
+        catch (Exception)
+        {
+            return StrikeHint.Auto;
+        }
+    }
+
     // ------------------------------------------------------------------ helpers
 
     private static string Pick(string[] options) => options[Rng.Next(options.Length)];
@@ -221,10 +243,13 @@ public static class MotionDirector
         LastTarget.Remove(player.NetId);
     }
 
-    /// <summary>Our hit landed on an enemy (later hits of multi-hit / random-target attacks): the sword flies there.</summary>
+    /// <summary>
+    /// Our hit landed on an enemy: the first hit's flight is already under way (ignored as the same hit); later hits of
+    /// multi-hit / random-target attacks send the sword again, from another angle (SwordVisuals.Strikes.cs).
+    /// </summary>
     public static void OnDealtDamage(Player player, Creature target)
     {
-        SwordVisuals.Strike(player, target);
+        SwordVisuals.Strike(player, target, HintFor(player), afterHit: true);
         SwordFx.Impact(player, target); // the current sword's own hit effect + impact sound
     }
 }

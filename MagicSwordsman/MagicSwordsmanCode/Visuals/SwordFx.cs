@@ -38,6 +38,52 @@ public static partial class SwordFx
         try
         {
             Sfx.Summon(sword);
+            var modes = SummonModesOf(sword);
+            switch (modes[SummonRng.Next(modes.Length)])
+            {
+                case SummonMode.Descend: SummonDescend(rigRoot, swordNode, sword, slot); break;
+                case SummonMode.Gather: SummonGather(rigRoot, swordNode, sword, slot); break;
+                case SummonMode.Ripple: SummonRipple(rigRoot, swordNode, sword, slot); break;
+                case SummonMode.Tomb: SummonTomb(rigRoot, swordNode, sword, slot); break;
+                default: SummonRise(rigRoot, swordNode, sword, slot); break;
+            }
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordFx] summon {sword}: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// The ways a sword can arrive (user request 2026-10-10 "검들 소환 모션도 좀 더 늘려줘"), all quiet and classical:
+    /// Rise — out of a brush circle (ensō), the original; Descend — from high above, point down, turning upright as it
+    /// settles onto a faint ring; Gather — motes (sparks, ash, leaves, frost, shards...) drift together and the blade
+    /// condenses out of them; Ripple — drawn out of a ripple in the air, from small to full size; Tomb — rising out of
+    /// the tomb sigil (images/vfx/magic_circle.png) behind Ensifer and gliding to its place.
+    /// </summary>
+    private enum SummonMode { Rise, Descend, Gather, Ripple, Tomb }
+
+    private static readonly Random SummonRng = new();
+
+    private static SummonMode[] SummonModesOf(SwordId sword) => sword switch
+    {
+        SwordId.Gram => [SummonMode.Rise, SummonMode.Gather, SummonMode.Descend],          // shards reforging
+        SwordId.Tyrfing => [SummonMode.Rise, SummonMode.Gather, SummonMode.Tomb],          // ash kindling
+        SwordId.Dainsleif => [SummonMode.Rise, SummonMode.Tomb, SummonMode.Ripple],
+        SwordId.Skofnung => [SummonMode.Rise, SummonMode.Gather, SummonMode.Ripple],       // frost mist
+        SwordId.Durandal => [SummonMode.Rise, SummonMode.Descend, SummonMode.Gather],
+        SwordId.ClaiomhSolais => [SummonMode.Rise, SummonMode.Descend, SummonMode.Gather],
+        SwordId.Caladbolg => [SummonMode.Rise, SummonMode.Ripple, SummonMode.Descend],
+        SwordId.Kusanagi => [SummonMode.Rise, SummonMode.Gather, SummonMode.Ripple],       // leaves on the wind
+        SwordId.Onimaru => [SummonMode.Rise, SummonMode.Tomb, SummonMode.Ripple],
+        SwordId.Ganjiang or SwordId.Moye => [SummonMode.Rise, SummonMode.Gather, SummonMode.Descend],
+        _ => [SummonMode.Rise, SummonMode.Gather],
+    };
+
+    /// <summary>Rise: the blade rises slowly out of nothing while an ensō draws itself behind it (the original summon).</summary>
+    private static void SummonRise(Node2D rigRoot, Node2D swordNode, SwordId sword, Vector2 slot)
+    {
+        {
             var col = SwordVisuals.ColorOf(sword);
             var soft = Muted(col);
             var fx = Root(rigRoot, slot, 1.4, 2);
@@ -103,9 +149,171 @@ public static partial class SwordFx
                     break;
             }
         }
+    }
+
+    /// <summary>The motes a sword is made of when it gathers / settles: texture, colour ramp, additive, spin.</summary>
+    private static (string Tex, Gradient Ramp, bool Add, float Spin, float SMin, float SMax) MotesOf(SwordId sword)
+    {
+        var soft = Muted(SwordVisuals.ColorOf(sword));
+        return sword switch
+        {
+            SwordId.Gram => ("fx_glow", FadeRamp(new Color(1f, 0.85f, 0.5f, 0.8f), new Color(1f, 0.75f, 0.35f, 0.7f)), true, 0f, 0.04f, 0.08f),
+            // grey ash that kindles to embers as it gathers
+            SwordId.Tyrfing => ("fx_glow", FadeRamp(new Color(0.5f, 0.46f, 0.44f, 0.6f), new Color(1f, 0.55f, 0.25f, 0.85f)), true, 0f, 0.04f, 0.08f),
+            SwordId.Skofnung => ("fx_smoke", FadeRamp(new Color(0.8f, 0.9f, 1f, 0.2f), new Color(0.85f, 0.95f, 1f, 0.28f)), true, 30f, 0.3f, 0.5f),
+            SwordId.Kusanagi => ("fx_leaf", FadeRamp(new Color(0.55f, 0.75f, 0.5f, 0.85f), new Color(0.6f, 0.82f, 0.55f, 0.8f)), false, 200f, 0.25f, 0.4f),
+            SwordId.Dainsleif => ("fx_drop", FadeRamp(new Color(0.5f, 0.05f, 0.1f, 0.75f), new Color(0.45f, 0.04f, 0.08f, 0.7f)), false, 0f, 0.14f, 0.22f),
+            SwordId.Onimaru => ("fx_ink", FadeRamp(new Color(0.2f, 0.14f, 0.26f, 0.7f), new Color(0.15f, 0.1f, 0.2f, 0.7f)), false, 40f, 0.06f, 0.12f),
+            SwordId.Durandal or SwordId.ClaiomhSolais =>
+                ("fx_glow", FadeRamp(new Color(1f, 0.97f, 0.85f, 0.75f), new Color(1f, 0.95f, 0.8f, 0.7f)), true, 0f, 0.04f, 0.08f),
+            _ => ("fx_glow", FadeRamp(new Color(soft.Lightened(0.3f), 0.7f), new Color(soft.Lightened(0.2f), 0.6f)), true, 0f, 0.04f, 0.07f),
+        };
+    }
+
+    /// <summary>
+    /// Descend: from high above, point down, it comes down slowly and turns upright as it settles; a soft column of light
+    /// marks its way and a faint ring opens flat under it when it arrives.
+    /// </summary>
+    private static void SummonDescend(Node2D rigRoot, Node2D swordNode, SwordId sword, Vector2 slot)
+    {
+        var soft = Muted(SwordVisuals.ColorOf(sword));
+        var fx = Root(rigRoot, slot, 1.5, 2);
+        var back = Root(rigRoot, slot, 1.5, -1);
+        // the layout tween (0.85 s, sine) carries it down; its rotation tween turns it from point-down to upright
+        Pose(swordNode, slot + new Vector2(0, -300), swordNode.Scale.X, Mathf.Pi, new Color(soft.Lightened(0.3f), 0f));
+        var light = sword is SwordId.Durandal or SwordId.ClaiomhSolais ? new Color(1f, 0.95f, 0.8f) : soft.Lightened(0.25f);
+        Shaft(back, new Vector2(0, -170), light, 560, 60, sword is SwordId.Durandal or SwordId.ClaiomhSolais ? 0.3f : 0.2f, 1.1);
+        var m = MotesOf(sword);
+        Motes(fx, new Vector2(0, -260), m.Ramp, m.Tex, 7, 1.1, new Vector2(0, 55), m.SMin, m.SMax, m.Add, rect: new Vector2(26, 60), spin: m.Spin);
+        Ring(back, new Vector2(0, 92), new Color(soft * 0.75f, 1f), 20, 120, 0.6, delay: 0.62, squash: 0.28f);
+        Enso(back, Vector2.Zero, 84, new Color(soft, 0.4f), 3, 0.8, delay: 0.45);
+    }
+
+    /// <summary>Gather: motes drift together from all round and the blade condenses out of them, a little late.</summary>
+    private static void SummonGather(Node2D rigRoot, Node2D swordNode, SwordId sword, Vector2 slot)
+    {
+        var soft = Muted(SwordVisuals.ColorOf(sword));
+        var fx = Root(rigRoot, slot, 1.5, 2);
+        var back = Root(rigRoot, slot, 1.5, -1);
+        Pose(swordNode, slot, swordNode.Scale.X, 0f, new Color(soft.Lightened(0.3f), 0f));
+        // the blade itself stays unseen until the motes have mostly gathered (the holder's layout fade still runs)
+        if (swordNode.GetNodeOrNull<Node2D>("Blade") is { } blade)
+        {
+            blade.Modulate = new Color(1, 1, 1, 0);
+            var t = blade.CreateTween();
+            t.TweenInterval(0.38);
+            t.TweenProperty(blade, "modulate:a", 1f, 0.45).SetTrans(Tween.TransitionType.Sine);
+        }
+        var m = MotesOf(sword);
+        Gathering(fx, m.Ramp, m.Tex, sword is SwordId.Skofnung ? 10 : 18, 150, 0.6, m.Add, m.Spin, m.SMin, m.SMax,
+            swirl: sword is SwordId.Kusanagi or SwordId.Skofnung ? 260f : 0f);
+        switch (sword)
+        {
+            case SwordId.Gram: // the shards of the broken blade come together (reforged)
+                Converge(fx, Vector2.Zero, Muted(SwordVisuals.ColorOf(sword)).Lightened(0.2f), 7, 170, 0.45);
+                break;
+            case SwordId.Ganjiang or SwordId.Moye: // a bronze and a silver light winding in to each other
+                Twin(fx, Vector2.Zero, 120, 0.5, sword == SwordId.Moye);
+                break;
+        }
+        Sigil(back, Vector2.Zero, sword, soft, 0.28f, 1.0);
+        Flare(back, Vector2.Zero, soft.Lightened(0.2f), 150, 0.5, delay: 0.35);
+    }
+
+    /// <summary>Ripple: rings spread through the air as through still water and the blade is drawn out of them.</summary>
+    private static void SummonRipple(Node2D rigRoot, Node2D swordNode, SwordId sword, Vector2 slot)
+    {
+        var soft = Muted(SwordVisuals.ColorOf(sword));
+        var back = Root(rigRoot, slot, 1.5, -1);
+        var fx = Root(rigRoot, slot, 1.5, 2);
+        // the layout tween grows it to its size: from small and far to here
+        Pose(swordNode, slot + new Vector2(0, 12), swordNode.Scale.X * 0.35f, 0f, new Color(soft.Lightened(0.3f), 0f));
+        var ring = sword switch
+        {
+            SwordId.Onimaru => new Color(0.35f, 0.25f, 0.45f),
+            SwordId.Dainsleif => new Color(0.5f, 0.12f, 0.16f),
+            _ => soft * 0.45f,
+        };
+        for (var i = 0; i < 3; i++)
+            Ring(back, Vector2.Zero, new Color(ring, 1f), 16, 120 + i * 18, 0.8, delay: i * 0.15, squash: 0.92f);
+        if (sword == SwordId.Caladbolg)
+            Arc(back, Vector2.Zero, 70, -90, 270, Colors.White, 5, 0.9, rainbow: true, delay: 0.1, grow: 1.5f);
+        if (sword == SwordId.Onimaru)
+            Enso(back, Vector2.Zero, 88, new Color(0.13f, 0.08f, 0.18f, 0.8f), 6, 0.9, additive: false);
+        Flare(back, Vector2.Zero, soft.Lightened(0.15f), 170, 0.7);
+        var m = MotesOf(sword);
+        Motes(fx, Vector2.Zero, m.Ramp, m.Tex, 5, 0.9, new Vector2(0, -10), m.SMin, m.SMax, m.Add, circle: 60, spin: m.Spin, delay: 0.3);
+    }
+
+    /// <summary>Behind Ensifer: the tomb sigil turns faintly where the swords sleep.</summary>
+    private static readonly Vector2 TombPos = new(0, -250);
+
+    /// <summary>Tomb: the tomb sigil surfaces behind him and the blade rises out of it, then glides to its place.</summary>
+    private static void SummonTomb(Node2D rigRoot, Node2D swordNode, SwordId sword, Vector2 slot)
+    {
+        var soft = Muted(SwordVisuals.ColorOf(sword));
+        var tomb = Root(rigRoot, TombPos, 1.5, -1);
+        var fx = Root(rigRoot, slot, 1.5, 2);
+        Pose(swordNode, TombPos + new Vector2(0, 40), swordNode.Scale.X * 0.75f, 0f, new Color(soft.Lightened(0.3f), 0f));
+        // behind his body while it rises out of the sigil; then back to the z the layout gave it
+        var z = swordNode.ZIndex;
+        swordNode.ZIndex = 0;
+        var zt = swordNode.CreateTween();
+        zt.TweenInterval(0.4);
+        zt.TweenCallback(Callable.From(() => { if (GodotObject.IsInstanceValid(swordNode) && swordNode.ZIndex == 0) swordNode.ZIndex = z; }));
+        var circleTex = T("magic_circle");
+        if (circleTex != null)
+        {
+            var ink = sword is SwordId.Onimaru or SwordId.Dainsleif;
+            var c = new Sprite2D
+            {
+                Texture = circleTex, Modulate = new Color(ink ? new Color(0.45f, 0.3f, 0.55f) : soft, 0f),
+                Material = AddMat, Scale = Vector2.One * 300f / Math.Max(1, circleTex.GetWidth()),
+            };
+            tomb.AddChild(c);
+            var t = c.CreateTween();
+            t.TweenProperty(c, "modulate:a", 0.32f, 0.35).SetTrans(Tween.TransitionType.Sine);
+            t.Parallel().TweenProperty(c, "rotation", 0.5f, 1.3).SetTrans(Tween.TransitionType.Sine);
+            t.TweenProperty(c, "modulate:a", 0f, 0.8).SetTrans(Tween.TransitionType.Sine);
+        }
+        Sigil(tomb, Vector2.Zero, sword, soft, 0.35f, 1.0);
+        Enso(tomb, Vector2.Zero, 120, sword == SwordId.Onimaru ? new Color(0.13f, 0.08f, 0.18f, 0.8f) : new Color(soft, 0.5f), 4, 1.0,
+            additive: sword != SwordId.Onimaru);
+        var m = MotesOf(sword);
+        Motes(fx, Vector2.Zero, m.Ramp, m.Tex, 6, 0.9, new Vector2(0, -12), m.SMin, m.SMax, m.Add, rect: new Vector2(30, 70), spin: m.Spin, delay: 0.5);
+    }
+
+    /// <summary>Motes released on a ring round <paramref name="p"/> that drift in to its centre over <paramref name="dur"/>.</summary>
+    private static void Gathering(Node2D p, Gradient ramp, string tex, int amount, float radius, double dur, bool additive,
+        float spin, float sMin, float sMax, float swirl = 0f)
+    {
+        var accel = 2f * radius / (float)(dur * dur); // from rest at the ring to the centre in one lifetime
+        var c = new CpuParticles2D
+        {
+            Amount = amount, Lifetime = dur, OneShot = true, Explosiveness = 0.55f, Randomness = 0.15f, Texture = T(tex),
+            Spread = 180, Gravity = Vector2.Zero, InitialVelocityMin = 0, InitialVelocityMax = 4, ScaleAmountMin = sMin,
+            ScaleAmountMax = sMax, ColorRamp = ramp, RadialAccelMin = -accel * 0.95f, RadialAccelMax = -accel,
+            TangentialAccelMin = swirl * 0.8f, TangentialAccelMax = swirl, AngleMin = -180, AngleMax = 180,
+            AngularVelocityMin = -spin, AngularVelocityMax = spin, EmissionShape = CpuParticles2D.EmissionShapeEnum.SphereSurface,
+            EmissionSphereRadius = radius,
+        };
+        if (additive) c.Material = AddMat;
+        p.AddChild(c);
+        c.Emitting = true;
+    }
+
+    /// <summary>A short bright glint across <paramref name="pos"/> (a drawn cut, a flash of light).</summary>
+    internal static void Glint(Node2D parent, Vector2 pos, Color col, float size)
+    {
+        try
+        {
+            var fx = Root(parent, pos, 0.5, 3);
+            Flare(fx, Vector2.Zero, new Color(1f, 0.98f, 0.92f), size * 0.55f, 0.25);
+            Beam(fx, Vector2.Zero, Mathf.Pi / 2 + (float)GD.RandRange(-0.15, 0.15), col.Lightened(0.3f), size * 1.6f, 12, 0.3);
+        }
         catch (Exception e)
         {
-            MainFile.Logger.Warn($"[SwordFx] summon {sword}: {e.Message}");
+            MainFile.Logger.Warn($"[SwordFx] glint: {e.Message}");
         }
     }
 
@@ -267,7 +475,8 @@ public static partial class SwordFx
             container.AddChild(fx);
             fx.GlobalPosition = node.VfxSpawnPosition;
             FreeAfter(fx, 0.8);
-            PlayImpact(fx, sword);
+            var accent = SwordVisuals.StrikeAccent(player); // the cut of the strike that just landed (SwordVisuals.Strikes.cs)
+            PlayImpact(fx, sword, accent?.Cut, accent?.Heavy ?? false);
         }
         catch (Exception e)
         {
@@ -275,11 +484,22 @@ public static partial class SwordFx
         }
     }
 
-    /// <summary>The impact itself, centred on <paramref name="fx"/> (screen pixels).</summary>
-    internal static void PlayImpact(Node2D fx, SwordId? sword)
+    /// <summary>
+    /// The impact itself, centred on <paramref name="fx"/> (screen pixels). <paramref name="cut"/>: direction of the
+    /// sword's cut (the strokes follow it, so successive hits of a flurry leave differently angled marks);
+    /// <paramref name="heavy"/>: a heavy variant (slam, cleave, judgment) adds a ring across the ground.
+    /// </summary>
+    internal static void PlayImpact(Node2D fx, SwordId? sword, float? cut = null, bool heavy = false)
     {
         var rot = (float)GD.RandRange(-0.5, 0.5);
         var col = sword is { } s ? SwordVisuals.ColorOf(s) : new Color(0.85f, 0.65f, 1f);
+        if (heavy)
+        {
+            Ring(fx, new Vector2(0, 120), col, 40, 300, 0.5, squash: 0.28f);
+            Flare(fx, Vector2.Zero, new Color(1f, 0.97f, 0.9f), 260, 0.3);
+        }
+        // a cut's stroke grows along the cut; without one, a random slant as before
+        float Along(float fallback) => cut ?? fallback;
         switch (sword)
         {
             case SwordId.Tyrfing: // a burst of fire
@@ -289,7 +509,7 @@ public static partial class SwordFx
                 Ring(fx, Vector2.Zero, new Color(1f, 0.45f, 0.15f), 30, 170, 0.35);
                 break;
             case SwordId.Skofnung: // a pale ghost cut that leaves frost-mist
-                Stroke(fx, new Vector2(-190, 0).Rotated(rot - 0.5f), rot - 0.5f, new Color(0.7f, 0.9f, 1f, 0.8f), 380, 50, 0.35, true);
+                Stroke(fx, new Vector2(-190, 0).Rotated(Along(rot - 0.5f)), Along(rot - 0.5f), new Color(0.7f, 0.9f, 1f, 0.8f), 380, 50, 0.35, true);
                 Burst(fx, Vector2.Zero, Ramp(new Color(0.75f, 0.9f, 1f, 0.22f)), "fx_smoke", 6, 0.5, 60, 140, Vector2.Zero, 180, 0.5f, 0.8f, true);
                 Burst(fx, Vector2.Zero, Ramp(new Color(0.85f, 0.95f, 1f)), "fx_shard", 10, 0.4, 150, 320, new Vector2(0, 400), 180, 0.25f, 0.45f, true, alignY: true);
                 break;
@@ -300,7 +520,7 @@ public static partial class SwordFx
                 break;
             case SwordId.Kusanagi: // three wind cuts and a scatter of grass
                 for (var k = 0; k < 3; k++)
-                    Slash(fx, Vector2.Zero, rot + k * Mathf.Tau / 3, new Color(0.55f, 0.95f, 0.6f, 0.6f), 0.75f, 0.32, delay: k * 0.04);
+                    Slash(fx, Vector2.Zero, Along(rot) + k * Mathf.Tau / 3, new Color(0.55f, 0.95f, 0.6f, 0.6f), 0.75f, 0.32, delay: k * 0.04);
                 Burst(fx, Vector2.Zero, Ramp(new Color(0.5f, 0.85f, 0.45f)), "fx_leaf", 14, 0.5, 150, 320, new Vector2(0, 300), 180,
                     0.4f, 0.7f, false, spin: 540);
                 break;
@@ -311,7 +531,7 @@ public static partial class SwordFx
                 Burst(fx, Vector2.Zero, Ramp(new Color(0.12f, 0.06f, 0.16f, 0.9f)), "fx_ink", 8, 0.45, 150, 320, new Vector2(0, 500), 180, 0.1f, 0.22f, false);
                 break;
             case SwordId.Dainsleif: // a blood-red cut and spatter
-                Stroke(fx, new Vector2(-180, 0).Rotated(rot + 0.4f), rot + 0.4f, new Color(0.75f, 0.12f, 0.18f, 0.85f), 360, 40, 0.35, true);
+                Stroke(fx, new Vector2(-180, 0).Rotated(Along(rot + 0.4f)), Along(rot + 0.4f), new Color(0.75f, 0.12f, 0.18f, 0.85f), 360, 40, 0.35, true);
                 Blot(fx, new Vector2(10, 10), new Color(0.45f, 0.02f, 0.07f, 0.85f), 30, 130, 0.5, squash: 1f);
                 Burst(fx, Vector2.Zero, Ramp(new Color(0.55f, 0.03f, 0.08f, 0.95f)), "fx_drop", 14, 0.5, 150, 380, new Vector2(0, 900), 180,
                     0.25f, 0.45f, false, alignY: true);
@@ -332,12 +552,13 @@ public static partial class SwordFx
                     250, 520, new Vector2(0, 700), 180, 0.25f, 0.5f, true, alignY: true);
                 break;
             case SwordId.Ganjiang or SwordId.Moye: // two crossing cuts, red and blue
-                Stroke(fx, new Vector2(-170, 0).Rotated(0.55f), 0.55f, SwordVisuals.ColorOf(SwordId.Ganjiang), 340, 36, 0.35, true);
-                Stroke(fx, new Vector2(-170, 0).Rotated(-0.55f), -0.55f, SwordVisuals.ColorOf(SwordId.Moye), 340, 36, 0.35, true, delay: 0.05);
+                var g = Along(0f);
+                Stroke(fx, new Vector2(-170, 0).Rotated(g + 0.55f), g + 0.55f, SwordVisuals.ColorOf(SwordId.Ganjiang), 340, 36, 0.35, true);
+                Stroke(fx, new Vector2(-170, 0).Rotated(g - 0.55f), g - 0.55f, SwordVisuals.ColorOf(SwordId.Moye), 340, 36, 0.35, true, delay: 0.05);
                 Flare(fx, Vector2.Zero, new Color(0.85f, 0.6f, 0.95f), 170, 0.3, delay: 0.05);
                 break;
             default: // no current sword: a plain violet cut
-                Slash(fx, Vector2.Zero, rot, new Color(col, 0.85f), 1f, 0.3);
+                Slash(fx, Vector2.Zero, Along(rot), new Color(col, 0.85f), 1f, 0.3);
                 Flare(fx, Vector2.Zero, col, 170, 0.3);
                 break;
         }

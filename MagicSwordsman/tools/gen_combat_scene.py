@@ -215,6 +215,35 @@ for sw,col in SWORD_COL.items():
     c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1),scale=(1,1)).fx('Visuals/Rig/Sigil',0.3,1,col,scale=(1.5,1.5)).fx('Visuals/Rig/Sigil',0.95,0.4,(1,1,1),scale=(1,1))
     rest(c,0.95); M.append(c)
 c=Clip('Summon',0.95); [c.tr.update({k:list(v)}) for k,v in M[-1].tr.items()]; M.append(c)  # generic = last sword's
+# more summon gestures (user request 2026-10-10 "검들 소환 모션도 좀 더 늘려줘"); MotionDirector picks one of these or the
+# sword's own clip. Colour-neutral: the palm circles take the sword's colour at runtime, the sigil glows white.
+# Summon_Raise: the right hand rises high, palm up, his gaze following it — calling the sword down from above
+c=Clip('Summon_Raise',1.0); rest(c,0)
+c.pose(0.18,y=-4,x=2,ur=-0.7,fr=-0.25,ul=0.06,head=-0.06)
+c.pose(0.34,y=-9,x=3,ur=-1.15,fr=-0.2,ul=0.1,head=-0.14,cr=-0.03,tint=(1.3,1.18,1.6))
+c.pose(0.62,y=-8,ur=-1.1,fr=-0.3,ul=0.1,head=-0.12)
+c.pose(0.8,y=-4,ur=-0.6,fr=-0.35,head=-0.04)
+c.hand('R',0.15,0.5,0.6); c.hand('R',0.34,0.9,1.0); c.hand('R',0.65,0.9,1.0); c.hand('R',0.92,0.8,0.0)
+c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1)).fx('Visuals/Rig/Sigil',0.36,1.0,(1,1,1),scale=(1.3,1.3)).fx('Visuals/Rig/Sigil',1.0,0.4,(1,1,1),scale=(1,1))
+rest(c,1.0); M.append(c)
+# Summon_Beckon: the arm reaches forward, the fingers close and draw back toward him, as if pulling the blade out of the air
+c=Clip('Summon_Beckon',1.0); rest(c,0)
+c.pose(0.2,x=5,rot=0.012,ur=-0.95,fr=-0.15,head=0.04,cr=-0.02)
+c.pose(0.38,x=4,ur=-0.9,fr=-0.25)
+c.pose(0.58,x=-3,rot=-0.01,ur=-0.45,fr=-1.05,head=-0.03,cl=0.02,tint=(1.3,1.18,1.6))   # the draw: hand comes back to the shoulder
+c.pose(0.76,x=-2,ur=-0.35,fr=-0.9)
+c.hand('R',0.18,0.5,0.7); c.hand('R',0.38,0.75,1.0); c.hand('R',0.6,0.6,0.9); c.hand('R',0.9,0.6,0.0)
+c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1)).fx('Visuals/Rig/Sigil',0.58,1.0,(1,1,1)).fx('Visuals/Rig/Sigil',1.0,0.4,(1,1,1))
+rest(c,1.0); M.append(c)
+# Summon_Chest: the left palm laid over the chest gem (it brightens), then opened outward to send the sword out
+c=Clip('Summon_Chest',1.05); rest(c,0)
+c.pose(0.22,y=-2,fl=-1.75,ul=-0.55,head=0.1)
+c.pose(0.42,y=-3,fl=-1.95,ul=-0.65,head=0.12,tint=(1.25,1.15,1.5))
+c.pose(0.64,y=-6,x=2,ul=0.55,fl=0.25,ur=-0.25,head=-0.05,cl=0.04,tint=(1.3,1.18,1.6))  # the palm opens out
+c.pose(0.84,y=-4,ul=0.45,fl=0.2,ur=-0.18)
+c.hand('L',0.5,0.45,0.0); c.hand('L',0.64,0.85,1.0); c.hand('L',0.95,0.8,0.0)
+c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1),scale=(1,1)).fx('Visuals/Rig/Sigil',0.4,1.5,(1,1,1),scale=(1.4,1.4)).fx('Visuals/Rig/Sigil',0.66,0.9,(1,1,1),scale=(1.1,1.1)).fx('Visuals/Rig/Sigil',1.05,0.4,(1,1,1),scale=(1,1))
+rest(c,1.05); M.append(c)
 for i,(peak,dur) in enumerate(((dict(ur=-1.1,fr=-0.3,ul=0.3),0.5),(dict(ul=1.1,fl=0.3,ur=-0.3),0.5),(dict(ur=-0.4,fr=-1.5,ul=0.4,fl=1.5,head=0.1),0.55)),1):
     c=Clip(f'Swap_{i}',dur); rest(c,0); c.pose(dur*0.4,y=-6,**peak); c.hand('R' if i==1 else 'L' if i==2 else 'LR',dur*0.4,0.7,1.0); c.hand('LR',dur*0.9,0.7,0.0); c.fx('Visuals/Rig/Sigil',dur*0.4,1,(1,1,1)); rest(c,dur); M.append(c)
 
