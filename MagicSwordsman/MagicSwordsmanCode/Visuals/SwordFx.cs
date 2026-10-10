@@ -21,7 +21,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Visuals;
 /// tools/fx_preview.gd mirrors these effects in GDScript for headless renders — keep the two in step.
 /// UNVERIFIED in game: sizes against the combat camera scaling, z-order against enemy sprites.
 /// </summary>
-public static class SwordFx
+public static partial class SwordFx
 {
     // ------------------------------------------------------------------ entry points
 
@@ -112,17 +112,26 @@ public static class SwordFx
     /// <summary>A sword colour taken towards old paper grey: the summons stay quiet.</summary>
     private static Color Muted(Color c) => c.Lerp(new Color(0.78f, 0.75f, 0.72f), 0.35f);
 
-    /// <summary>Two blades meet (guard, a parried cut): a short bright spark and a few sparks thrown off.</summary>
-    internal static void Clash(Node2D parent, Vector2 pos, Color col)
+    /// <summary>
+    /// Two blades meet (guard, a parried cut): a short bright spark and a few sparks thrown off. <paramref name="power"/>
+    /// scales it (a blocked hit ≈ 1.4: the impact frame of the guard); from 1.2 up a thin white streak flashes across the
+    /// contact at <paramref name="angle"/> (radians, the line of the blades).
+    /// </summary>
+    internal static void Clash(Node2D parent, Vector2 pos, Color col, float power = 1f, float angle = -0.6f)
     {
         try
         {
             Sfx.Guard();
             var fx = Root(parent, pos, 0.6, 3);
-            Flare(fx, Vector2.Zero, new Color(1f, 0.97f, 0.9f), 120, 0.22);
-            Flare(fx, Vector2.Zero, col, 80, 0.3);
-            Burst(fx, Vector2.Zero, Ramp(new Color(1f, 0.95f, 0.8f), new Color(1f, 0.7f, 0.4f)), "fx_spark", 12, 0.3, 160, 360,
-                new Vector2(0, 500), 180, 0.12f, 0.22f, true, alignY: true);
+            Flare(fx, Vector2.Zero, new Color(1f, 0.97f, 0.9f), 120 * power, 0.22);
+            Flare(fx, Vector2.Zero, col, 80 * power, 0.3);
+            if (power >= 1.2f)
+            {
+                Beam(fx, Vector2.Zero, angle, new Color(1f, 0.98f, 0.92f), 150 * power, 10, 0.16);
+                Ring(fx, Vector2.Zero, col.Lightened(0.35f), 12, 70 * power, 0.22);
+            }
+            Burst(fx, Vector2.Zero, Ramp(new Color(1f, 0.95f, 0.8f), new Color(1f, 0.7f, 0.4f)), "fx_spark", (int)(12 * power), 0.3,
+                160, 360 * power, new Vector2(0, 500), 180, 0.12f, 0.22f, true, alignY: true);
         }
         catch (Exception e)
         {
@@ -130,15 +139,25 @@ public static class SwordFx
         }
     }
 
-    /// <summary>A blade goes into Ensifer (death): a dull dark-red spatter, no light.</summary>
-    internal static void Pierce(Node2D parent, Vector2 pos)
+    /// <summary>
+    /// A blade goes into Ensifer (death): a dull dark-red spatter thrown out along the blade's travel
+    /// (<paramref name="dir"/>), a brief pale streak along it and a dark flash of the sword's colour, so every one of the
+    /// blows reads on its own. No bright light.
+    /// </summary>
+    internal static void Pierce(Node2D parent, Vector2 pos, Vector2? dir = null, Color? col = null)
     {
         try
         {
             Sfx.Impact(null);
             var fx = Root(parent, pos, 0.8, 3);
-            Burst(fx, Vector2.Zero, Ramp(new Color(0.45f, 0.03f, 0.07f, 0.9f)), "fx_drop", 7, 0.45, 60, 160, new Vector2(0, 700), 70,
-                0.12f, 0.2f, false, dir: -60, alignY: true);
+            var d = dir ?? new Vector2(0.5f, -0.87f);
+            var deg = Mathf.RadToDeg(d.Angle());
+            Burst(fx, Vector2.Zero, Ramp(new Color(0.45f, 0.03f, 0.07f, 0.9f)), "fx_drop", 10, 0.45, 80, 220, new Vector2(0, 700), 45,
+                0.14f, 0.24f, false, dir: dir == null ? -60 : deg, alignY: true);
+            Blot(fx, Vector2.Zero, new Color(0.32f, 0.02f, 0.06f, 0.75f), 8, 34, 0.45, squash: 1f);
+            if (dir == null) return;
+            Beam(fx, -d * 40, d.Angle() + Mathf.Pi / 2, new Color(0.95f, 0.9f, 0.92f, 0.8f), 140, 7, 0.14);
+            if (col is { } c) Flare(fx, Vector2.Zero, c.Darkened(0.2f), 90, 0.25);
         }
         catch (Exception e)
         {
