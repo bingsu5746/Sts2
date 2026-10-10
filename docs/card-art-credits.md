@@ -410,3 +410,7 @@ The combat rig parts (`images/character/parts/*`) and `images/character/magic_sw
 ## Combat body v3 (2026-10-10)
 
 New side-view body (young face matching the card art, flat boots, cleaner hands): AI Horde img2img (AlbedoBase XL, denoise 0.6, seed 33) from the previous body, background removed with rembg, parts split by `tools/split_body.py`.
+
+## Character select v4 (2026-10-10)
+
+Centred composition: the hooded swordsman stands in the middle of the frame under a ruined arch. AI Horde txt2img (AlbedoBase XL, 1024×576, RealESRGAN ×2; prompt in `tools/charselect_art/jobs_v4.json`, seed 13), ring of floating swords composited from the mod's own sword sprites with a drawn glow.
