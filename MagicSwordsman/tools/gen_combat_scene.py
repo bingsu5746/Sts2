@@ -219,17 +219,18 @@ for i,(peak,dur) in enumerate(((dict(ur=-1.1,fr=-0.3,ul=0.3),0.5),(dict(ul=1.1,f
     c=Clip(f'Swap_{i}',dur); rest(c,0); c.pose(dur*0.4,y=-6,**peak); c.hand('R' if i==1 else 'L' if i==2 else 'LR',dur*0.4,0.7,1.0); c.hand('LR',dur*0.9,0.7,0.0); c.fx('Visuals/Rig/Sigil',dur*0.4,1,(1,1,1)); rest(c,dur); M.append(c)
 
 # ---------------------------------------------------------------- block / hit / death / victory
-def block(name,peak,dur=0.6,back=-9,lean=-0.035):
-    """Gaining Block: his swords cross into an X in front of him (SwordVisuals.Guard: crossed at 0.14 s, pushed into
-    the blow at 0.22 s, home by 0.6 s). The body only braces like a person would: weight onto the back foot (x),
-    shoulders lean back a little (rot < 0 tilts the top away from the enemy), the palm steering the swords. No scaling,
-    no shield flash."""
+def block(name,peak,dur=0.75,back=-9,lean=-0.035):
+    """Gaining Block: his swords form a guard in front of him (SwordVisuals.Guard: wind-up to 0.08 s, snapped into place
+    by 0.2 s, pushed into the blow at 0.27 s, home by about 0.75 s). The body only braces like a person would: a small
+    gather on the wind-up, weight onto the back foot (x), shoulders lean back a little (rot < 0 tilts the top away from
+    the enemy), the palm steering the swords. No scaling, no shield flash."""
     c=Clip(name,dur); rest(c,0)
-    c.pose(0.1,x=back*0.6,rot=lean*0.6,**{k:v*0.7 for k,v in peak.items()})
-    c.pose(0.22,x=back,rot=lean,**peak)                     # the blow meets the swords
-    c.pose(0.3,x=back*0.85,rot=lean*0.8)
+    c.pose(0.08,x=back*0.2,rot=-lean*0.3,**{k:v*0.35 for k,v in peak.items()})   # gathers (anticipation)
+    c.pose(0.2,x=back*0.7,rot=lean*0.7,**{k:v*0.85 for k,v in peak.items()})
+    c.pose(0.27,x=back,rot=lean,**peak)                     # the blow meets the swords
+    c.pose(0.36,x=back*0.85,rot=lean*0.8)
     c.pose(dur*0.75,x=back*0.3,rot=lean*0.25,**{k:v*0.3 for k,v in peak.items()})
-    c.hand('LR',0.08,0.6,0.85,(0.8,0.85,1.0)); c.hand('LR',0.22,0.7,1.0,(0.8,0.85,1.0)); c.hand('LR',dur*0.85,0.7,0.0,(0.8,0.85,1.0))
+    c.hand('LR',0.08,0.6,0.85,(0.8,0.85,1.0)); c.hand('LR',0.27,0.7,1.0,(0.8,0.85,1.0)); c.hand('LR',dur*0.85,0.7,0.0,(0.8,0.85,1.0))
     rest(c,dur); return c
 M.append(block('Block',dict(ur=-0.55,fr=-0.2,ul=0.15,head=0.05,cl=0.03,cr=0.04)))
 M.append(block('Block_Cross',dict(ur=-0.3,fr=-0.7,ul=0.25,fl=0.6,head=0.07,cr=0.04)))
@@ -244,7 +245,7 @@ M.append(hit('Hit',0.45,-28,-0.05,dict(ul=0.18,ur=-0.12,cl=0.045,cr=0.045,head=-
 M.append(hit('Hit_Light',0.3,-14,-0.02,dict(head=-0.06,ul=0.08,ur=-0.06)))
 M.append(hit('Hit_Heavy',0.7,-48,-0.12,dict(ul=0.5,ur=-0.4,fl=0.3,fr=-0.3,cl=0.07,cr=0.07,head=-0.18,y=8)))
 M.append(hit('Hit_Stagger',0.6,-36,0.08,dict(ul=-0.2,ur=-0.5,head=0.15,y=4)))
-# Blocked completely: the crossed swords take the blow (SwordVisuals.Guard, hit: crossed at 0.09 s, struck at 0.17 s).
+# Blocked completely: the guarding swords take the blow (SwordVisuals.Guard, hit: wind-up 0.05 s, in place and struck at 0.15 s).
 # He takes the jolt through his stance: a short slide back, the shoulders rock back and settle. No red, no scaling.
 c=Clip('Hit_Guarded',0.55); rest(c,0)
 c.pose(0.08,x=-5,rot=-0.015,ur=-0.35,fr=-0.5,ul=0.1,head=0.03,cl=0.02,cr=0.03,tint=(1.08,1.08,1.18))
@@ -253,36 +254,47 @@ c.pose(0.28,x=-13,rot=-0.02,ur=-0.35,fr=-0.45,head=0.03)
 c.pose(0.42,x=-6,rot=-0.008,ur=-0.15,fr=-0.2,head=0.01,tint=(1,1,1))
 c.hand('R',0.0,0.5,0.0,(0.75,0.85,1.0)); c.hand('R',0.08,0.7,1.0,(0.75,0.85,1.0)); c.hand('R',0.45,0.7,0.0,(0.75,0.85,1.0))
 rest(c,0.55); M.append(c)
-# Death (user 2026-10-10 "본인이 소환한 마검들이 본인을 공격해서 마검들과 싸우다가 몸에 박힌 채로 털썩 주저앉는 모션"):
-# his own swords turn on him (SwordVisuals.DeathBetrayal — keep the times in step). 0.15-0.5 they circle him and he
-# turns to face them; 0.6 he parries a cut from the front; 1.0 one cuts him from behind and he staggers forward; 1.44 a
-# blade goes into his chest, 1.64 one into his belly, 1.84 one into his back; then his knees give and he drops onto
-# them, slumped forward over the blades, and stays there (the last key is the corpse pose). The rig is one flat picture
-# without separate legs, so kneeling = the whole figure drops by KNEEL px while the Body sprite's region is cut from the
-# bottom by the same height (rig px = 2x screen px): his feet stay on the ground line and the lower legs are "folded
-# under" him. No scaling, no lying-flat spin.
+# Death (user 2026-10-10 "본인이 소환한 마검들이 본인을 공격해서 마검들과 싸우다가 몸에 박힌 채로 털썩 주저앉는 모션", then
+# "죽을 때 ... 내가 보내준 사진처럼 쓰러졌으면": a warrior on both knees, upright, head bowed, bristling with blades).
+# His own swords turn on him (SwordVisuals.DeathBetrayal — keep the times in step). 0.15-0.5 they circle him and he turns
+# to face them; 0.6 he parries a cut from the front, 0.92 one from behind with the other hand; then the blades come one
+# at a time and each jolts him the way it drives: 1.12 through the chest from the front (thrown back), 1.34 through the
+# back (thrown forward), 1.56 into the right side; his knees give (1.68-1.9) and he drops onto them; 2.0 the right
+# shoulder from above, 2.18 the left shoulder from above behind, 2.36 the small of the back; the head sinks and the arms
+# hang, and he stays kneeling upright (the last key is the corpse pose). The rig is one flat picture without separate
+# legs, so kneeling = the whole figure drops by KNEEL px while the Body sprite's region is cut from the bottom by the
+# same height (rig px = 2x screen px): the thighs stay, the shins are "folded under" him and the knees are on the ground
+# line. No scaling, no slump forward, no lying flat.
 DEAD_TINT=(0.62,0.56,0.68)
 HURT=(1.25,0.88,0.92)
-KNEEL=92
+KNEEL=96
 def dead_swords(name):
-    c=Clip(name,2.4); rest(c,0)
+    c=Clip(name,2.8); rest(c,0)
     c.pose(0.15,x=-3,head=-0.1,ul=0.12,ur=-0.18,fr=-0.25)                              # startled: looks up at them
     c.pose(0.42,x=-6,rot=-0.015,head=0.06,ul=0.25,ur=-0.55,fr=-0.5,cl=0.02,cr=0.03)   # wary, palm raised
-    c.pose(0.6,x=-13,rot=-0.045,head=-0.06,ur=-1.0,fr=-0.3,ul=0.3,cr=0.05)            # parries the first cut
-    c.pose(0.78,x=-9,rot=-0.02,head=0.02,ur=-0.6,fr=-0.4,ul=0.2)
-    c.pose(0.92,x=-7,rot=-0.01,head=-0.08,ul=0.35,ur=-0.45,tint=(1,1,1))               # turns, too late
-    c.pose(1.02,x=9,rot=0.06,head=0.14,ul=0.5,fl=0.3,ur=-0.2,cl=0.05,cr=-0.02,tint=HURT)  # cut from behind
-    c.pose(1.2,x=6,rot=0.035,head=0.08,ul=0.3,ur=-0.35,fr=-0.3,tint=(1.05,0.97,1.0))
-    c.pose(1.44,x=-14,rot=-0.07,head=-0.2,ul=0.4,fl=0.2,ur=-0.45,fr=0.1,cl=0.06,cr=0.06,tint=HURT)  # chest
-    c.pose(1.64,x=-10,y=6,rot=0.02,head=0.12,ul=0.15,ur=-0.15,fl=0.35,fr=-0.3,tint=(1.15,0.9,0.94))  # belly: folds
-    c.pose(1.84,x=-4,y=12,rot=0.06,head=0.2,ul=0.05,ur=0.0,fl=0.2,fr=-0.2,tint=HURT)                # back
-    c.pose(2.08,x=0,y=KNEEL+4,rot=0.11,head=0.36,ul=-0.04,ur=0.06,fl=0.12,fr=-0.08,cl=0.06,cr=-0.05,tint=(0.85,0.76,0.88))  # drops onto his knees
-    c.pose(2.22,x=0,y=KNEEL-3,rot=0.1,head=0.4)                                                              # settles
-    c.pose(2.4,x=0,y=KNEEL,rot=0.11,head=0.42,ul=-0.05,ur=0.07,fl=0.14,fr=-0.1,cl=0.06,cr=-0.05,tint=DEAD_TINT)
-    for t,y in ((0,0),(1.84,12),(2.08,KNEEL+4),(2.22,KNEEL-3),(2.4,KNEEL)):
-        c.key('Visuals/Rig/Body:region_rect',t,BODY_RECT(2*y))  # feet stay on the ground line
-    c.hand('R',0.42,0.5,0.6,(0.8,0.85,1.0)); c.hand('R',0.6,0.75,1.0,(0.8,0.85,1.0)); c.hand('R',0.95,0.6,0.0,(0.8,0.85,1.0))
-    c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1)).fx('Visuals/Rig/Sigil',1.44,0.9,(1,0.6,0.6)).fx('Visuals/Rig/Sigil',2.1,0,(1,1,1))
+    c.pose(0.6,x=-13,rot=-0.045,head=-0.06,ur=-1.0,fr=-0.3,ul=0.3,cr=0.05)            # parries the first cut (front)
+    c.pose(0.76,x=-9,rot=-0.02,head=0.0,ur=-0.6,fr=-0.4,ul=0.4,fl=0.3)
+    c.pose(0.92,x=-4,rot=0.02,head=-0.14,ur=-0.3,fr=-0.2,ul=0.95,fl=0.65,cl=0.05)     # turns: parries behind, left palm up
+    c.pose(1.04,x=-6,rot=0.0,head=-0.04,ur=-0.45,fr=-0.35,ul=0.5,fl=0.35)
+    c.pose(1.12,x=-18,rot=-0.07,head=-0.16,ul=0.4,fl=0.25,ur=-0.4,fr=0.05,cl=0.06,cr=0.07,tint=HURT)  # through the chest
+    c.pose(1.24,x=-12,rot=-0.03,head=-0.05,ul=0.25,ur=-0.25,fr=-0.1,tint=(1.05,0.96,0.98))
+    c.pose(1.34,x=8,rot=0.06,head=0.16,ul=0.15,fl=0.35,ur=-0.1,fr=-0.35,cl=-0.02,cr=-0.03,tint=HURT)  # through the back
+    c.pose(1.46,x=4,rot=0.03,head=0.1,ul=0.12,ur=-0.12,tint=(1.05,0.96,0.98))
+    c.pose(1.56,x=-8,y=6,rot=-0.035,head=0.02,ul=0.2,fl=0.1,ur=-0.3,fr=-0.2,cl=0.05,cr=0.06,tint=HURT)   # the right side
+    c.pose(1.68,x=-5,y=16,rot=0.0,head=0.12,ul=0.06,fl=0.12,ur=-0.06,fr=-0.12,tint=(1.05,0.95,0.98))   # the knees go
+    c.pose(1.88,x=-2,y=KNEEL+6,rot=0.04,head=0.2,ul=0.02,fl=0.1,ur=-0.02,fr=-0.1,cl=0.05,cr=-0.04)     # down onto them
+    c.pose(2.0,x=-2,y=KNEEL+2,rot=-0.03,head=0.02,ul=0.12,ur=-0.12,fl=0.15,fr=-0.15,tint=HURT)         # right shoulder
+    c.pose(2.09,x=-1,y=KNEEL-1,rot=0.0,head=0.12)
+    c.pose(2.18,x=2,y=KNEEL+3,rot=0.045,head=0.22,ul=0.08,ur=-0.08,fl=0.18,fr=-0.12,tint=HURT)          # left shoulder
+    c.pose(2.27,x=1,y=KNEEL,rot=0.025,head=0.18,tint=(1.05,0.95,0.98))
+    c.pose(2.36,x=5,y=KNEEL+2,rot=0.05,head=0.26,ul=0.06,ur=-0.06,fl=0.12,fr=-0.1,cl=-0.02,tint=HURT)   # small of the back
+    c.pose(2.55,x=2,y=KNEEL,rot=0.03,head=0.3,ul=-0.02,ur=0.03,fl=0.08,fr=-0.06,cl=0.03,cr=-0.03,tint=(0.85,0.78,0.88))
+    c.pose(2.8,x=1,y=KNEEL,rot=0.025,head=0.32,ul=-0.04,ur=0.05,fl=0.06,fr=-0.04,cl=0.03,cr=-0.03,tint=DEAD_TINT)  # kneeling upright
+    for t,y in ((0,0),(1.56,6),(1.68,16),(1.88,KNEEL+6),(2.0,KNEEL+2),(2.09,KNEEL-1),(2.18,KNEEL+3),(2.27,KNEEL),(2.36,KNEEL+2),(2.55,KNEEL),(2.8,KNEEL)):
+        c.key('Visuals/Rig/Body:region_rect',t,BODY_RECT(2*y))  # feet (then knees) stay on the ground line
+    c.hand('R',0.42,0.5,0.6,(0.8,0.85,1.0)); c.hand('R',0.6,0.75,1.0,(0.8,0.85,1.0)); c.hand('R',0.85,0.6,0.0,(0.8,0.85,1.0))
+    c.hand('L',0.76,0.5,0.0,(0.8,0.85,1.0)); c.hand('L',0.92,0.75,1.0,(0.8,0.85,1.0)); c.hand('L',1.1,0.6,0.0,(0.8,0.85,1.0))
+    c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1)).fx('Visuals/Rig/Sigil',1.12,0.9,(1,0.6,0.6)).fx('Visuals/Rig/Sigil',2.55,0,(1,1,1))
     return c
 M.append(dead_swords('Dead_Swords'))
 M.append(dead_swords('Dead'))  # the game's own trigger name: identical, so the body is right even without the redirect
