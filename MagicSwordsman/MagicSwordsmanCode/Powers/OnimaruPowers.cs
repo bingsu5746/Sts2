@@ -1,4 +1,9 @@
+using MagicSwordsman.MagicSwordsmanCode.Combat;
+using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
+using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Nodes.Combat;
+using MegaCrit.Sts2.Core.Nodes.Rooms;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 
@@ -9,12 +14,65 @@ namespace MagicSwordsman.MagicSwordsmanCode.Powers;
 /// The kind itself is stored in the Onimaru combat counters (OnimaruAttack.SetKind keeps exactly one of these powers).
 /// The smart description shows the live numbers of one auto attack (vars AutoDamage / AutoHits / AutoBlock / AutoWeak,
 /// refreshed in <see cref="SmartDescriptionLocKey"/> like CurrentSwordPower does).
+///
+/// Hidden while Onimaru is the current sword (user 2026-10-10: two identical katana icons -> one): CurrentSwordPower
+/// then shows the stance in its own title, text and icon. Visibility is read by the power bar when a power is added,
+/// so <see cref="SyncVisibility"/> adds / removes the icon node when Onimaru becomes / stops being current.
+/// Icons: onimaru_&lt;kind&gt;_power.png, the katana with a stance glyph (tools/gen_power_icons.py).
 /// </summary>
 public abstract class OnimaruKindPower : MagicSwordsmanPower
 {
     public abstract OnimaruKind Kind { get; }
 
     public override PowerType Type => PowerType.Buff;
+
+    protected override bool IsVisibleInternal =>
+        !(IsMutable && Owner?.Player is { } p && SwordCombat.CurrentSword(p) == SwordId.Onimaru);
+
+    private static readonly System.Reflection.MethodInfo? ContainerAdd =
+        HarmonyLib.AccessTools.Method(typeof(NPowerContainer), "Add");
+    private static readonly System.Reflection.MethodInfo? ContainerRemove =
+        HarmonyLib.AccessTools.Method(typeof(NPowerContainer), "Remove");
+    private static readonly System.Reflection.FieldInfo? ContainerCreature =
+        HarmonyLib.AccessTools.Field(typeof(NPowerContainer), "_creature");
+    private static readonly System.Reflection.FieldInfo? ContainerNodes =
+        HarmonyLib.AccessTools.Field(typeof(NPowerContainer), "_powerNodes");
+
+    /// <summary>
+    /// Presentation only: shows / hides the stance power's icon to match <see cref="IsVisibleInternal"/> (called after
+    /// a sword switch and after the stance changes). Never throws.
+    /// </summary>
+    public static void SyncVisibility(Player player)
+    {
+        try
+        {
+            var creature = player.Creature;
+            var kinds = creature.Powers.OfType<OnimaruKindPower>().ToList();
+            if (kinds.Count == 0 || ContainerAdd == null || ContainerRemove == null || ContainerCreature == null ||
+                ContainerNodes == null) return;
+            var creatureNode = NCombatRoom.Instance?.GetCreatureNode(creature);
+            if (creatureNode == null) return;
+            var stack = new Stack<Godot.Node>([creatureNode]);
+            while (stack.Count > 0)
+            {
+                var n = stack.Pop();
+                foreach (var c in n.GetChildren()) stack.Push(c);
+                if (n is not NPowerContainer container || !ReferenceEquals(ContainerCreature.GetValue(container), creature))
+                    continue;
+                if (ContainerNodes.GetValue(container) is not List<NPower> nodes) continue;
+                foreach (var power in kinds)
+                {
+                    var shown = nodes.Any(x => ReferenceEquals(x.Model, power));
+                    if (power.IsVisible && !shown) ContainerAdd.Invoke(container, [power]);
+                    else if (!power.IsVisible && shown) ContainerRemove.Invoke(container, [power]);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[OnimaruKindPower] visibility sync failed: {e.Message}");
+        }
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
     [
