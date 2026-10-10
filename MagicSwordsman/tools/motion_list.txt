@@ -65,6 +65,9 @@ Summon_Onimaru	0.95s
 Summon_ClaiomhSolais	0.95s
 Summon_Caladbolg	0.95s
 Summon	0.95s
+Summon_Raise	1.0s
+Summon_Beckon	1.0s
+Summon_Chest	1.05s
 Swap_1	0.5s
 Swap_2	0.5s
 Swap_3	0.55s
