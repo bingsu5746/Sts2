@@ -300,7 +300,7 @@ public sealed class TombResonanceEvent : CustomEventModel
             return;
         }
 
-        var outcome = await SwordForge.Apply(Owner!, sword, ForgeMode.Safe, Rng);
+        var outcome = await SwordForge.ApplyEventUpgrade(Owner!, sword, Rng);
         MarkDone();
         var text = L10NLookup($"{PageKey("FORGO")}.description");
         text.Add("Sword", SwordLore.Name(sword));

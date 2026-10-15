@@ -209,7 +209,7 @@ public sealed class TombEpitaphEvent : CustomEventModel
             ValueProp.Unblockable | ValueProp.Unpowered, (Creature?)null, (CardModel?)null);
         if (Owner.Creature.IsDead) return;
 
-        var outcome = await SwordForge.Apply(Owner, sword, ForgeMode.Safe, Rng);
+        var outcome = await SwordForge.ApplyEventUpgrade(Owner, sword, Rng);
         var text = L10NLookup($"{PageKey("READ")}.description");
         text.Add("Sword", SwordLore.Name(sword));
         text.Add("NewLevel", outcome.NewLevel);
