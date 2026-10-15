@@ -70,6 +70,7 @@ public static partial class SwordVisuals
     {
         try { SyncInner(player); }
         catch (Exception e) { MainFile.Logger.Warn($"[SwordVisuals] Sync failed: {e.Message}"); }
+        OnimaruStanceHud.Refresh(player); // stance tag under the health bar (never throws)
     }
 
     /// <summary>Removed by user decision (2026-10-04): no tomb object / door animation. Kept as a no-op for callers.</summary>
@@ -132,7 +133,7 @@ public static partial class SwordVisuals
         {
             if (Rigs.TryGetValue(player, out var rig) && GodotObject.IsInstanceValid(rig.Root) &&
                 rig.Swords.TryGetValue(sword, out var node) && GodotObject.IsInstanceValid(node))
-                return node.ToGlobal(new Vector2(20, -SwordSpriteHeight * 0.5f));
+                return SpeechPointOf(node) ?? node.ToGlobal(new Vector2(0, -SwordSpriteHeight * 0.5f));
             var creatureNode = NCombatRoom.Instance?.GetCreatureNode(player.Creature);
             return creatureNode == null ? null : creatureNode.GetGlobalTransform() * IdleSlots[1];
         }
@@ -350,12 +351,15 @@ public static partial class SwordVisuals
         var blade = new Node2D { Name = "Blade" };
         var id = sword.ToString().ToLowerInvariant();
         var texPath = $"{MainFile.ResPath}/images/swords/{id}.png";
-        var size = new Vector2(40, 120);
+        Texture2D? bladeTex = null;
+        var bladeScale = 1f;
         if (ResourceLoader.Exists(texPath))
         {
             var tex = GD.Load<Texture2D>(texPath);
             // Art is high-res (about 1000 px tall); every sword is shown at the same on-screen height.
             var scale = SwordSpriteHeight / Math.Max(1f, tex.GetHeight());
+            bladeTex = tex;
+            bladeScale = scale;
 
             // faint violet aura behind the blade (user request 2026-10-08), breathing slowly
             var auraPath = $"{MainFile.ResPath}/images/swords/aura/{id}.png";
@@ -380,7 +384,6 @@ public static partial class SwordVisuals
             var level = SwordCombat.LevelOf(player, sword);
             holder.SetMeta("level", level);
             AddBlade(blade, sword, level, tex, scale);
-            size = new Vector2(tex.GetWidth(), tex.GetHeight()) * scale;
         }
         else
         {
@@ -397,14 +400,9 @@ public static partial class SwordVisuals
             return holder;
         }
 
-        // hover box exactly over the drawn sword (moves with the bob): name, level and effect in the game's tooltip
-        var hover = new Control
-        {
-            Name = "Hover", Size = size, Position = -size / 2, MouseFilter = Control.MouseFilterEnum.Pass,
-        };
-        hover.MouseEntered += () => ShowTip(hover, sword, player);
-        hover.MouseExited += () => HideTip(hover);
-        blade.AddChild(hover);
+        // hover boxes fitted to the drawn sword (move with the bob): name, level and effect in the game's tooltip
+        // (SwordVisuals.Hover.cs)
+        AttachHover(holder, blade, sword, player, bladeTex, bladeScale);
 
         holder.AddChild(blade);
 
@@ -566,8 +564,10 @@ public static partial class SwordVisuals
             var affinity = Dialogue.SwordAffinity.TipLine(player, sword);
             if (affinity.Length > 0) desc += "\n" + affinity;
             desc += Cards.Union.UnionCatalog.SwordTipLine(player, sword); // 【조합】 cards of this sword
-            MegaCrit.Sts2.Core.Nodes.HoverTips.NHoverTipSet.CreateAndShow(owner,
-                new MegaCrit.Sts2.Core.HoverTips.HoverTip(Events.SwordLore.Name(sword), desc));
+            MegaCrit.Sts2.Core.Nodes.HoverTips.NHoverTipSet.Remove(owner);
+            // alignment None leaves the set at the screen's top-left: PlaceTip puts it beside the sword
+            PlaceTip(owner, MegaCrit.Sts2.Core.Nodes.HoverTips.NHoverTipSet.CreateAndShow(owner,
+                new MegaCrit.Sts2.Core.HoverTips.HoverTip(Events.SwordLore.Name(sword), desc)));
         }
         catch (Exception e)
         {
@@ -577,6 +577,7 @@ public static partial class SwordVisuals
 
     private static void HideTip(Control owner)
     {
+        Tips.Remove(owner);
         try { MegaCrit.Sts2.Core.Nodes.HoverTips.NHoverTipSet.Remove(owner); }
         catch (Exception) { /* presentation only */ }
     }
