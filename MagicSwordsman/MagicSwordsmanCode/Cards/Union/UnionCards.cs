@@ -7,6 +7,7 @@ using MagicSwordsman.MagicSwordsmanCode.Powers;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 using MagicSwordsman.MagicSwordsmanCode.Visuals;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -14,6 +15,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 
@@ -23,19 +25,28 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.Union;
 //   Gram 3 · Tyrfing 3 · Durandal 3 · Kusanagi 3 · Dainsleif 2 · Skofnung 2 · Onimaru 2 · Solais 2 · Caladbolg 2 ·
 //   Ganjiang/Moye 2.  Rarity: Uncommon 9 · Rare 3.  Numbers grow with the SUM of the two swords' levels (UnionLevel).
 // Lore links are noted per card; "thematic" = a link we drew, not a story the two swords share.
+// 2026-10-15: 용을 벤 칼 / 난쟁이의 솜씨 reworked, 시드의 빛 redesigned as a Power; 5 more pairs in UnionCards3.cs.
 
 /// <summary>
-/// 용을 벤 칼 — Gram + Kusanagi, Attack, Rare, 2. 14 damage (+UnionLevel); +8 against elites/bosses (primary enemy).
-/// Then remove one of your debuffs (Kusanagi's Rare-strength purify). Gram current -> its +L applies too.
-/// Lore (high confidence): Gram killed the dragon Fafnir; Kusanagi came out of the tail of the serpent Yamata no
-/// Orochi that Susanoo killed. Two serpent/dragon-slaying swords.
+/// 용을 벤 칼 — Gram + Kusanagi, Attack, Rare, 2. First remove one of your debuffs completely and apply that many
+/// Vulnerable to the target (max 3; 1 if you had no debuff) — the beast is brought low first. Then 14 damage
+/// (+UnionLevel); +8 against elites/bosses (primary enemy). Gram current -> its +L applies too.
+/// Reworked 2026-10-15 (user request #39: combo cards must be special, not plain damage): the purify now feeds the
+/// strike (your affliction turned into the serpent's opening) instead of being a rider after it.
+/// Lore (high confidence): Gram killed the dragon Fafnir, Sigurd striking from a pit dug under its path (Völsunga
+/// saga); Kusanagi came out of the tail of the serpent Yamata no Orochi, which Susanoo first made drunk on strong
+/// sake before cutting it apart (Kojiki). Both dragons were made helpless before the blow.
 /// </summary>
 public sealed class UnionSerpentSlayers : UnionCard
 {
+    public const int MaxVulnerable = 3;
+
     public UnionSerpentSlayers() : base(2, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy)
     {
         WithDamage(14);
         WithVar("EliteBonus", 8);
+        WithVar("MaxVuln", MaxVulnerable);
+        WithTip(typeof(VulnerablePower));
     }
 
     public override SwordId Primary => SwordId.Gram;
@@ -55,14 +66,26 @@ public sealed class UnionSerpentSlayers : UnionCard
 
     protected override async Task OnUnionPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        var debuff = KusanagiPurify.StrongestDebuff(Owner.Creature);
+        var vulnerable = 1;
+        if (debuff != null)
+        {
+            vulnerable = Math.Clamp((int)Math.Abs(debuff.Amount), 1, MaxVulnerable);
+            await PowerCmd.Remove(debuff);
+        }
+
+        if (cardPlay.Target is { IsAlive: true } target)
+            await PowerCmd.Apply<VulnerablePower>(choiceContext, target, vulnerable, Owner.Creature, this);
         await UnionAttack(cardPlay).WithHitFx("vfx/vfx_attack_slash").Execute(choiceContext);
-        await KusanagiPurify.RemoveOneDebuff(Owner.Creature);
     }
 }
 
 /// <summary>
 /// 난쟁이의 솜씨 — Tyrfing + Gram, Attack, Uncommon, 1. 4 damage twice (+⌊UnionLevel/3⌋ per hit). Switches to Tyrfing
-/// (its attacks ignore Block) but also carries Gram's effect: +Gram level per hit.
+/// (its attacks ignore Block) but also carries Gram's effect: +Gram level per hit. Then choose another Attack card in
+/// your hand: the smiths re-forge it — it deals 2 (+⌊UnionLevel/4⌋) more damage for the rest of the combat
+/// (<see cref="UnionDwarvenEdgePower"/>, per card instance, stacks).
+/// Reworked 2026-10-15 (user request #39): it was a plain two-hit attack; now it forges your other blades too.
 /// Lore: Tyrfing was forged by the dwarves Dvalin and Durin (Hervarar saga, high confidence); Gram was re-forged by
 /// Regin, a smith who is a dwarf in the Eddic Reginsmál / "dwarf in stature" in Völsunga saga (medium-high).
 /// </summary>
@@ -74,7 +97,11 @@ public sealed class UnionDwarvenCraft : UnionCard
         WithVar("Hits", 2);
         WithCalculatedVar("GramBonus", 0, 1,
             static (card, _) => card.IsMutable && card.Owner is { } o ? SwordCombat.LevelOf(o, SwordId.Gram) : 0);
+        WithUnionVar("Forge", 2, 4);
+        WithTip(typeof(UnionDwarvenEdgePower));
     }
+
+    private static bool IsOtherAttack(CardModel card) => card.Type == CardType.Attack;
 
     public override SwordId Primary => SwordId.Tyrfing;
     public override SwordId Partner => SwordId.Gram;
@@ -90,6 +117,13 @@ public sealed class UnionDwarvenCraft : UnionCard
     {
         await UnionAttack(cardPlay, DynamicVars["Hits"].IntValue).WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
+
+        if (!PileType.Hand.GetPile(Owner).Cards.Any(c => !ReferenceEquals(c, this) && IsOtherAttack(c))) return;
+        var chosen = (await CardSelectCmd.FromHand(choiceContext, Owner,
+                new CardSelectorPrefs(SelectionScreenPrompt, 1), c => !ReferenceEquals(c, this) && IsOtherAttack(c), this))
+            .FirstOrDefault();
+        if (chosen == null) return;
+        await UnionDwarvenEdgePower.Forge(choiceContext, Owner.Creature, chosen, UnionValue(2, 4), this);
     }
 }
 
@@ -260,43 +294,52 @@ public sealed class UnionMountainCleavers : UnionCard
 }
 
 /// <summary>
-/// 시드의 빛 — Caladbolg + Claíomh Solais, Attack, Rare, 2. 【발도】: consume all Light; 6 (+⌊UnionLevel/2⌋) damage +
-/// K per Light (K by Solais level, 4..7), ignoring Block. Caladbolg current: up to 3 enemies.
+/// 시드의 빛 — Caladbolg + Claíomh Solais, Power, Rare, 2 (1 from combined level 6). This combat
+/// (<see cref="UnionSidheLightPower"/>):
+///  - whenever one of your attacks hits 2 or more enemies, gain 1 Light (at most 2 per turn) — Caladbolg's sweeps
+///    charge Claíomh Solais even though Solais is not the sword in hand;
+///  - when you end your turn without Claíomh Solais' effect and your Light is about to fade (Solais' cost, which
+///    still applies), the Light first bursts out: 3 (+⌊UnionLevel/3⌋) damage to ALL enemies per Light.
+/// The two swords normally fight over the end of the turn (Solais wants to be held, Caladbolg wants to swing all
+/// turn); this card turns that conflict into a loop instead of a choice: sweep with Caladbolg to gather light,
+/// and if you finish on Caladbolg the gathered light erupts over the whole field instead of just going out.
+/// Redesigned 2026-10-15 (user request #39: "시드의 빛 is too stale — combo cards must be really special"): it used to
+/// be one more 【발도】 "X + K per Light" attack.
 /// Lore (medium): Claíomh Solais belongs to Nuada of the Tuatha Dé Danann, who withdrew into the síde (fairy mounds);
-/// Caladbolg is called "the sword of Leite from the fairy mounds". The "light from the mounds" link is ours.
+/// Caladbolg is called "the sword of Leite from the fairy mounds". The light hidden under the mounds that breaks out
+/// across the hills is our link.
 /// </summary>
 public sealed class UnionSidheLight : UnionCard
 {
-    private const ValueProp DrawCutProps = ValueProp.Move | ValueProp.Unblockable;
+    public const int CheaperFromUnionLevel = 6;
 
-    public UnionSidheLight() : base(2, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy)
+    public UnionSidheLight() : base(2, CardType.Power, CardRarity.Rare, TargetType.Self)
     {
-        WithDamage(6);
-        WithCalculatedVar("PerLight", 4, 1, static (card, _) =>
-            card.IsMutable && card.Owner is { } o ? SolaisLight.LevelBonus(SwordCombat.LevelOf(o, SwordId.ClaiomhSolais)) : 0);
+        WithVar("PerTurn", UnionSidheLightPower.MaxLightPerTurn);
+        WithUnionVar("Burst", UnionSidheLightPower.BaseBurst, 3);
+        WithVar("CheaperAt", CheaperFromUnionLevel);
         WithTip(typeof(SolaisLightPower));
-        WithTip(new TooltipSource(_ => HoverTipFactory.FromKeyword(MagicSwordsmanKeywords.DrawCut)));
+        WithTip(typeof(UnionSidheLightPower));
     }
 
     public override SwordId Primary => SwordId.Caladbolg;
     public override SwordId Partner => SwordId.ClaiomhSolais;
-    public override UnionMotionKind Motion => UnionMotionKind.BeamArc;
-    public override string BodyClip => "Attack_Sweep";
-    public override float Impact => 0.42f;
-    protected override int UnionDamageDivisor => 2;
+    public override UnionMotionKind Motion => UnionMotionKind.Halo;
+    public override string BodyClip => "Power_Focus";
 
-    private int Light => IsMutable && Owner?.PlayerCombatState != null ? SolaisLight.Get(Owner) : 0;
-
-    protected override decimal BonusDamage(Creature? target) =>
-        IsMutable && Owner != null ? Light * SolaisLight.DamagePerLight(SwordCombat.LevelOf(Owner, SwordId.ClaiomhSolais)) : 0;
+    public override bool TryModifyEnergyCostInCombat(CardModel card, decimal originalCost, out decimal modifiedCost)
+    {
+        modifiedCost = originalCost;
+        if (!ReferenceEquals(card, this) || UnionLevel < CheaperFromUnionLevel || originalCost <= 1) return false;
+        modifiedCost = 1;
+        return true;
+    }
 
     protected override async Task OnUnionPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await UnionAttack(cardPlay, DynamicVars.Damage.BaseValue, DrawCutProps).WithHitFx("vfx/vfx_attack_slash")
-            .Execute(choiceContext);
-        await SolaisLight.ConsumeAll(Owner);
-        var silverArm = Owner.Creature.GetPower<SolaisSilverArmPower>();
-        if (silverArm != null) await silverArm.OnDrawCut(choiceContext);
+        PlayMotion(null);
+        await PowerCmd.Apply<UnionSidheLightPower>(choiceContext, Owner.Creature,
+            UnionValue(UnionSidheLightPower.BaseBurst, 3), Owner.Creature, this);
     }
 }
 

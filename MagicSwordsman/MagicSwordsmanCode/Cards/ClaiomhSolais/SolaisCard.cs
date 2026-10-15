@@ -108,3 +108,21 @@ public abstract class SolaisDrawCutCard(int cost, CardType type, CardRarity rari
     protected AttackCommand DrawCutAttack(CardPlay cardPlay) =>
         CommonActions.CardAttack(this, cardPlay, cardPlay.Target, DynamicVars.Damage.BaseValue, DrawCutProps);
 }
+
+/// <summary>
+/// Partial Light spending (user request 2026-10-15, #38: Light used in more ways than "consume all for damage").
+/// Cards that "spend N Light" remove exactly N (never more) and only when the owner has at least N.
+/// </summary>
+public static class SolaisLightSpend
+{
+    /// <summary>Removes <paramref name="amount"/> Light if the player has that much. Returns whether it was spent.</summary>
+    public static async Task<bool> TrySpend(PlayerChoiceContext choiceContext, MegaCrit.Sts2.Core.Entities.Players.Player player,
+        int amount, CardModel? source)
+    {
+        if (amount <= 0) return true;
+        var power = player.Creature.GetPower<SolaisLightPower>();
+        if (power == null || power.Amount < amount) return false;
+        await MegaCrit.Sts2.Core.Commands.PowerCmd.ModifyAmount(choiceContext, power, -amount, null, source);
+        return true;
+    }
+}

@@ -1,0 +1,23 @@
+{
+  "MAGICSWORDSMAN-DAINSLEIF_THIRST.title": "Dáinn's Thirst",
+  "MAGICSWORDSMAN-DAINSLEIF_THIRST.description": "Deal {Damage:diff()} damage.\nWhenever you draw this card, it deals {Growth} more damage this combat.\n[gold]Dáinsleif[/gold] level {SwordLevel} (+1 damage per level; +3 per draw from level 3).",
+  "MAGICSWORDSMAN-GANJIANG_TORTOISE_SHELL.title": "Tortoise-Shell Pattern",
+  "MAGICSWORDSMAN-GANJIANG_TORTOISE_SHELL.description": "Deal {Damage:diff()} damage.\n[gold]Pair[/gold]: Gain {Block:diff()} [gold]Block[/gold].\n[gold]Ganjiang[/gold] level {SwordLevel} (+1 damage and Block per level).",
+  "MAGICSWORDSMAN-MOYE_PINE_ON_STONE.title": "Pine on the Stone",
+  "MAGICSWORDSMAN-MOYE_PINE_ON_STONE.description": "Choose a [gold]Ganjiang[/gold] card (twin cards included) in your draw pile and put it into your hand.\n[gold]Pair[/gold]: It costs 0 this turn.\nIf there is none, draw {Cards:diff()} {Cards:plural:card|cards}.\n[gold]Moye[/gold] level {SwordLevel}.",
+  "MAGICSWORDSMAN-MOYE_PINE_ON_STONE.selectionScreenPrompt": "Choose a Ganjiang card to put into your hand.",
+  "MAGICSWORDSMAN-SOLAIS_KINGSHIP_RESTORED.title": "Kingship Restored",
+  "MAGICSWORDSMAN-SOLAIS_KINGSHIP_RESTORED.description": "Spend {LightCost} [gold]Light[/gold]: gain {Strength} [gold]Strength[/gold].\nCan only be played with {LightCost} or more Light.\n[gold]Claíomh Solais[/gold] level {SwordLevel} (3 Strength from level 5).",
+  "MAGICSWORDSMAN-UNION_DWARVEN_CRAFT.selectionScreenPrompt": "Choose an Attack card to forge.",
+  "MAGICSWORDSMAN-UNION_TWENTY_FOUR_BERSERKERS.title": "Twenty-Four Berserkers",
+  "MAGICSWORDSMAN-UNION_TWENTY_FOUR_BERSERKERS.description": "[purple]Union[/purple] {SwordA} + {SwordB}\nDeal {Damage:diff()} damage once per [gold]Scar[/gold] on the target (at least once). The Scars remain.\nCombined level {UnionLevel} (+1 damage per hit every 4).",
+  "MAGICSWORDSMAN-UNION_ROYAL_TREASURES.title": "Royal Treasures",
+  "MAGICSWORDSMAN-UNION_ROYAL_TREASURES.description": "[purple]Union[/purple] {SwordA} + {SwordB}\nDouble your [gold]Light[/gold].\nReduce one of your debuffs by 1.\nCombined level {UnionLevel} (costs 0 from {CheaperAt}).",
+  "MAGICSWORDSMAN-UNION_ANVIL_AND_ROCK.title": "Anvil and Rock",
+  "MAGICSWORDSMAN-UNION_ANVIL_AND_ROCK.description": "[purple]Union[/purple] {SwordA} + {SwordB}\nRemove all of the target's [gold]Block[/gold] and gain that much Block (max {Cap}).\nDeal {Damage:diff()} damage.\nCombined level {UnionLevel} (+1 damage every 2; +1 max per level).",
+  "MAGICSWORDSMAN-UNION_SUNLIT_HILT.title": "Sunlit Hilt",
+  "MAGICSWORDSMAN-UNION_SUNLIT_HILT.description": "[purple]Union[/purple] {SwordA} + {SwordB}\nConsume all [gold]Light[/gold].\nApply 1 [gold]Scar[/gold] per Light consumed to ALL enemies, twice as many to enemies that already had Scars.",
+  "MAGICSWORDSMAN-UNION_TURNED_BLOW.title": "The Turned Blow",
+  "MAGICSWORDSMAN-UNION_TURNED_BLOW.description": "[purple]Union[/purple] {SwordA} + {SwordB}\nDeal {Damage:diff()} damage.\nFor each enemy hit, you may put a card from your discard pile on top of your draw pile.\nCombined level {UnionLevel} (+1 damage every 2).",
+  "MAGICSWORDSMAN-UNION_TURNED_BLOW.selectionScreenPrompt": "Choose cards to put on top of your draw pile."
+}

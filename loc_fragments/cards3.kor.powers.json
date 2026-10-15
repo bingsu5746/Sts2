@@ -1,0 +1,8 @@
+{
+  "MAGICSWORDSMAN-UNION_SIDHE_LIGHT_POWER.title": "시드의 빛",
+  "MAGICSWORDSMAN-UNION_SIDHE_LIGHT_POWER.description": "공격 1번으로 적을 2명 이상 맞힐 때마다 [gold]빛[/gold]을 1 얻습니다(턴마다 최대 2). [gold]클라이브 솔라시[/gold]의 대가로 빛이 사라지기 직전, 모든 적에게 빛 1당 피해를 줍니다.",
+  "MAGICSWORDSMAN-UNION_SIDHE_LIGHT_POWER.smartDescription": "공격 1번으로 적을 2명 이상 맞힐 때마다 [gold]빛[/gold]을 1 얻습니다(턴마다 최대 2). [gold]클라이브 솔라시[/gold]의 대가로 빛이 사라지기 직전, 모든 적에게 빛 1당 피해를 {Amount} 줍니다.",
+  "MAGICSWORDSMAN-UNION_DWARVEN_EDGE_POWER.title": "난쟁이의 벼림",
+  "MAGICSWORDSMAN-UNION_DWARVEN_EDGE_POWER.description": "[gold]난쟁이의 솜씨[/gold]로 벼린 공격 카드는 이번 전투 동안 피해가 증가합니다.",
+  "MAGICSWORDSMAN-UNION_DWARVEN_EDGE_POWER.smartDescription": "[gold]난쟁이의 솜씨[/gold]로 벼린 공격 카드는 이번 전투 동안 피해가 증가합니다(벼린 횟수 {Amount})."
+}
