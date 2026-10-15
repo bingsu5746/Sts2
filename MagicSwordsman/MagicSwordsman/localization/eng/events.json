@@ -2188,5 +2188,9 @@
   "MAGICSWORDSMAN-SWORD_FX.COST_SKOFNUNG": "Cannot be used on the first turn of combat",
   "MAGICSWORDSMAN-SWORD_FX.COST_ONIMARU": "In normal fights, {Chance}% chance of another stance",
   "MAGICSWORDSMAN-SWORD_FX.COST_CLAIOMHSOLAIS": "Ending a turn holding another sword loses all Light",
-  "MAGICSWORDSMAN-SWORD_FX.COST_CALADBOLG": "Against a single enemy, attack damage -{Penalty}%"
+  "MAGICSWORDSMAN-SWORD_FX.COST_CALADBOLG": "Against a single enemy, attack damage -{Penalty}%",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.START_SEALED.description": "Before you set out, the Tomb of Ten Thousand Swords hums at your back.\nSomewhere inside, a sword is stirring. No one knows yet which one will answer.",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.START_SEALED.options.AWAKEN.title": "Wake the First Sword",
+  "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.START_SEALED.options.AWAKEN.description": "Lay your hand on the tomb and call the first sword that answers.",
+  "MAGICSWORDSMAN-SWORD_LORE.ROULETTE_HEADER": "The tomb rings..."
 }
