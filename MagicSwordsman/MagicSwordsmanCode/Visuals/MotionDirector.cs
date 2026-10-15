@@ -83,7 +83,14 @@ public static class MotionDirector
         SwordVisuals.Guard(player, null, hit: false);
     }
 
-    public static void OnDamageReceived(Player player, int unblocked, bool fullyBlocked, Creature? dealer = null)
+    /// <summary>
+    /// Ensifer was hit (the damage hook runs at the moment the blow lands). Fully blocked: the swords' guard takes it.
+    /// Some damage got through from an attack (<paramref name="attack"/>): the guard formation breaks
+    /// (SwordVisuals.GuardBreak, user request 2026-10-15) and he staggers with it (Hit_Break, timed to the break; the
+    /// heaviest hits keep Hit_Heavy). Other damage gets the plain hit reaction sized to the damage.
+    /// </summary>
+    public static void OnDamageReceived(Player player, int unblocked, bool fullyBlocked, Creature? dealer = null,
+        int blocked = 0, bool attack = false)
     {
         var creature = player.Creature;
         if (creature.IsDead) return;
@@ -96,6 +103,12 @@ public static class MotionDirector
         }
         if (unblocked <= 0) return;
         var heavy = unblocked >= Math.Max(15, creature.MaxHp / 5);
+        if (attack && dealer != null)
+        {
+            SwordVisuals.GuardBreak(player, dealer, blocked, unblocked);
+            Play(player, heavy ? "Hit_Heavy" : unblocked <= 3 && blocked <= 0 ? "Hit_Light" : "Hit_Break");
+            return;
+        }
         Play(player, heavy ? "Hit_Heavy" : unblocked >= 8 ? "Hit_Stagger" : unblocked <= 3 ? "Hit_Light" : "Hit");
     }
 

@@ -11,9 +11,13 @@ namespace MagicSwordsman.MagicSwordsmanCode.Visuals;
 /// <summary>
 /// Sword choreographies besides the plain strike (user requests 2026-10-10):
 ///  - <see cref="Guard"/>: gaining Block / a fully blocked hit — the free swords form a guard on the attacker's side whose
-///    shape depends on how many there are (one: a lone parry, or a heavy blade planted point-down like a wall; two: an
-///    X; three: a fan; four or more: a slowly turning ring of blades), with a flourish of the lead sword's own
-///    (SwordFx.GuardFx). Wind-up, a fast snap, one impact frame, a wobble, a soft return (≈ 0.7 s).
+///    shape depends on how many there are, two or three ways each, the lead sword favouring one (one: a twirling
+///    parry, a heavy blade planted point-down, or a sliding parry; two: an X, a parallel brace, or a parry and
+///    counter-thrust; three: a fan, a triangle shield, or staggered layers; four or more: a turning ring, a hedge of
+///    points, or a whirling cyclone), with a flourish of the lead sword's own (SwordFx.GuardFx). Wind-up, a fast snap,
+///    one impact frame, a wobble, a soft return (≈ 0.7 s).
+///  - <see cref="GuardBreak"/>: a hit that gets through (some HP lost): the formation breaks and the blades are thrown
+///    off, then gather themselves and come home (≈ 1.3 s).
 ///  - <see cref="OnimaruStrike"/>: Onimaru's own attacks (【명령】, auto attacks, kind cards) fly the katana to the
 ///    target and back. Those attacks deal Unpowered damage without the game's "Attack" trigger, so the generic
 ///    <see cref="Strike"/> never saw them (OnimaruAttack.Perform calls this directly).
@@ -29,20 +33,62 @@ public static partial class SwordVisuals
     // ------------------------------------------------------------------ guard: formations by count, flourish by sword
 
     private static readonly Dictionary<ulong, ulong> LastGuard = new();
+    /// <summary>Until when (ticks ms) a guard / guard break owns a sword; cleared when it hands the sword back.</summary>
     private static readonly Dictionary<Node2D, ulong> GuardAt = new();
+    /// <summary>The formation of each player's last guard (not repeated twice running; a break breaks that one).</summary>
+    private static readonly Dictionary<ulong, GuardShape> LastShape = new();
+    private static readonly Dictionary<ulong, ulong> LastBreak = new();
+    private static readonly Random GuardRng = new();
 
-    /// <summary>How the guarding blades stand (user request 2026-10-10 "검마다 다르게, 검의 개수마다 다르게").</summary>
+    /// <summary>
+    /// How the guarding blades stand (user requests 2026-10-10 "검마다 다르게, 검의 개수마다 다르게", 2026-10-15 "검으로
+    /// 방어하는 모션도 다양화시켜 줘"): two or three ways for each number of blades, the lead sword favouring one.
+    /// </summary>
     private enum GuardShape
     {
-        Solo,  // one light blade: spins once and stops on a diagonal block
-        Plant, // one heavy blade: drops point-first into the ground before him like a wall
-        Cross, // two: the X
-        Fan,   // three: a fan of blades opening upward from one point
-        Ring,  // four or more: a ring of blades in front of him, points outward, turning slowly
+        Solo,     // one blade: spins once and stops on a diagonal block
+        Plant,    // one heavy blade: drops point-first into the ground before him like a wall
+        Slide,    // one blade: comes in low and level, slides up along the blow and turns it over his head
+        Cross,    // two: the X
+        Bar,      // two: held parallel, one high one low, leaning into the blow (a two-tier brace)
+        Counter,  // two: the lead parries, the other darts out past it at the attacker and back
+        Fan,      // three: a fan of blades opening upward from one point
+        Triangle, // three: the blades are the sides of a triangle, a flat shield facing the enemy
+        Layers,   // three: staggered upright layers, the blow rippling through them front to back
+        Ring,     // four or more: a ring of blades in front of him, points outward, turning slowly
+        Wall,     // four or more: a hedge of blades stacked one above another, points at the enemy
+        Cyclone,  // four or more: the blades whirl round an upright axis in front of him, passing behind and before
     }
 
     private static bool HeavyBlade(SwordId s) =>
         s is SwordId.Gram or SwordId.Durandal or SwordId.Tyrfing or SwordId.Caladbolg or SwordId.Dainsleif;
+
+    /// <summary>The formations open to <paramref name="n"/> blades led by <paramref name="lead"/>; the first is its favourite.</summary>
+    private static GuardShape[] GuardOptions(SwordId lead, int n) => n switch
+    {
+        1 when lead == SwordId.Onimaru => [GuardShape.Slide, GuardShape.Solo],
+        1 when HeavyBlade(lead) => [GuardShape.Plant, GuardShape.Slide, GuardShape.Solo],
+        1 => [GuardShape.Solo, GuardShape.Slide],
+        2 when lead is SwordId.Ganjiang or SwordId.Moye => [GuardShape.Cross, GuardShape.Counter],
+        2 when lead is SwordId.Gram or SwordId.Durandal or SwordId.Caladbolg => [GuardShape.Bar, GuardShape.Cross, GuardShape.Counter],
+        2 when lead is SwordId.Tyrfing or SwordId.Dainsleif or SwordId.Kusanagi => [GuardShape.Counter, GuardShape.Cross, GuardShape.Bar],
+        2 => [GuardShape.Cross, GuardShape.Bar, GuardShape.Counter],
+        3 when lead is SwordId.Durandal or SwordId.Gram or SwordId.Caladbolg => [GuardShape.Triangle, GuardShape.Fan, GuardShape.Layers],
+        3 when lead is SwordId.Skofnung or SwordId.Kusanagi or SwordId.ClaiomhSolais => [GuardShape.Layers, GuardShape.Fan, GuardShape.Triangle],
+        3 => [GuardShape.Fan, GuardShape.Triangle, GuardShape.Layers],
+        _ when lead is SwordId.Kusanagi or SwordId.Skofnung or SwordId.Caladbolg => [GuardShape.Cyclone, GuardShape.Ring, GuardShape.Wall],
+        _ when lead is SwordId.Durandal or SwordId.Gram or SwordId.Tyrfing => [GuardShape.Wall, GuardShape.Ring, GuardShape.Cyclone],
+        _ => [GuardShape.Ring, GuardShape.Wall, GuardShape.Cyclone],
+    };
+
+    /// <summary>Random formation: the favourite counts twice; the same one is not picked twice running if avoidable.</summary>
+    private static GuardShape PickGuardShape(ulong who, SwordId lead, int n)
+    {
+        var options = GuardOptions(lead, n);
+        var bag = new List<GuardShape>(options) { options[0] };
+        if (LastShape.TryGetValue(who, out var last) && options.Length > 1) bag.RemoveAll(s => s == last);
+        return bag[GuardRng.Next(bag.Count)];
+    }
 
     /// <summary>
     /// Block gained (<paramref name="hit"/> false) or a hit fully blocked (true). <paramref name="attacker"/> decides the
@@ -62,19 +108,16 @@ public static partial class SwordVisuals
     private const double GuardPush = 0.07;                              // gaining Block: the push forward that meets the blow
     private const double GuardHold = 0.26, GuardHome = 0.3;
 
-    private static void GuardInner(Player player, Creature? attacker, bool hit)
+    /// <summary>The swords free to guard, lead first (the current sword, then by id; the twin right after its twin).</summary>
+    private static List<KeyValuePair<SwordId, Node2D>> GuardBlades(Rig rig, ulong now, bool takeGuarding)
     {
-        var rig = GetRig(player, create: false);
-        if (rig == null || rig.Dead || rig.Swords.Count == 0) return;
-        var now = Time.GetTicksMsec();
-        if (LastGuard.TryGetValue(player.NetId, out var t0) && now - t0 < 450) return;
-
         var free = rig.Swords
-            .Where(kv => GodotObject.IsInstanceValid(kv.Value) && !IsUnionBusy(kv.Value) &&
-                         !(LastStrike.TryGetValue(kv.Value, out var s0) && now - s0 < 500))
+            .Where(kv => GodotObject.IsInstanceValid(kv.Value) && !IsUnionBusy(kv.Value) && !IsStriking(kv.Value) &&
+                         !(LastStrike.TryGetValue(kv.Value, out var s0) && now - s0 < 500) &&
+                         (takeGuarding || !GuardAt.ContainsKey(kv.Value)))
             .OrderByDescending(kv => kv.Key == rig.Current).ThenBy(kv => (int)kv.Key)
             .Take(6).ToList();
-        if (free.Count == 0) return;
+        if (free.Count == 0) return free;
         var lead = free[0].Key;
         // the twin blades stand together: Moye right after Ganjiang (or the reverse) when both are out
         var twin = lead switch { SwordId.Ganjiang => SwordId.Moye, SwordId.Moye => SwordId.Ganjiang, _ => (SwordId?)null };
@@ -82,21 +125,34 @@ public static partial class SwordVisuals
         if (ti > 1) { var x = free[ti]; free.RemoveAt(ti); free.Insert(1, x); }
         // Onimaru guards alone: one precise parry, whatever else is out
         if (lead == SwordId.Onimaru) free = free.Take(1).ToList();
-        LastGuard[player.NetId] = now;
+        return free;
+    }
 
-        var side = 1f;
+    /// <summary>+1 when the attacker stands to Ensifer's right (the default), -1 to his left.</summary>
+    private static float GuardSide(Player player, Creature? attacker)
+    {
         var room = NCombatRoom.Instance;
         if (attacker != null && room?.GetCreatureNode(attacker) is { } enemy && room.GetCreatureNode(player.Creature) is { } me)
-            side = enemy.GlobalPosition.X >= me.GlobalPosition.X ? 1f : -1f;
+            return enemy.GlobalPosition.X >= me.GlobalPosition.X ? 1f : -1f;
+        return 1f;
+    }
 
+    private static void GuardInner(Player player, Creature? attacker, bool hit)
+    {
+        var rig = GetRig(player, create: false);
+        if (rig == null || rig.Dead || rig.Swords.Count == 0) return;
+        var now = Time.GetTicksMsec();
+        if (LastGuard.TryGetValue(player.NetId, out var t0) && now - t0 < 450) return;
+        if (LastBreak.TryGetValue(player.NetId, out var b0) && now - b0 < 1300) return; // the blades are still scattered
+
+        var free = GuardBlades(rig, now, takeGuarding: true);
+        if (free.Count == 0) return;
+        var lead = free[0].Key;
+        LastGuard[player.NetId] = now;
+        var side = GuardSide(player, attacker);
         var n = free.Count;
-        var shape = n switch
-        {
-            1 => HeavyBlade(lead) ? GuardShape.Plant : GuardShape.Solo,
-            2 => GuardShape.Cross,
-            3 => GuardShape.Fan,
-            _ => GuardShape.Ring,
-        };
+        var shape = PickGuardShape(player.NetId, lead, n);
+        LastShape[player.NetId] = shape;
 
         var wind = hit ? GuardWindHit : GuardWindBlock;
         var snap = hit ? GuardSnapHit : GuardSnapBlock;
@@ -118,16 +174,16 @@ public static partial class SwordVisuals
                     if (GodotObject.IsInstanceValid(nd)) GuardGhosts(nd, side);
         }));
 
+        var push = !hit && shape != GuardShape.Plant;
+        var hold = GuardHold + (push ? GuardPush : 0);
         for (var i = 0; i < n; i++)
         {
             var (sword, node) = free[i];
-            if (!rig.Slots.TryGetValue(sword, out var home)) home = node.Position;
             if (rig.Moves.TryGetValue(sword, out var mv) && GodotObject.IsInstanceValid(mv)) mv.Kill();
-            GuardAt[node] = now; // in flight: a Sync during the guard leaves it alone (a strike may still take it over)
-            var homeZ = rig.Current == sword ? ZFront : node.ZIndex;
-            var homeScale = node.Scale;
             var lag = Math.Min(i * 0.02, 0.06);
             var snapI = Math.Max(0.05, snap - lag); // every blade arrives on the same frame
+            // in flight: a Sync during the guard leaves it alone (its end hands it back; a strike may still take it over)
+            GuardAt[node] = now + (ulong)((wind + snap + hold + GuardHome) * 1000) + 400;
             var target = GuardPose(shape, i, n, side, 0);
             var scale = Vector2.One * GuardScale(shape, rig.Current == sword);
 
@@ -138,9 +194,12 @@ public static partial class SwordVisuals
                 ? startPos + new Vector2(side * 20f, -70f)
                 : startPos + new Vector2(-side * 22f, 12f);
             var windRot = shape == GuardShape.Plant ? Mathf.Pi + side * 0.5f : startRot - side * 0.3f;
-            var ctrl = shape == GuardShape.Plant
-                ? new Vector2(target.Pos.X, windPos.Y - 60f)
-                : (windPos + target.Pos) * 0.5f + new Vector2(side * 30f, -70f);
+            var ctrl = shape switch
+            {
+                GuardShape.Plant => new Vector2(target.Pos.X, windPos.Y - 60f),
+                GuardShape.Slide => (windPos + target.Pos) * 0.5f + new Vector2(side * 20f, 70f), // swoops in from below
+                _ => (windPos + target.Pos) * 0.5f + new Vector2(side * 30f, -70f),
+            };
             var spin = shape == GuardShape.Solo ? -side * Mathf.Tau : 0f; // the lone blade twirls once on its way in
 
             var tw = node.CreateTween();
@@ -162,59 +221,111 @@ public static partial class SwordVisuals
 
             // the blow: knocked back with a decaying wobble (hit), or a push forward that meets it (gaining Block)
             var idx = i;
-            var push = !hit && shape != GuardShape.Plant;
-            var hold = GuardHold + (push ? GuardPush : 0);
-            var sign = i % 2 == 0 ? 1f : -1f;
             tw.TweenMethod(Callable.From<float>(t =>
             {
                 if (!GodotObject.IsInstanceValid(node)) return;
-                var (off, kick) = GuardRide(shape, hit, t);
-                var p = GuardPose(shape, idx, n, side, GuardRingTurn(shape, hit, t, hold) * side);
-                node.Position = p.Pos + new Vector2(side * off, Math.Abs(off) * 0.12f);
-                node.Rotation = p.Rot + side * kick * sign;
+                var p = GuardHeld(shape, hit, idx, n, side, t, hold);
+                node.Position = p.Pos;
+                node.Rotation = p.Rot;
+                node.ZIndex = p.Z;
             }), 0f, (float)hold, hold);
 
-            // follow-through: home on an arc that dips below the straight line, overshooting a little before it settles
-            tw.TweenCallback(Callable.From(() => { if (GodotObject.IsInstanceValid(node)) node.ZIndex = homeZ; }));
-            var endPose = GuardPose(shape, i, n, side, GuardRingTurn(shape, hit, (float)hold, hold) * side);
-            var homeCtrl = (endPose.Pos + home) * 0.5f + new Vector2(-side * 20f, 50f);
-            var endRot = endPose.Rot;
+            // follow-through: home on an arc that dips below the straight line, overshooting a little before it settles;
+            // home is read when the return starts (a switch during the guard may have moved its slot)
+            var endPose = GuardHeld(shape, hit, i, n, side, (float)hold, hold);
+            var s = sword;
+            var homeScale = Vector2.One * (rig.Current == sword ? 1.15f : 0.85f);
+            var home = node.Position;
+            tw.TweenCallback(Callable.From(() =>
+            {
+                if (!GodotObject.IsInstanceValid(node)) return;
+                node.ZIndex = rig.Current == s ? ZFront : ZBack;
+                home = rig.Slots.TryGetValue(s, out var h) ? h : node.Position;
+                homeScale = Vector2.One * (rig.Current == s ? 1.15f : 0.85f);
+            }));
             tw.TweenMethod(Callable.From<float>(u =>
             {
                 if (!GodotObject.IsInstanceValid(node)) return;
+                var homeCtrl = (endPose.Pos + home) * 0.5f + new Vector2(-side * 20f, 50f);
                 node.Position = Bezier(endPose.Pos, homeCtrl, home, u);
-                node.Rotation = Mathf.LerpAngle(endRot, 0f, Mathf.Clamp(u, 0f, 1f));
+                node.Rotation = Mathf.LerpAngle(endPose.Rot, 0f, Mathf.Clamp(u, 0f, 1f));
+                node.Scale = scale.Lerp(homeScale, Mathf.Clamp(u, 0f, 1f));
             }), 0f, 1f, GuardHome).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
-            tw.Parallel().TweenProperty(node, "scale", homeScale, GuardHome);
-            var s = sword;
             tw.TweenCallback(Callable.From(() => Layout(rig, only: s)));
         }
     }
 
-    /// <summary>Where blade <paramref name="i"/> of <paramref name="n"/> stands in the formation (rig space).</summary>
+    /// <summary>
+    /// Where blade <paramref name="i"/> of <paramref name="n"/> stands in the formation (rig space). Built for an enemy on
+    /// the right and mirrored for one on the left. <paramref name="turn"/>: how far a turning formation has turned.
+    /// </summary>
     private static (Vector2 Pos, float Rot, int Z) GuardPose(GuardShape shape, int i, int n, float side, float turn)
     {
-        var c = new Vector2(side * 150f, -268f); // in front of his chest, on the attacker's side
+        var (pos, rot, z) = GuardPoseRight(shape, i, n, turn);
+        return (new Vector2(pos.X * side, pos.Y), rot * side, z);
+    }
+
+    private static (Vector2 Pos, float Rot, int Z) GuardPoseRight(GuardShape shape, int i, int n, float turn)
+    {
+        var c = new Vector2(150f, -268f); // in front of his chest, on the attacker's side
         switch (shape)
         {
             case GuardShape.Plant:
                 // point down, bitten into the ground, the hilt leaning toward the enemy
-                return (new Vector2(side * 178f, -98f), Mathf.Pi + side * 0.12f, ZFlying);
+                return (new Vector2(178f, -98f), Mathf.Pi + 0.12f, ZFlying);
             case GuardShape.Solo:
-                return (c + new Vector2(side * 14f, -8f), side * 0.62f, ZFlying);
+                return (c + new Vector2(14f, -8f), 0.62f, ZFlying);
+            case GuardShape.Slide:
+                // low and nearly level, the point up and forward, under the blow
+                return (new Vector2(152f, -224f), 1.18f, ZFlying);
             case GuardShape.Cross:
-                return i == 0
-                    ? (c + new Vector2(side * 10f, -6f), side * 0.58f, ZFlying)
-                    : (c + new Vector2(-side * 6f, 6f), -side * 0.52f, ZFront);
+                return i == 0 ? (c + new Vector2(10f, -6f), 0.58f, ZFlying) : (c + new Vector2(-6f, 6f), -0.52f, ZFront);
+            case GuardShape.Bar:
+                return i == 0 ? (new Vector2(170f, -330f), 0.4f, ZFlying) : (new Vector2(156f, -206f), 0.32f, ZFront);
+            case GuardShape.Counter:
+                // the lead parries on the diagonal; the other waits low behind it, point at the enemy
+                return i == 0 ? (c + new Vector2(12f, -14f), 0.62f, ZFlying) : (new Vector2(92f, -205f), Mathf.Pi / 2 + 0.06f, ZFront);
             case GuardShape.Fan:
             {
-                var a = side * (i == 0 ? 0f : i == 1 ? -0.55f : 0.55f) + side * 0.1f;
-                var pivot = new Vector2(side * 150f, -150f);
+                var a = (i == 0 ? 0f : i == 1 ? -0.55f : 0.55f) + 0.1f;
+                var pivot = new Vector2(150f, -150f);
                 return (pivot + Vector2.Up.Rotated(a) * 102f, a, i == 0 ? ZFlying : ZFront);
+            }
+            case GuardShape.Triangle:
+            {
+                // vertices to his side, up-front and down-front: the lead is the upright side facing the enemy, the
+                // other two close it toward him; the blades run round it the same way, like a pinwheel
+                var phi = i == 0 ? 0f : i == 1 ? Mathf.Pi * 4 / 3 : Mathf.Pi * 2 / 3;
+                var center = new Vector2(170f, -270f);
+                return (center + new Vector2(Mathf.Cos(phi), Mathf.Sin(phi)) * 47f, phi, i == 0 ? ZFlying : ZFront);
+            }
+            case GuardShape.Layers:
+                return i switch
+                {
+                    0 => (new Vector2(206f, -262f), 0.2f, ZFlying),
+                    1 => (new Vector2(170f, -290f), 0.12f, ZFront),
+                    _ => (new Vector2(134f, -318f), 0.05f, ZFront),
+                };
+            case GuardShape.Wall:
+            {
+                // lead in the middle, the others above and below it in turn
+                var k = i == 0 ? 0 : (i % 2 == 1 ? -(i + 1) / 2 : i / 2);
+                var step = Math.Min(70f, 300f / Math.Max(1, n - 1));
+                var alt = i % 2 == 0 ? 1f : -1f;
+                return (new Vector2(178f + 9f * alt, -270f + k * step), Mathf.Pi / 2 - 0.07f * alt + k * 0.03f, ZFlying);
+            }
+            case GuardShape.Cyclone:
+            {
+                // a helix round an upright axis: the lead in the middle height; the far half passes behind his body
+                var k = i == 0 ? 0 : (i % 2 == 1 ? -(i + 1) / 2 : i / 2);
+                var step = Math.Min(62f, 260f / Math.Max(1, n - 1));
+                var th = Mathf.Pi / 2 + Mathf.Tau * i / n + turn;
+                var pos = new Vector2(160f + Mathf.Cos(th) * 74f, -270f + k * step + Mathf.Sin(th) * 12f);
+                return (pos, -0.42f * Mathf.Sin(th) + 0.12f, Mathf.Sin(th) > -0.2f ? ZFlying : ZBack);
             }
             default:
             {
-                var center = new Vector2(side * 168f, -272f);
+                var center = new Vector2(168f, -272f);
                 var th = -Mathf.Pi / 2 + Mathf.Tau * i / n + turn;
                 var pos = center + new Vector2(Mathf.Cos(th) * 80f, Mathf.Sin(th) * 128f);
                 return (pos, PointAt(center, pos), ZFlying);
@@ -225,49 +336,249 @@ public static partial class SwordVisuals
     private static float GuardScale(GuardShape shape, bool current) => shape switch
     {
         GuardShape.Plant => 1.2f,
-        GuardShape.Solo => 1.15f,
-        GuardShape.Cross => current ? 1.15f : 1.05f,
-        GuardShape.Fan => current ? 1.05f : 0.95f,
+        GuardShape.Solo or GuardShape.Slide => 1.15f,
+        GuardShape.Cross or GuardShape.Counter => current ? 1.15f : 1.05f,
+        GuardShape.Bar => current ? 1.1f : 1.0f,
+        GuardShape.Fan or GuardShape.Layers => current ? 1.05f : 0.95f,
+        GuardShape.Triangle => current ? 0.95f : 0.9f,
+        GuardShape.Wall => current ? 0.88f : 0.8f,
+        GuardShape.Cyclone => current ? 0.92f : 0.84f,
         _ => current ? 0.95f : 0.85f,
     };
 
-    private static Vector2 GuardImpactPoint(GuardShape shape, float side) => shape switch
+    private static Vector2 GuardImpactPoint(GuardShape shape, float side)
     {
-        GuardShape.Plant => new Vector2(side * 200f, -175f),
-        GuardShape.Solo => new Vector2(side * 192f, -300f),
-        GuardShape.Cross => new Vector2(side * 172f, -282f),
-        GuardShape.Fan => new Vector2(side * 185f, -250f),
-        _ => new Vector2(side * 200f, -272f),
-    };
+        var p = shape switch
+        {
+            GuardShape.Plant => new Vector2(200f, -175f),
+            GuardShape.Solo => new Vector2(192f, -300f),
+            GuardShape.Slide => new Vector2(200f, -268f),
+            GuardShape.Cross => new Vector2(172f, -282f),
+            GuardShape.Bar => new Vector2(205f, -272f),
+            GuardShape.Counter => new Vector2(190f, -296f),
+            GuardShape.Fan => new Vector2(185f, -250f),
+            GuardShape.Triangle => new Vector2(222f, -270f),
+            GuardShape.Layers => new Vector2(224f, -268f),
+            GuardShape.Wall => new Vector2(232f, -270f),
+            GuardShape.Cyclone => new Vector2(218f, -272f),
+            _ => new Vector2(200f, -272f),
+        };
+        return new Vector2(p.X * side, p.Y);
+    }
 
     /// <summary>A pulse that rises to 1 at <paramref name="tau"/> and dies away: (t/τ)·e^(1 − t/τ).</summary>
     private static float Pulse(float t, float tau) => t <= 0 ? 0 : t / tau * Mathf.Exp(1 - t / tau);
 
     /// <summary>
-    /// The blades riding the blow, <paramref name="t"/> s after they arrive: (offset toward the enemy in px, extra tilt).
-    /// A blocked hit knocks them back and they wobble to rest; gaining Block they push forward to meet it. A planted
-    /// blade does not slide, it only quivers.
+    /// Blade <paramref name="i"/> riding the blow, <paramref name="t"/> s after the blades arrive: its pose in the
+    /// formation plus the ride (<see cref="GuardRide"/>), mirrored for the side.
     /// </summary>
-    private static (float Off, float Kick) GuardRide(GuardShape shape, bool hit, float t)
+    private static (Vector2 Pos, float Rot, int Z) GuardHeld(GuardShape shape, bool hit, int i, int n, float side, float t, double hold)
     {
-        var amp = shape switch { GuardShape.Plant => 5f, GuardShape.Solo => 30f, GuardShape.Cross => 26f, GuardShape.Fan => 22f, _ => 16f };
-        var tilt = shape == GuardShape.Plant ? 0.12f : 0.18f;
+        var (pos, rot, z) = GuardPoseRight(shape, i, n, GuardRingTurn(shape, hit, t, hold));
+        var (off, kick) = GuardRide(shape, hit, i, t);
+        return (new Vector2((pos.X + off.X) * side, pos.Y + off.Y), (rot + kick) * side, z);
+    }
+
+    /// <summary>
+    /// The ride of blade <paramref name="i"/>, <paramref name="t"/> s after it arrives (enemy on the right): (offset, extra
+    /// tilt). A blocked hit knocks the blades back and they wobble to rest; gaining Block they push forward to meet it. A
+    /// planted blade only quivers; a sliding parry runs up along the blow; the counter blade darts out and back; staggered
+    /// layers take the blow one after another.
+    /// </summary>
+    private static (Vector2 Off, float Kick) GuardRide(GuardShape shape, bool hit, int i, float t)
+    {
+        if (shape == GuardShape.Slide)
+        {
+            var s = Mathf.SmoothStep(0f, 1f, Mathf.Clamp(t / 0.13f, 0f, 1f));
+            var jolt = Pulse(t, 0.04f) * Mathf.Cos(Math.Max(0, t - 0.04f) * 26f);
+            return (new Vector2(-10f * s - (hit ? 10f : 4f) * jolt, -62f * s), -0.55f * s - 0.08f * jolt);
+        }
+        if (shape == GuardShape.Counter && i == 1)
+            return (new Vector2(125f * Pulse(t - 0.02f, 0.06f), -6f * Pulse(t - 0.02f, 0.06f)), -0.05f * Pulse(t - 0.02f, 0.06f));
+        if (shape == GuardShape.Layers) t -= i * 0.035f;
+        var amp = shape switch
+        {
+            GuardShape.Plant => 5f, GuardShape.Solo => 30f, GuardShape.Cross or GuardShape.Counter => 26f, GuardShape.Bar => 24f,
+            GuardShape.Fan or GuardShape.Layers => 22f, GuardShape.Triangle => 20f, GuardShape.Wall => 18f,
+            GuardShape.Cyclone => 10f, _ => 16f,
+        };
+        var tilt = shape == GuardShape.Plant ? 0.12f : shape is GuardShape.Wall or GuardShape.Triangle ? 0.08f : 0.18f;
+        var sign = i % 2 == 0 ? 1f : -1f;
+        float off, kick;
         if (hit || shape == GuardShape.Plant)
         {
             var w = Pulse(t, 0.05f) * Mathf.Cos(Math.Max(0, t - 0.05f) * 22f);
-            return (-amp * w, -tilt * w);
+            (off, kick) = (-amp * w, -tilt * w);
         }
-        var push = Pulse(t, (float)GuardPush);
-        var quiver = Pulse(t - (float)GuardPush, 0.04f) * Mathf.Cos(Math.Max(0, t - (float)GuardPush) * 24f);
-        return (amp * push - amp * 0.35f * quiver, tilt * 0.5f * push - tilt * 0.6f * quiver);
+        else
+        {
+            var push = Pulse(t, (float)GuardPush);
+            var quiver = Pulse(t - (float)GuardPush, 0.04f) * Mathf.Cos(Math.Max(0, t - (float)GuardPush) * 24f);
+            (off, kick) = (amp * push - amp * 0.35f * quiver, tilt * 0.5f * push - tilt * 0.6f * quiver);
+        }
+        return (new Vector2(off, Math.Abs(off) * 0.12f), kick * sign);
     }
 
-    /// <summary>The ring turns slowly while it holds (and is jolted round by a blocked hit); other shapes do not turn.</summary>
+    /// <summary>
+    /// The ring turns slowly while it holds (and is jolted round by a blocked hit); the cyclone whirls about two and a half
+    /// times, slowing as it settles; other shapes do not turn.
+    /// </summary>
     private static float GuardRingTurn(GuardShape shape, bool hit, float t, double hold)
     {
+        var u = Mathf.Clamp(t / (float)hold, 0f, 1f);
+        if (shape == GuardShape.Cyclone)
+            return Mathf.Tau * 2.4f * (1 - (1 - u) * (1 - u)) + (hit ? 0.6f * Pulse(t, 0.05f) : 0f);
         if (shape != GuardShape.Ring) return 0f;
-        var turn = 0.45f * Mathf.SmoothStep(0, 1, t / (float)hold);
+        var turn = 0.45f * Mathf.SmoothStep(0, 1, u);
         return hit ? turn + 0.3f * Pulse(t, 0.05f) : turn;
+    }
+
+    // ------------------------------------------------------------------ guard break: the blow gets through
+
+    /// <summary>
+    /// A hit that Block did not fully stop (user request 2026-10-15 "방어도가 부족해서 HP가 깎이게 되는 공격을 받을 때는 원래처럼
+    /// 방어 모션 취하다가, 상대가 공격한 투사체나 몸통 박치기 같은 게 오면 그 방어진이 무너지는 모션으로"). Called from the
+    /// damage hook, i.e. at the moment the blow lands: the formation snaps up (or, when a guard is already standing, is
+    /// simply there) and breaks — a crack of light, the blades knocked away spinning (the lead shoved right past him,
+    /// others thrown high, one skidding low), he staggers (body clip Hit_Break), and after a beat the swords gather
+    /// themselves and return to their slots. <paramref name="blocked"/> 0: there was no Block at all — the swords try to
+    /// intercept, arrive short and are swatted aside (smaller crack, shorter flight).
+    /// </summary>
+    public static void GuardBreak(Player player, Creature? attacker, int blocked, int unblocked)
+    {
+        try { GuardBreakInner(player, attacker, blocked, unblocked); }
+        catch (Exception e) { MainFile.Logger.Warn($"[SwordVisuals] guard break failed: {e.Message}"); }
+    }
+
+    // Timing (s, from the hook = the blow). Snap 0.09 (the blades are already in place when a guard stands: 0.04), one
+    // buckle frame, knocked away 0.42, a dazed beat 0.24, back home 0.45 (staggered 0.05 a blade). ≈ 1.3 s.
+    private const double BreakSnap = 0.09, BreakSnapStanding = 0.04, BreakBuckle = 0.05, BreakFly = 0.42, BreakBeat = 0.24,
+        BreakHome = 0.45;
+
+    /// <summary>Where each blade is thrown (enemy on the right; rig space), and how many turns it spins on the way.</summary>
+    private static readonly (Vector2 To, float Turns)[] BreakThrows =
+    {
+        (new Vector2(-255f, -315f), -2.25f), // the lead takes the brunt: shoved right past him, behind his back
+        (new Vector2(-105f, -545f), 1.6f),   // thrown high over his head
+        (new Vector2(-30f, -70f), -1.15f),   // knocked down, skidding along the ground in front of his feet
+        (new Vector2(-310f, -150f), 2.0f),   // past him low
+        (new Vector2(-195f, -470f), -1.75f), // high behind him
+        (new Vector2(70f, -500f), 1.4f),     // straight up
+    };
+
+    private static void GuardBreakInner(Player player, Creature? attacker, int blocked, int unblocked)
+    {
+        var rig = GetRig(player, create: false);
+        if (rig == null || rig.Dead || rig.Swords.Count == 0) return;
+        var now = Time.GetTicksMsec();
+        if (LastBreak.TryGetValue(player.NetId, out var b0) && now - b0 < 700) return; // already scattered
+        var free = GuardBlades(rig, now, takeGuarding: true);
+        if (free.Count == 0) return;
+        var lead = free[0].Key;
+        var n = free.Count;
+        var side = GuardSide(player, attacker);
+        var fail = blocked <= 0;
+        // a guard formed a moment ago (an earlier hit of this attack, or Block gained just now) is the one that breaks
+        var standing = LastGuard.TryGetValue(player.NetId, out var g0) && now - g0 < 650 &&
+                       LastShape.TryGetValue(player.NetId, out var ls) && GuardOptions(lead, n).Contains(ls);
+        var shape = standing ? LastShape[player.NetId] : PickGuardShape(player.NetId, lead, n);
+        LastShape[player.NetId] = shape;
+        LastGuard[player.NetId] = now;
+        LastBreak[player.NetId] = now;
+
+        var snap = standing ? BreakSnapStanding : BreakSnap;
+        var impactPos = GuardImpactPoint(shape, side) + (fail ? new Vector2(side * 20f, 0) : Vector2.Zero);
+        var clock = rig.Root.CreateTween();
+        clock.TweenInterval(snap);
+        clock.TweenCallback(Callable.From(() =>
+        {
+            SwordFx.GuardBreakFx(rig.Root, impactPos, lead, side, fail);
+            Shake(fail ? MegaCrit.Sts2.Core.Nodes.Vfx.Utilities.ShakeStrength.VeryWeak
+                : MegaCrit.Sts2.Core.Nodes.Vfx.Utilities.ShakeStrength.Weak);
+        }));
+
+        var reach = fail ? 0.7f : 1f; // a failed intercept: they never get all the way out, and are swatted a shorter way
+        for (var i = 0; i < n; i++)
+        {
+            var (sword, node) = free[i];
+            if (rig.Moves.TryGetValue(sword, out var mv) && GodotObject.IsInstanceValid(mv)) mv.Kill();
+            var stagger = i * 0.05;
+            GuardAt[node] = now + (ulong)((snap + BreakBuckle + BreakFly + BreakBeat + BreakHome + stagger) * 1000) + 400;
+            var target = GuardPose(shape, i, n, side, 0);
+            var start = node.Position;
+            var startRot = node.Rotation;
+            var formPos = start.Lerp(target.Pos, reach);
+            var formRot = Mathf.LerpAngle(startRot, target.Rot, reach);
+            var scale = Vector2.One * GuardScale(shape, rig.Current == sword);
+            var throwTo = BreakThrows[i % BreakThrows.Length];
+            var land = new Vector2(throwTo.To.X * side, throwTo.To.Y);
+            land = formPos.Lerp(land, fail ? 0.65f : 1f);
+            var turns = throwTo.Turns * side * (fail ? 0.6f : 1f);
+            // the blade lands lying the way it tumbled: the low one flat on the ground, the others askew
+            var landRot = i % BreakThrows.Length == 2 ? side * (Mathf.Pi / 2 + 0.15f) : side * (0.5f + 0.35f * (i % 3));
+            var flyCtrl = (formPos + land) * 0.5f + new Vector2(0, i % BreakThrows.Length == 2 ? -40f : -110f);
+            var dim = new Color(0.72f, 0.72f, 0.8f, 0.9f);
+
+            var tw = node.CreateTween();
+            rig.Moves[sword] = tw;
+            node.ZIndex = target.Z;
+            tw.TweenMethod(Callable.From<float>(u =>
+            {
+                if (!GodotObject.IsInstanceValid(node)) return;
+                node.Position = start.Lerp(formPos, u);
+                node.Rotation = Mathf.LerpAngle(startRot, formRot, u);
+            }), 0f, 1f, snap).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+            tw.Parallel().TweenProperty(node, "scale", scale, snap);
+            tw.Parallel().TweenProperty(node, "modulate", Colors.White, snap);
+            // buckle: the blow drives the formation back and the blades bend away from it
+            var buckled = formPos + new Vector2(-side * 22f, 6f);
+            var buckRot = formRot - side * 0.3f * (i % 2 == 0 ? 1f : -1f);
+            tw.TweenProperty(node, "position", buckled, BreakBuckle).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+            tw.Parallel().TweenProperty(node, "rotation", buckRot, BreakBuckle);
+            // knocked away, tumbling; the ones thrown past him go behind his body halfway
+            var behind = land.X * side < -60f;
+            tw.TweenMethod(Callable.From<float>(u =>
+            {
+                if (!GodotObject.IsInstanceValid(node)) return;
+                var e = 1f - Mathf.Pow(1f - u, 3f);
+                node.Position = Bezier(buckled, flyCtrl, land, e);
+                node.Rotation = buckRot + (landRot - buckRot) * e + turns * Mathf.Tau * (1f - Mathf.Pow(1f - u, 2.2f));
+                if (behind && u > 0.35f) node.ZIndex = ZBack;
+            }), 0f, 1f, BreakFly);
+            tw.Parallel().TweenProperty(node, "modulate", dim, BreakFly);
+            tw.Parallel().TweenProperty(node, "scale", Vector2.One * 0.85f, BreakFly);
+            // a dazed beat: they hang there, sinking a little, then gather themselves
+            var settledRot = landRot + turns * Mathf.Tau;
+            tw.TweenMethod(Callable.From<float>(t =>
+            {
+                if (!GodotObject.IsInstanceValid(node)) return;
+                node.Position = land + new Vector2(0, 10f * Mathf.SmoothStep(0f, 1f, t / (float)BreakBeat));
+                node.Rotation = settledRot + 0.06f * Mathf.Sin(t * 30f) * (1f - t / (float)BreakBeat);
+            }), 0f, (float)(BreakBeat + stagger), BreakBeat + stagger);
+            // home: read the slot now (a switch may have moved it); a straight wind-up turn to upright, a soft arc back
+            var s = sword;
+            var home = land;
+            var homeScale = Vector2.One * 0.85f;
+            tw.TweenCallback(Callable.From(() =>
+            {
+                if (!GodotObject.IsInstanceValid(node)) return;
+                home = rig.Slots.TryGetValue(s, out var h) ? h : node.Position;
+                homeScale = Vector2.One * (rig.Current == s ? 1.15f : 0.85f);
+                node.ZIndex = rig.Current == s ? ZFront : ZBack;
+            }));
+            var from = land + new Vector2(0, 10f);
+            tw.TweenMethod(Callable.From<float>(u =>
+            {
+                if (!GodotObject.IsInstanceValid(node)) return;
+                var ctrl = (from + home) * 0.5f + new Vector2(0, -60f);
+                node.Position = Bezier(from, ctrl, home, u);
+                node.Rotation = Mathf.LerpAngle(settledRot, 0f, Mathf.Clamp(u, 0f, 1f));
+                node.Scale = (Vector2.One * 0.85f).Lerp(homeScale, Mathf.Clamp(u, 0f, 1f));
+            }), 0f, 1f, BreakHome).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+            tw.Parallel().TweenProperty(node, "modulate", rig.Current == sword ? Colors.White : new Color(0.82f, 0.82f, 0.88f, 0.95f), BreakHome);
+            tw.TweenCallback(Callable.From(() => Layout(rig, only: s)));
+        }
     }
 
     /// <summary>Skofnung: two pale copies of the blade linger behind it and fade (its ghostly afterimages).</summary>
@@ -335,6 +646,8 @@ public static partial class SwordVisuals
         node.ZIndex = ZFlying;
         node.Modulate = Colors.White;
         LastStrike[node] = Time.GetTicksMsec();
+        // in flight until it hands itself back (Layout(only) clears this): a Sync meanwhile leaves it alone
+        node.SetMeta(StrikeUntilMeta, Time.GetTicksMsec() + 1200);
         var tw = node.CreateTween();
         rig.Moves[SwordId.Onimaru] = tw;
         var col = ColorOf(SwordId.Onimaru);

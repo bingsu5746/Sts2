@@ -39,6 +39,11 @@ public static partial class SwordVisuals
         public readonly Dictionary<SwordId, Vector2> Slots = new();
         /// <summary>The running layout tween of each sword (killed when a strike takes over the sword).</summary>
         public readonly Dictionary<SwordId, Tween> Moves = new();
+        /// <summary>
+        /// Which idle slot each non-current sword holds. Kept from one layout to the next so a switch only moves the two
+        /// swords that trade places (bug report 2026-10-15 "환검 쓰면 검들의 위치가 이상하게 꼬이는 버그").
+        /// </summary>
+        public readonly Dictionary<SwordId, int> SlotIndex = new();
         public SwordId? Current;
     }
 
@@ -59,7 +64,19 @@ public static partial class SwordVisuals
         new(-70, -290),   // behind his body, partly hidden by it (feedback 2026-10-10: not above the head)
         new(55, -305),    // behind his body on the other side (sword cap raised by relics)
         new(-205, -420),  // left and higher
+        // more swords out at once (환검 / summon cards can bring out every owned sword): an outer ring, so no two
+        // swords ever share a slot (slot 4 used to wrap onto slot 0 and draw two swords on top of each other)
+        new(-320, -320),
+        new(190, -440),
+        new(-330, -470),
+        new(-75, -480),
+        new(-300, -175),
+        new(300, -360),
     };
+
+    /// <summary>Idle slot <paramref name="i"/>; past the table, a small step off the wrapped slot (never exactly on it).</summary>
+    private static Vector2 IdleSlot(int i) =>
+        IdleSlots[i % IdleSlots.Length] + new Vector2(-24f, -20f) * (i / IdleSlots.Length);
 
     private const int ZBack = 0, ZFront = 1, ZFlying = 2;
 
@@ -168,6 +185,11 @@ public static partial class SwordVisuals
         {
             var node = rig.Swords[gone];
             rig.Swords.Remove(gone);
+            rig.Slots.Remove(gone);
+            rig.SlotIndex.Remove(gone);
+            // whatever was moving it (layout, guard, strike) would fight the shrink and leave it hanging mid-air
+            if (rig.Moves.Remove(gone, out var mv) && GodotObject.IsInstanceValid(mv)) mv.Kill();
+            if (!GodotObject.IsInstanceValid(node)) continue;
             var t = node.CreateTween().SetParallel();
             t.TweenProperty(node, "position", SpawnPos, 0.4).SetTrans(Tween.TransitionType.Quad);
             t.TweenProperty(node, "modulate:a", 0f, 0.4);
@@ -201,6 +223,7 @@ public static partial class SwordVisuals
 
         var previous = rig.Current;
         rig.Current = state.Current;
+        AssignSlots(rig, previous);
         Layout(rig, appeared);
         ApplyPalmCircles(player, state.Current);
         PlaySyncFx(rig, appeared, previous);
@@ -227,85 +250,107 @@ public static partial class SwordVisuals
     private const string BornMeta = "ms_fx_born";
 
     /// <summary>
-    /// Sends every sword to its resting place: the current sword to the front-right slot, the others to the idle
-    /// slots around him (behind the body), Onimaru to the pose of its stance (<see cref="OnimaruPose"/>).
+    /// Keeps each idle sword in the slot it already holds (bug report 2026-10-15 "환검 쓰면 검들의 위치가 이상하게 꼬이는
+    /// 버그"). The old layout handed out the idle slots in sword order every time, so one switch re-seated every sword:
+    /// several flew across each other at once, and with five or more idle swords two of them shared slot 0. Now the new
+    /// current sword leaves its slot, the previous current sword takes exactly that slot (the two trade places), and a
+    /// newly summoned sword takes the first free slot.
+    /// </summary>
+    private static void AssignSlots(Rig rig, SwordId? previous)
+    {
+        foreach (var s in rig.SlotIndex.Keys.Where(s => !rig.Swords.ContainsKey(s)).ToList()) rig.SlotIndex.Remove(s);
+        int? vacated = null;
+        if (rig.Current is { } cur && rig.SlotIndex.Remove(cur, out var v)) vacated = v;
+        if (previous is { } prev && prev != rig.Current && rig.Swords.ContainsKey(prev) && !rig.SlotIndex.ContainsKey(prev) &&
+            vacated is { } vac && !rig.SlotIndex.ContainsValue(vac))
+            rig.SlotIndex[prev] = vac;
+        FillSlots(rig);
+    }
+
+    /// <summary>Every non-current sword without a slot takes the lowest free one (in sword order).</summary>
+    private static void FillSlots(Rig rig)
+    {
+        if (rig.Current is { } cur) rig.SlotIndex.Remove(cur);
+        foreach (var sword in rig.Swords.Keys.OrderBy(k => (int)k))
+        {
+            if (sword == rig.Current || rig.SlotIndex.ContainsKey(sword)) continue;
+            var i = 0;
+            while (rig.SlotIndex.ContainsValue(i)) i++;
+            rig.SlotIndex[sword] = i;
+        }
+    }
+
+    /// <summary>
+    /// Sends every sword to its resting place: the current sword to the front-right slot, the others to the idle slot
+    /// they hold (<see cref="AssignSlots"/>). Onimaru floats in a slot like every other sword; its stance only tilts it
+    /// a little (<see cref="OnimaruTilt"/>).
     /// <paramref name="fresh"/>: swords summoned this very sync rise slowly to their place (SwordFx.Summon).
     /// <paramref name="only"/>: a choreography (strike, guard, union) handing one sword back — the others are left
-    /// alone so a sword still in flight is not yanked home.
+    /// alone so a sword still in flight is not yanked home. Handing back also ends that sword's "in flight" marks, so the
+    /// next full layout moves it again.
     /// </summary>
     private static void Layout(Rig rig, ICollection<SwordId>? fresh = null, SwordId? only = null)
     {
         if (rig.Dead) return;
-        var slot = 0;
+        FillSlots(rig);
+        var now = Time.GetTicksMsec();
         foreach (var (sword, node) in rig.Swords.OrderBy(kv => (int)kv.Key))
         {
             if (!GodotObject.IsInstanceValid(node)) continue;
             var isCurrent = rig.Current == sword;
-            var stance = sword == SwordId.Onimaru ? OnimaruPose(rig.Player, isCurrent) : null;
-            var pos = stance?.Pos ?? (isCurrent ? CurrentPos : IdleSlots[slot++ % IdleSlots.Length]);
+            var pos = isCurrent ? CurrentPos : IdleSlot(rig.SlotIndex.TryGetValue(sword, out var si) ? si : 0);
+            var tilt = sword == SwordId.Onimaru ? OnimaruTilt(rig.Player) : 0f;
             rig.Slots[sword] = pos;
             if (only != null && only != sword) continue;
+            if (only != null)
+            {
+                GuardAt.Remove(node);
+                if (node.HasMeta(StrikeUntilMeta)) node.SetMeta(StrikeUntilMeta, 0UL);
+            }
             // a full re-layout (Sync) leaves a sword in the middle of a choreography alone: its own end calls
             // Layout(only: it), which reads the slot computed here
             if (only == null && (IsUnionBusy(node) || InFlight(node))) continue;
             if (rig.Moves.TryGetValue(sword, out var old) && GodotObject.IsInstanceValid(old)) old.Kill();
-            var born = fresh?.Contains(sword) == true;
-            var dur = born ? 0.85 : 0.4;
+            // summoned a moment ago and still rising (e.g. 환검 summoning a sword and switching to it right away): keep
+            // the slow summon glide for the rest of the way instead of snapping across in 0.4 s
+            var isFresh = fresh?.Contains(sword) == true;
+            var age = node.HasMeta(BornMeta) ? now - (ulong)node.GetMeta(BornMeta) : ulong.MaxValue;
+            var born = isFresh || age < 700;
+            var dur = isFresh ? 0.85 : born ? Math.Max(0.45, 0.85 - age / 1000.0) : 0.4;
             var t = node.CreateTween().SetParallel();
             rig.Moves[sword] = t;
             if (born)
                 t.TweenProperty(node, "position", pos, dur).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
             else
                 t.TweenProperty(node, "position", pos, dur).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
-            var scale = stance?.Scale ?? (isCurrent ? 1.15f : 0.85f);
+            var scale = isCurrent ? 1.15f : 0.85f;
             t.TweenProperty(node, "scale", new Vector2(scale, scale), dur * 0.8);
-            t.TweenProperty(node, "rotation", stance?.Rot ?? 0f, dur * 0.8).SetTrans(Tween.TransitionType.Sine);
+            t.TweenProperty(node, "rotation", tilt, dur * 0.8).SetTrans(Tween.TransitionType.Sine);
             t.TweenProperty(node, "modulate", isCurrent ? Colors.White : new Color(0.82f, 0.82f, 0.88f, 0.95f), dur * 0.8);
-            node.ZIndex = stance?.Z ?? (isCurrent ? ZFront : ZBack);
-            if (stance?.Orbit == true) t.Chain().TweenCallback(Callable.From(() => StartRanbuOrbit(rig, sword, node)));
+            node.ZIndex = isCurrent ? ZFront : ZBack;
         }
     }
 
     /// <summary>
-    /// Onimaru's resting pose by stance (user request 2026-10-10 "오니마루는 자세마다 소환되어서 있는 모션이나 위치, 각도
-    /// 등등을 좀 바꿔줘"): 호위 stands guard in front of him, 거합 rests at his hip like a sheathed blade, 퇴마 is raised
-    /// high point up, 베기 is held level pointing at the enemy, 난무 circles him quickly (<see cref="StartRanbuOrbit"/>).
-    /// Art points up, so rotation is the angle of the tip from "up", clockwise. A stance change re-runs Layout
-    /// (OnimaruAttack.SetKind calls Sync), which tweens the katana from the old pose to the new one.
+    /// Onimaru's stance shows only as a slight lean of the floating katana (user request 2026-10-15 "오니마루도 다른 검들처럼
+    /// 부유하고 있게 해줘. 허리 쪽에 있게 하지 말고": no more hip / overhead / level / orbiting poses — it floats in a slot and
+    /// bobs like the others). 거합 leans back like a blade about to be drawn, 베기 leans its point toward the enemy, 난무 a
+    /// restless slant, 퇴마 stands straight, 호위 barely tilts back. Art points up, so this is the angle of the tip from
+    /// "up", clockwise. A stance change re-runs Layout (OnimaruAttack.SetKind calls Sync), which eases it to the new lean.
     /// </summary>
-    private static (Vector2 Pos, float Rot, float Scale, int Z, bool Orbit)? OnimaruPose(Player player, bool isCurrent)
+    private static float OnimaruTilt(Player player)
     {
         OnimaruKind kind;
         try { kind = OnimaruAttack.GetKind(player); }
         catch (Exception) { kind = OnimaruKind.Iai; }
-        var k = isCurrent ? 1.12f : 1f;
         return kind switch
         {
-            OnimaruKind.Goei => (new Vector2(70, -225), 0f, 1.1f * k, ZFront, false),
-            OnimaruKind.Taima => (new Vector2(70, -575), 0f, 1f * k, ZBack, false),
-            OnimaruKind.Giri => (new Vector2(215, -350), Mathf.Pi / 2, 0.95f * k, ZFront, false),
-            OnimaruKind.Ranbu => (RanbuAt(0f), RanbuRot(0f), 0.85f * k, ZFront, true),
-            _ => (new Vector2(30, -165), -1.95f, 0.9f * k, ZFront, false), // Iai: hilt forward, blade back and down
+            OnimaruKind.Goei => -0.05f,
+            OnimaruKind.Taima => 0f,
+            OnimaruKind.Giri => 0.2f,
+            OnimaruKind.Ranbu => 0.11f,
+            _ => -0.15f, // Iai
         };
-    }
-
-    private static readonly Vector2 RanbuCenter = new(0, -255);
-    private static Vector2 RanbuAt(float th) => RanbuCenter + new Vector2(Mathf.Cos(th) * 215f, Mathf.Sin(th) * 70f);
-    // blade along the direction of travel
-    private static float RanbuRot(float th) => PointAt(RanbuAt(th), RanbuAt(th + 0.1f));
-
-    /// <summary>난무: Onimaru circles him fast, passing in front of and behind the body.</summary>
-    private static void StartRanbuOrbit(Rig rig, SwordId sword, Node2D node)
-    {
-        if (rig.Dead || !GodotObject.IsInstanceValid(node)) return;
-        var t = node.CreateTween().SetLoops();
-        rig.Moves[sword] = t;
-        t.TweenMethod(Callable.From<float>(th =>
-        {
-            node.Position = RanbuAt(th);
-            node.Rotation = RanbuRot(th);
-            node.ZIndex = Mathf.Sin(th) > 0 ? ZFront : ZBack; // lower half of the ellipse = nearer the camera
-        }), 0f, Mathf.Tau, 1.3);
     }
 
     private static Rig? GetRig(Player player, bool create)
@@ -591,10 +636,15 @@ public static partial class SwordVisuals
 
     private static readonly Dictionary<Node2D, ulong> LastStrike = new();
 
-    /// <summary>A strike (until it ends) / Onimaru attack (0.45 s) or a guard (0.6 s) is moving this sword right now.</summary>
+    /// <summary>
+    /// A strike, an Onimaru attack, a guard or a guard break is moving this sword right now. Each choreography ends by
+    /// handing the sword back (Layout(only)), which clears its mark; the time limits are only a safety net for a
+    /// choreography whose tween was killed. (These used to be fixed windows — 0.45 s after a strike, 0.8 s after a guard
+    /// — that did not match the real lengths, so a Sync could skip a sword that had already gone home, or run while it
+    /// was still on its way, and leave it in its old slot after a switch.)
+    /// </summary>
     private static bool InFlight(Node2D node) =>
-        IsStriking(node) || (LastStrike.TryGetValue(node, out var t0) && Time.GetTicksMsec() - t0 < 450) ||
-        (GuardAt.TryGetValue(node, out var g0) && Time.GetTicksMsec() - g0 < 800);
+        IsStriking(node) || (GuardAt.TryGetValue(node, out var g0) && Time.GetTicksMsec() < g0);
 
     // Strike(): SwordVisuals.Strikes.cs
 
