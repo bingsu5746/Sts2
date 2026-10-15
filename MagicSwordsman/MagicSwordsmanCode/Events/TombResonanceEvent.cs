@@ -136,7 +136,7 @@ public sealed class TombResonanceEvent : CustomEventModel
                 var option = new EventOption(this, () => ChooseSword(s), SwordLore.Name(s),
                     SwordEventHelper.OptionDescription(s, tomb), $"{PageKey(StartPage)}.options.SWORD_{SwordLore.SwordKey(s)}",
                     // + the 【조합】 cards this sword would complete with the swords already owned (discovery)
-                    [HoverTipFactory.FromCard(SwordTokenCard.CanonicalFor(s)), ..Cards.Union.UnionCatalog.TipsIfAcquired(tomb, s)]);
+                    [HoverTipFactory.FromCard(SwordTokenCard.EventCardFor(s)), ..Cards.Union.UnionCatalog.TipsIfAcquired(tomb, s)]);
                 options.Add(option);
             }
         }
@@ -283,7 +283,7 @@ public sealed class TombResonanceEvent : CustomEventModel
             body.Add("Slots", SwordRegistry.GroupSlotCost(o));
             options.Add(new EventOption(this, () => PickRelease(newSword, pending, o), title, body,
                 $"{PageKey("RELEASE")}.options.SWORD_{SwordLore.SwordKey(o)}",
-                [HoverTipFactory.FromCard(SwordTokenCard.CanonicalFor(o))]));
+                [HoverTipFactory.FromCard(SwordTokenCard.EventCardFor(o))]));
         }
 
         options.Add(new EventOption(this, BackToStart, $"{PageKey("RELEASE")}.options.BACK"));

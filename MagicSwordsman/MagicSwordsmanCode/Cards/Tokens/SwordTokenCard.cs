@@ -95,10 +95,16 @@ public abstract class SwordTokenCard : ChoiceTokenCard
         SwordId.Caladbolg => ModelDb.Card<CaladbolgToken>(),
         _ => throw new ArgumentOutOfRangeException(nameof(sword), sword, "No token card for this sword"),
     };
+
+    /// <summary>Token shown when a sword is offered in an event: 간장·막야 come as a pair, so their offer shows both
+    /// swords (<see cref="GanjiangMoyeToken"/>); the Ganjiang token alone stays for swap/forge screens.</summary>
+    public static CardModel EventCardFor(SwordId sword) =>
+        sword is SwordId.Ganjiang or SwordId.Moye ? ModelDb.Card<GanjiangMoyeToken>() : CanonicalFor(sword);
 }
 
 public sealed class GramToken : SwordTokenCard { public override SwordId Sword => SwordId.Gram; }
 public sealed class GanjiangToken : SwordTokenCard { public override SwordId Sword => SwordId.Ganjiang; }
+public sealed class GanjiangMoyeToken : SwordTokenCard { public override SwordId Sword => SwordId.Ganjiang; }
 public sealed class MoyeToken : SwordTokenCard { public override SwordId Sword => SwordId.Moye; }
 public sealed class KusanagiToken : SwordTokenCard { public override SwordId Sword => SwordId.Kusanagi; }
 public sealed class TyrfingToken : SwordTokenCard { public override SwordId Sword => SwordId.Tyrfing; }
