@@ -122,7 +122,7 @@ public sealed class TombResonanceEvent : CustomEventModel
             {
                 var s = sword;
                 var option = new EventOption(this, () => ChooseSword(s), SwordLore.Name(s),
-                    SwordEventHelper.OptionDescription(s), $"{PageKey(StartPage)}.options.SWORD_{SwordLore.SwordKey(s)}",
+                    SwordEventHelper.OptionDescription(s, tomb), $"{PageKey(StartPage)}.options.SWORD_{SwordLore.SwordKey(s)}",
                     // + the 【조합】 cards this sword would complete with the swords already owned (discovery)
                     [HoverTipFactory.FromCard(SwordTokenCard.CanonicalFor(s)), ..Cards.Union.UnionCatalog.TipsIfAcquired(tomb, s)]);
                 options.Add(option);
@@ -135,10 +135,12 @@ public sealed class TombResonanceEvent : CustomEventModel
         }
         else if (IsDeep && tomb != null)
         {
+            // Exactly ONE exit row (2026-10-15: with 3 swords + a locked FORGO + PASS the last row was cut off at the bottom
+            // of the screen in act 3): FORGO while a sword can still be upgraded, otherwise PASS.
             var canForge = SwordForge.UpgradeableSwords(tomb).Count > 0;
-            options.Add(new EventOption(this, canForge ? Forgo : (Func<Task>?)null, $"{PageKey(StartPage)}.options.FORGO"));
-            // Every sword already at level 5: FORGO is locked, keep a way out.
-            if (!canForge) options.Add(new EventOption(this, Pass, $"{PageKey(StartPage)}.options.PASS"));
+            options.Add(canForge
+                ? new EventOption(this, Forgo, $"{PageKey(StartPage)}.options.FORGO")
+                : new EventOption(this, Pass, $"{PageKey(StartPage)}.options.PASS"));
         }
         else
         {

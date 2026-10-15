@@ -64,12 +64,22 @@ public static class SwordEventHelper
         return await SwordAcquisition.AcquireWithRelease(player, tomb, sword, choiceContext, offerCardPick);
     }
 
-    /// <summary>"{Tagline}\n대가: {Cost}" — description of a sword button (content doc §6.1 / §6.3).</summary>
-    public static LocString OptionDescription(SwordId sword)
+    /// <summary>
+    /// "{Effect} · 대가 {Cost}" — ONE line under a sword button (2026-10-15: the old two-line "tagline + cost" made the
+    /// act-3 page overflow; the full effect and cost stay in the button's token hover tip). Numbers of a new (level 0)
+    /// sword. 간장·막야's first-time Max HP price keeps its lore line.
+    /// </summary>
+    public static LocString OptionDescription(SwordId sword, Mangeomchong? tomb)
     {
         var desc = SwordLore.Generic("OPTION");
-        desc.Add("Tagline", SwordLore.Line(sword, "TAGLINE"));
-        desc.Add("Cost", SwordLore.Line(sword, "COST"));
+        var effect = SwordEffectText.FirstLine(SwordEffectText.Effect(sword, null, 0));
+        if (sword == SwordId.Ganjiang)
+            effect += " / " + SwordEffectText.FirstLine(SwordEffectText.Effect(SwordId.Moye, null, 0));
+        desc.Add("Effect", effect);
+        if (sword == SwordId.Ganjiang && tomb != null && CostsMaxHp(tomb, sword))
+            desc.Add("Cost", SwordLore.Line(sword, "COST"));
+        else
+            desc.Add("Cost", SwordEffectText.Cost(sword, tomb?.Owner, 0));
         return desc;
     }
 

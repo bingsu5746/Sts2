@@ -111,7 +111,8 @@ public static class SwordAcquiredPopup
         var origin = MakeLabel(Text(SwordLore.Line(sword, "ORIGIN")), 18, new Color(0.85f, 0.82f, 0.75f));
         col.AddChild(origin);
         col.AddChild(new HSeparator { MouseFilter = Control.MouseFilterEnum.Ignore });
-        AddEntry(col, Lore("POPUP_EFFECT"), Text(SwordLore.Line(sword, "EFFECT")), accent);
+        // the effect with the numbers of a newly acquired (level 0) sword, no per-level explanation (2026-10-15)
+        AddEntry(col, Lore("POPUP_EFFECT"), SwordEffectText.Plain(SwordEffectText.Effect(sword, null, 0, withPartner: true)), accent);
         // 간장·막야 as the random first sword: its Max HP cost is waived (사용자 결정 2026-10-09)
         var costKey = headerKey == "POPUP_HEADER_FIRST" && sword == SwordId.Ganjiang ? "COST_START" : "COST";
         AddEntry(col, Lore("POPUP_COST"), Text(SwordLore.Line(sword, costKey)), new Color(0.9f, 0.4f, 0.4f));

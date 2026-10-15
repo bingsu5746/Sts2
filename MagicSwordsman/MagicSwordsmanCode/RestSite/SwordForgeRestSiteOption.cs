@@ -56,7 +56,8 @@ public sealed class SwordForgeRestSiteOption(Player owner) : CustomRestSiteOptio
                 $"{MainFile.ResPath}/images/relics/big/mangeomchong.png", new Godot.Color(0.62f, 0.45f, 0.95f),
                 candidates.Select(c => new EventChoiceScreen.Option(
                     $"{SwordLore.NameText(c)} — {LevelText(relic.GetLevel(c))} {Text(SwordLore.StageName(c, relic.GetLevel(c)))}",
-                    WithMastery(Text(SwordLore.Line(c, "EFFECT")), SwordMastery.ForgeLine(relic, c)))).ToList(),
+                    WithMastery(SwordEffectText.Effect(c, Owner, relic.GetLevel(c), withPartner: true),
+                        SwordMastery.ForgeLine(relic, c)))).ToList(),
                 Ui("BACK"));
             if (swordIdx < 0 || swordIdx >= candidates.Count) return false;
             var sword = candidates[swordIdx];

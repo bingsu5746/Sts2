@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
@@ -53,7 +54,23 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         new DynamicVar("AutoBlock", 0m),
         new DynamicVar("AutoWeak", 0m),
         new DynamicVar("IaiBonus", 0m),
+        new StringVar(TextVar, ""),
+        new StringVar(WildVar, ""),
     ];
+
+    /// <summary>
+    /// {Text}: the current sword's effect + cost with live numbers (Swords/SwordEffectText, user request 2026-10-15:
+    /// no per-level explanations in the UI). {Wild}: Onimaru's "normal fights: 25% another stance" line ("" in
+    /// elite/boss fights).
+    /// </summary>
+    private const string TextVar = "Text";
+    private const string WildVar = "Wild";
+
+    /// <summary>망령 상흔 tip while Skofnung's effect runs (current, or inherited by Kusanagi).</summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        OwnerPlayer is { } p && DurandalBehavior.IsSwordEffectActive(p, SwordId.Skofnung, out _)
+            ? [HoverTipFactory.FromPower<SkofnungWoundPower>()]
+            : [];
 
     private Player? OwnerPlayer => IsMutable ? Owner?.Player : null;
 
@@ -172,6 +189,8 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
             : null;
         if (DynamicVars[InheritedNameVar] is StringVar inh)
             inh.StringValue = inherited != null ? SwordRegistry.DisplayName(inherited.Value) : "-";
+        if (DynamicVars[TextVar] is StringVar text) text.StringValue = ComputedText(player, sword, level);
+        if (DynamicVars[WildVar] is StringVar wild) wild.StringValue = SwordEffectText.OnimaruWildLine(player);
         if (player != null && StanceKind() is { } kind)
         {
             var n = OnimaruAttack.Compute(player, kind);
@@ -182,6 +201,9 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
             DynamicVars["IaiBonus"].BaseValue = OnimaruAttack.IaiBonus(player);
         }
     }
+
+    private static string ComputedText(Player? player, SwordId? sword, int level) =>
+        sword is { } s ? SwordEffectText.Full(s, player, level) : "";
 
     private string SwordKey(SwordId sword, string field) => $"{Id.Entry}.{sword.ToString().ToUpperInvariant()}.{field}";
 
@@ -203,6 +225,8 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         loc.Add("AutoBlock", n.Block);
         loc.Add("AutoWeak", n.Weak);
         loc.Add("IaiBonus", player != null ? OnimaruAttack.IaiBonus(player) : 0);
+        loc.Add(TextVar, ComputedText(player, sword, level));
+        loc.Add(WildVar, SwordEffectText.OnimaruWildLine(player));
     }
 
     /// <summary>Called after a switch so the icon number / tooltip update.</summary>
