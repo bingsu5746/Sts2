@@ -232,6 +232,8 @@ public static class OnimaruAttack
     {
         var creature = player.Creature;
         if (!creature.IsAlive || creature.CombatState is not { } combatState) return;
+        // Onimaru only acts while it is actually out (emerged / summoned, not returned to the vault).
+        if (!SwordCombat.IsPresent(player, SwordId.Onimaru)) return;
         var n = Compute(player, kind, assumeCurrent);
         var rng = player.RunState.Rng.CombatTargets;
 

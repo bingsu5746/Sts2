@@ -326,8 +326,12 @@ public static class SwordCombat
     public static void Emerge(Player player, SwordId sword)
     {
         var state = GetOrCreate(player);
-        state?.Present.Add(sword);
+        if (state == null || !state.Present.Add(sword)) return;
+        // Presentation: it visibly comes out (Sync plays SwordFx.Summon for a newly present sword) with a summon
+        // gesture, so the player sees Onimaru arrive before its first auto attack (user report #20).
         SwordVisuals.Sync(player);
+        MotionDirector.OnSummoned(player, sword);
+        MainFile.Logger.Info($"[Sword] {player.NetId}: {sword} emerges on its own at combat start");
     }
 
     /// <summary>

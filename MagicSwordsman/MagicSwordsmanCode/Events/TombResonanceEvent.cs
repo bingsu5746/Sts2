@@ -6,6 +6,7 @@ using MagicSwordsman.MagicSwordsmanCode.Visuals;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Events;
+using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.HoverTips;
@@ -23,7 +24,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Events;
 /// Started by <see cref="TombResonanceTrigger"/> right after the next act is entered (never from the ? room pool:
 /// autoAdd false + IsAllowed false). One event class, two texts: the act index picks the INITIAL / DEEP page.
 /// Options: 3 random unowned swords (button = name, one-line intro, cost); a 4th exit:
-///   act 1 -> PASS ("부르지 않는다", 25 gold), act 2 -> FORGO (safe +1 on an owned sword).
+///   act 1 -> PASS ("부르지 않는다", a random relic since 2026-10-15), act 2 -> FORGO (safe +1 on an owned sword).
 /// 간장·막야 (first time) asks for confirmation (Max HP -6, paid by GanjiangBehavior.OnAcquired).
 /// When Mangeomchong is full the player releases a sword first (SwordEventHelper.Acquire); cancelling returns here.
 /// A per-act run counter on Mangeomchong marks the event as done so the trigger does not repeat it.
@@ -75,8 +76,18 @@ public sealed class TombResonanceEvent : CustomEventModel
     public override LocString InitialDescription =>
         IsMutable && Owner != null ? StartDescription() : base.InitialDescription;
 
+    /// <summary>
+    /// Run start (user report #4): the first sword is hidden until the player presses "첫 검을 깨운다", which plays the
+    /// roulette (Visuals/SwordRoulette) landing on the sword Mangeomchong already rolled with the run seed.
+    /// Per event instance: a reload shows the button (and the same sword) again.
+    /// </summary>
+    private bool _firstSwordRevealed;
+
+    private bool IsSealedStart => IsStart && !_firstSwordRevealed;
+
     private LocString StartDescription()
     {
+        if (IsSealedStart) return L10NLookup($"{PageKey("START_SEALED")}.description");
         var desc = L10NLookup($"{PageKey(StartPage)}.description");
         var tomb = SwordEventHelper.Tomb(Owner!);
         var full = tomb != null && _candidates.Count > 0 && !_candidates.Any(tomb.CanAcquire);
@@ -100,13 +111,8 @@ public sealed class TombResonanceEvent : CustomEventModel
             // The event Rng is seeded only by run seed + event id, so mix in the act: act 1 and act 2 roll differently.
             var rng = new Rng(Rng.Seed, $"tomb_resonance_act{ActIndex}");
             _candidates = SwordEventHelper.Roll(tomb, CandidateCount, rng);
-
-            // Run start: introduce the random first sword with the same "new sword" popup an acquisition shows
-            // (presentation only, local player only, header "가장 먼저 깨어난 마검").
-            if (IsStart && !isPreFinished && tomb.GetRunCounter(DoneKey(0)) == 0 && LocalContext.IsMe(Owner) &&
-                FirstSword(tomb) is { } first)
-                SwordAcquiredPopup.Show(first, "POPUP_HEADER_FIRST");
         }
+        _firstSwordRevealed = false;
 
         return Task.CompletedTask;
     }
@@ -115,6 +121,12 @@ public sealed class TombResonanceEvent : CustomEventModel
     {
         var options = new List<EventOption>();
         var tomb = Owner != null ? SwordEventHelper.Tomb(Owner) : null;
+
+        if (IsSealedStart && tomb != null && FirstSword(tomb) != null)
+        {
+            options.Add(new EventOption(this, RevealFirstSword, $"{PageKey("START_SEALED")}.options.AWAKEN"));
+            return options;
+        }
 
         if (tomb != null)
         {
@@ -149,6 +161,23 @@ public sealed class TombResonanceEvent : CustomEventModel
     }
 
     private void ShowStart() => SetEventState(InitialDescription, GenerateInitialOptionsWrapper());
+
+    /// <summary>
+    /// "첫 검을 깨운다": roulette (local player only, presentation) -> the "new sword" popup (header "가장 먼저 깨어난
+    /// 마검") -> the usual 1-of-3 page. The sword itself was granted at run creation with the seeded roll; nothing here
+    /// touches an Rng or the run state, so every client stays in sync.
+    /// </summary>
+    private async Task RevealFirstSword()
+    {
+        _firstSwordRevealed = true;
+        var tomb = Owner != null ? SwordEventHelper.Tomb(Owner) : null;
+        if (tomb != null && FirstSword(tomb) is { } first && LocalContext.IsMe(Owner))
+        {
+            await SwordRoulette.Play(first);
+            SwordAcquiredPopup.Show(first, "POPUP_HEADER_FIRST");
+        }
+        ShowStart();
+    }
 
     private Task ChooseSword(SwordId sword)
     {
@@ -282,7 +311,9 @@ public sealed class TombResonanceEvent : CustomEventModel
 
     private async Task Pass()
     {
-        await PlayerCmd.GainGold(DynamicVars[PassGoldVar].BaseValue, Owner!);
+        // User report #42 (25 gold was too weak): a random relic instead, rarity rolled by the game like the
+        // relic events (RoundTeaParty / UnrestSite: RelicFactory.PullNextRelicFromFront + RelicCmd.Obtain).
+        await RelicCmd.Obtain(RelicFactory.PullNextRelicFromFront(Owner!).ToMutable(), Owner!);
         MarkDone();
         SetEventFinished(L10NLookup($"{PageKey("PASS")}.description"));
     }
