@@ -232,7 +232,10 @@ public static class OnimaruAttack
     {
         var creature = player.Creature;
         if (!creature.IsAlive || creature.CombatState is not { } combatState) return;
+        // Onimaru only acts while it is actually out (emerged / summoned, not returned to the vault).
+        if (!SwordCombat.IsPresent(player, SwordId.Onimaru)) return;
         var n = Compute(player, kind, assumeCurrent);
+        n = n with { PerHit = WithEnchantment(n.PerHit, source) };
         var rng = player.RunState.Rng.CombatTargets;
 
         if (kind == OnimaruKind.Goei)
@@ -275,6 +278,22 @@ public static class OnimaruAttack
                 await CreatureCmd.Damage(choiceContext, enemies, n.PerHit, ValueProp.Unpowered, creature, source);
                 break;
         }
+    }
+
+    /// <summary>
+    /// The card's enchantment (예리 = game Sharp: +N, Corrupted ×1.5, ...) applied to each hit of an attack the card
+    /// commands. The hits are ValueProp.Unpowered (Strength/Vulnerable do not apply, content doc 0.4 #13), and every
+    /// game enchantment ignores unpowered damage in Hook.ModifyDamage, so without this an enchanted Onimaru card got
+    /// nothing from its enchantment (user question #18). Evaluated as a powered attack here, exactly once per hit; the
+    /// game's own pass still adds nothing (Unpowered), so nothing is counted twice. Auto attacks (no card) unchanged.
+    /// </summary>
+    private static int WithEnchantment(int perHit, CardModel? source)
+    {
+        if (perHit <= 0 || source?.Enchantment is not { } enchantment) return perHit;
+        decimal dmg = perHit;
+        dmg += enchantment.EnchantDamageAdditive(dmg, ValueProp.Move);
+        dmg *= enchantment.EnchantDamageMultiplicative(dmg, ValueProp.Move);
+        return (int)Math.Max(0m, dmg);
     }
 
     /// <summary>Presentation only (never throws): the katana flies at the targets and Ensifer gestures the command.</summary>

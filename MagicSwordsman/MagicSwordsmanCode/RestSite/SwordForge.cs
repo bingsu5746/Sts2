@@ -7,7 +7,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.RestSite;
 
 public enum ForgeMode
 {
-    Safe,        // 안전 강화: +1 guaranteed
+    Safe,        // 안전 강화: +1, a roll since 2026-10-15 (failure = no change, never shatters)
     GamblePlus2, // 도박 강화 +2
     GamblePlus3, // 도박 강화 +3
 }
@@ -41,7 +41,13 @@ public interface ISwordForgeModifier
 
 /// <summary>
 /// Pure rules of the rest-site "마검 강화" (spec §4). UI lives in <see cref="SwordForgeRestSiteOption"/>.
-/// Odds are [임시] values from the spec: +2 = 65/32/3, +3 = 40/52/8 (percent).
+/// Odds (user decision 2026-10-15): every mode gets harder as the sword's CURRENT level rises, no mode is certain
+/// (안전 강화 is a roll too; its failure changes nothing) and reaching level 5 is never guaranteed.
+/// Percent success / failure / shatter by current level:
+///   안전 +1 : L0 95/5/0   L1 85/15/0  L2 75/25/0  L3 50/50/0  L4 25/75/0
+///   도박 +2 : L0 60/37/3  L1 50/45/5  L2 40/53/7  L3 20/68/12
+///   도박 +3 : L0 35/55/10 L1 25/63/12 L2 15/72/13
+/// Gambles that would pass level 5 are not offered. A failed gamble = curse or level -1 (50:50; curse at level 0).
 /// </summary>
 public static class SwordForge
 {
@@ -53,19 +59,32 @@ public static class SwordForge
         _ => 1,
     };
 
-    public static ForgeOdds OddsFor(ForgeMode mode) => mode switch
-    {
-        ForgeMode.Safe => new ForgeOdds(100, 0, 0),
-        ForgeMode.GamblePlus2 => new ForgeOdds(65, 32, 3),
-        ForgeMode.GamblePlus3 => new ForgeOdds(40, 52, 8),
-        _ => new ForgeOdds(100, 0, 0),
-    };
+    private static readonly ForgeOdds[] SafeOdds =
+        [new(95, 5, 0), new(85, 15, 0), new(75, 25, 0), new(50, 50, 0), new(25, 75, 0)];
 
-    /// <summary>Odds for this player and sword, after every relic's <see cref="ISwordForgeModifier"/>.</summary>
+    private static readonly ForgeOdds[] Gamble2Odds =
+        [new(60, 37, 3), new(50, 45, 5), new(40, 53, 7), new(20, 68, 12)];
+
+    private static readonly ForgeOdds[] Gamble3Odds =
+        [new(35, 55, 10), new(25, 63, 12), new(15, 72, 13)];
+
+    /// <summary>Base odds of <paramref name="mode"/> for a sword currently at <paramref name="currentLevel"/>.</summary>
+    public static ForgeOdds OddsFor(ForgeMode mode, int currentLevel = 0)
+    {
+        var table = mode switch
+        {
+            ForgeMode.GamblePlus2 => Gamble2Odds,
+            ForgeMode.GamblePlus3 => Gamble3Odds,
+            _ => SafeOdds,
+        };
+        return table[Math.Clamp(currentLevel, 0, table.Length - 1)];
+    }
+
+    /// <summary>Odds for this player and sword (at its current level), after every relic's <see cref="ISwordForgeModifier"/>.</summary>
     public static ForgeOdds OddsFor(Player player, SwordId sword, ForgeMode mode)
     {
-        var odds = OddsFor(mode);
-        if (mode == ForgeMode.Safe) return odds; // 안전 강화 is always certain
+        var level = player.GetRelic<Mangeomchong>()?.GetLevel(SwordRegistry.GroupLeader(sword)) ?? 0;
+        var odds = OddsFor(mode, level);
         foreach (var modifier in Modifiers(player))
             odds = modifier.ModifyForgeOdds(player, sword, mode, odds);
         return odds;
@@ -106,7 +125,11 @@ public static class SwordForge
         }
 
         if (roll < odds.Success + odds.Failure)
+        {
+            // 안전 강화 failing costs nothing: the level stays (FailureNothing result text "단계는 그대로다").
+            if (mode == ForgeMode.Safe) return new ForgeOutcome(ForgeOutcomeKind.FailureNothing, sword, oldLevel, oldLevel);
             return await ApplyFailure(player, relic, sword, oldLevel, rng);
+        }
 
         // shatter (a relic may turn it into a normal failure: 흑칠 칼집)
         foreach (var modifier in Modifiers(player))
@@ -123,6 +146,21 @@ public static class SwordForge
 
         await relic.LoseSword(sword);
         return new ForgeOutcome(ForgeOutcomeKind.Shatter, sword, oldLevel, 0);
+    }
+
+    /// <summary>
+    /// Event reward "보유 검 하나 +1" (비문 / 공명 events): certain below level 4, but 4 -> 5 is never guaranteed (user
+    /// decision 2026-10-15), so at level 4 it is a 안전 강화 roll (25%, failure = no change).
+    /// </summary>
+    public static async Task<ForgeOutcome> ApplyEventUpgrade(Player player, SwordId sword, Rng rng)
+    {
+        var relic = player.GetRelic<Mangeomchong>() ??
+                    throw new InvalidOperationException("SwordForge requires Mangeomchong");
+        sword = SwordRegistry.GroupLeader(sword);
+        var oldLevel = relic.GetLevel(sword);
+        if (oldLevel >= SwordRegistry.MaxLevel - 1) return await Apply(player, sword, ForgeMode.Safe, rng);
+        await relic.SetLevel(sword, oldLevel + 1);
+        return new ForgeOutcome(ForgeOutcomeKind.Success, sword, oldLevel, oldLevel + 1);
     }
 
     /// <summary>
