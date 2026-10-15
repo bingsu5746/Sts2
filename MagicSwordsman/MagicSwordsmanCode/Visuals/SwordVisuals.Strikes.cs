@@ -338,7 +338,8 @@ public static partial class SwordVisuals
     private static Node2D? BladeCopy(Node2D node)
     {
         if (node.GetNodeOrNull<Node2D>("Blade") is not { } blade) return null;
-        var ghost = new Node2D { Position = node.Position, Rotation = node.Rotation, Scale = node.Scale };
+        // the blade's own scale is the level size (SwordVisuals.Level.cs)
+        var ghost = new Node2D { Position = node.Position, Rotation = node.Rotation, Scale = node.Scale * blade.Scale };
         foreach (var child in blade.GetChildren())
             if (child is Sprite2D sp && sp.Name != "Aura")
                 ghost.AddChild(new Sprite2D
@@ -360,7 +361,7 @@ public static partial class SwordVisuals
         if (BladeCopy(c.Node) is not { } g) return;
         g.Position = from;
         g.Rotation = PointAt(from, to);
-        g.Scale = Vector2.One * 1.1f;
+        g.Scale = Vector2.One * 1.1f * (g.Scale.X / Math.Max(0.01f, c.Node.Scale.X)); // keeps the level size
         g.ZIndex = ZFlying;
         g.Modulate = new Color(tint, 0f);
         g.Material = new CanvasItemMaterial { BlendMode = CanvasItemMaterial.BlendModeEnum.Add };

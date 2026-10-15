@@ -38,6 +38,8 @@ public static partial class SwordFx
         try
         {
             Sfx.Summon(sword);
+            var level = Math.Clamp((int)swordNode.GetMeta("level", 2), 0, 5);
+            var before = new HashSet<Node>(rigRoot.GetChildren());
             var modes = SummonModesOf(sword);
             switch (modes[SummonRng.Next(modes.Length)])
             {
@@ -47,6 +49,12 @@ public static partial class SwordFx
                 case SummonMode.Tomb: SummonTomb(rigRoot, swordNode, sword, slot); break;
                 default: SummonRise(rigRoot, swordNode, sword, slot); break;
             }
+            // the low levels arrive more quietly: the mode's own effects are dimmed
+            if (level < 3)
+                foreach (var n in rigRoot.GetChildren())
+                    if (!before.Contains(n) && n is Node2D fxNode && n != swordNode)
+                        fxNode.Modulate = new Color(1, 1, 1, 0.55f + 0.15f * level);
+            SummonLevelLayers(rigRoot, sword, slot, level);
         }
         catch (Exception e)
         {
@@ -283,6 +291,100 @@ public static partial class SwordFx
         Motes(fx, Vector2.Zero, m.Ramp, m.Tex, 6, 0.9, new Vector2(0, -12), m.SMin, m.SMax, m.Add, rect: new Vector2(30, 70), spin: m.Spin, delay: 0.5);
     }
 
+    /// <summary>
+    /// What the sword's level adds to any summon (user request 2026-10-15 "검 소환할 때 이펙트 ... 확연한 차이"), on top
+    /// of the mode (which is dimmed below level 3):
+    ///  0 — nothing more: a bare, quiet arrival.  1–2 — one (two) thin rings opening where it settles.
+    ///  3–4 — a flat circle of light under it, a bloom in its colour and soft rays (4: plus a standing shaft and rising
+    ///        motes).  5 — a tall pillar of gold-white light, the tomb sigil turning wide beneath it, a ring of rays,
+    ///        a double ring and a rise of sparks; a last bright bloom as the blade settles.
+    /// </summary>
+    private static void SummonLevelLayers(Node2D rigRoot, SwordId sword, Vector2 slot, int level)
+    {
+        if (level <= 0) return;
+        var col = SwordVisuals.ColorOf(sword);
+        var soft = Muted(col);
+        var back = Root(rigRoot, slot, 1.8, -1);
+        var fx = Root(rigRoot, slot, 1.8, 2);
+        const double settle = 0.62; // the layout tween brings the blade home at ~0.85 s
+        if (level <= 2)
+        {
+            Ring(back, Vector2.Zero, new Color(soft.Lightened(0.2f), 1f), 30, 120, 0.7, delay: settle * 0.6);
+            if (level == 2) Ring(back, Vector2.Zero, new Color(soft.Lightened(0.1f), 1f), 20, 90, 0.6, delay: settle * 0.85);
+            return;
+        }
+        var bright = col.Lightened(0.25f);
+        Ring(back, new Vector2(0, 100), bright, 30, 150 + 20 * (level - 3), 0.8, delay: settle * 0.5, squash: 0.3f);
+        Flare(back, Vector2.Zero, bright, 190 + 30 * (level - 3), 0.7, delay: settle * 0.7);
+        Rays(back, Vector2.Zero, new Color(col.Lerp(new Color(1f, 0.95f, 0.8f), 0.5f), 0.7f), level >= 5 ? 12 : 6, 170 + 40 * (level - 3), 0.8,
+            delay: settle * 0.75);
+        if (level >= 4)
+        {
+            Shaft(back, new Vector2(0, -40), bright, 420, 70, 0.3f, 1.2);
+            Motes(fx, new Vector2(0, 60), new Color(bright, 0.8f), "fx_glow", 10, 1.2, new Vector2(0, -60), 0.04f, 0.08f, true,
+                rect: new Vector2(50, 30), delay: 0.2);
+        }
+        if (level < 5) return;
+        var gold = new Color(1f, 0.92f, 0.65f);
+        Pillar(back, new Vector2(0, -120), gold, 760, 120, 1.3);
+        if (T("magic_circle") is { } circleTex)
+        {
+            // laid flat on the ground: the holder squashes it, the sprite turns inside it
+            var flat = new Node2D { Position = new Vector2(0, 104), Scale = new Vector2(1f, 0.3f) };
+            back.AddChild(flat);
+            var c = new Sprite2D
+            {
+                Texture = circleTex, Modulate = new Color(gold, 0f), Material = AddMat,
+                Scale = Vector2.One * 320f / Math.Max(1, circleTex.GetWidth()),
+            };
+            flat.AddChild(c);
+            var t = c.CreateTween();
+            t.TweenProperty(c, "modulate:a", 0.55f, 0.35).SetTrans(Tween.TransitionType.Sine);
+            t.Parallel().TweenProperty(c, "rotation", 0.9f, 1.6).SetTrans(Tween.TransitionType.Sine);
+            t.TweenProperty(c, "modulate:a", 0f, 0.7).SetTrans(Tween.TransitionType.Sine);
+        }
+        Ring(back, Vector2.Zero, gold, 40, 210, 0.7, delay: settle);
+        Ring(back, Vector2.Zero, bright, 30, 160, 0.6, delay: settle + 0.1);
+        Burst(fx, new Vector2(0, 60), Ramp(new Color(1f, 0.95f, 0.75f), gold), "fx_spark", 18, 0.9, 80, 220, new Vector2(0, -160), 40,
+            0.15f, 0.3f, true, dir: -90, rect: new Vector2(60, 10), alignY: true, delay: 0.15);
+        Flare(fx, Vector2.Zero, new Color(1f, 0.98f, 0.9f), 200, 0.5, delay: settle + 0.15);
+    }
+
+    /// <summary>The sword's level rose mid-combat (it is redrawn in place): a bloom, a ring and, from 3, rays.</summary>
+    internal static void LevelUp(Node2D rigRoot, Vector2 pos, SwordId sword, int level)
+    {
+        try
+        {
+            var col = SwordVisuals.ColorOf(sword).Lightened(0.25f);
+            var fx = Root(rigRoot, pos, 1.0, 2);
+            var back = Root(rigRoot, pos, 1.0, -1);
+            Flare(back, Vector2.Zero, col, 160 + 25 * level, 0.5);
+            Ring(back, Vector2.Zero, col, 30, 110 + 20 * level, 0.5);
+            if (level >= 3) Rays(back, Vector2.Zero, new Color(1f, 0.95f, 0.8f, 0.8f), 6 + level, 140 + 20 * level, 0.6);
+            Motes(fx, new Vector2(0, 40), new Color(col, 0.85f), "fx_glow", 4 + 2 * level, 0.9, new Vector2(0, -70), 0.04f, 0.08f, true,
+                rect: new Vector2(30, 70));
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordFx] level up {sword}: {e.Message}");
+        }
+    }
+
+    /// <summary>A pinch of sparks shed by a high-level sword's strike trail (SwordVisuals.Trail).</summary>
+    internal static void TrailSpark(Node2D parent, Vector2 pos, Color col, int level)
+    {
+        try
+        {
+            var fx = Root(parent, pos, 0.5, 1);
+            Burst(fx, Vector2.Zero, Ramp(col.Lightened(0.5f), col), level >= 5 ? "fx_spark" : "fx_glow", level >= 5 ? 3 : 2, 0.35,
+                20, 70, new Vector2(0, 120), 180, level >= 5 ? 0.12f : 0.04f, level >= 5 ? 0.2f : 0.07f, true, alignY: level >= 5);
+        }
+        catch (Exception)
+        {
+            // presentation only
+        }
+    }
+
     /// <summary>Motes released on a ring round <paramref name="p"/> that drift in to its centre over <paramref name="dur"/>.</summary>
     private static void Gathering(Node2D p, Gradient ramp, string tex, int amount, float radius, double dur, bool additive,
         float spin, float sMin, float sMax, float swirl = 0f)
@@ -476,7 +578,8 @@ public static partial class SwordFx
             fx.GlobalPosition = node.VfxSpawnPosition;
             FreeAfter(fx, 0.8);
             var accent = SwordVisuals.StrikeAccent(player); // the cut of the strike that just landed (SwordVisuals.Strikes.cs)
-            PlayImpact(fx, sword, accent?.Cut, accent?.Heavy ?? false);
+            var level = sword is { } cur ? SwordCombat.LevelOf(player, cur) : -1;
+            PlayImpact(fx, sword, accent?.Cut, accent?.Heavy ?? false, level);
         }
         catch (Exception e)
         {
@@ -488,11 +591,20 @@ public static partial class SwordFx
     /// The impact itself, centred on <paramref name="fx"/> (screen pixels). <paramref name="cut"/>: direction of the
     /// sword's cut (the strokes follow it, so successive hits of a flurry leave differently angled marks);
     /// <paramref name="heavy"/>: a heavy variant (slam, cleave, judgment) adds a ring across the ground.
+    /// <paramref name="level"/>: the sword's level (−1 unknown) — the whole impact is smaller and duller at 0 and larger
+    /// at 5, and <see cref="ImpactLevelLayers"/> adds rings, light and sparks from level 3.
     /// </summary>
-    internal static void PlayImpact(Node2D fx, SwordId? sword, float? cut = null, bool heavy = false)
+    internal static void PlayImpact(Node2D fx, SwordId? sword, float? cut = null, bool heavy = false, int level = -1)
     {
         var rot = (float)GD.RandRange(-0.5, 0.5);
         var col = sword is { } s ? SwordVisuals.ColorOf(s) : new Color(0.85f, 0.65f, 1f);
+        if (level >= 0)
+        {
+            level = Math.Min(level, 5);
+            fx.Scale = Vector2.One * (0.78f + 0.07f * level); // 0.78 .. 1.13
+            if (level <= 1) fx.Modulate = new Color(0.86f, 0.85f, 0.9f, 0.8f + 0.1f * level);
+            ImpactLevelLayers(fx, col, cut ?? rot, level);
+        }
         if (heavy)
         {
             Ring(fx, new Vector2(0, 120), col, 40, 300, 0.5, squash: 0.28f);
@@ -562,6 +674,25 @@ public static partial class SwordFx
                 Flare(fx, Vector2.Zero, col, 170, 0.3);
                 break;
         }
+    }
+
+    /// <summary>
+    /// Level 3+: a ring in the sword's colour; 4: plus a white bloom and a cross-glint along the cut; 5: plus a crown of
+    /// rays, a second gold ring and a spray of sparks — the strongest hits read at a glance.
+    /// </summary>
+    private static void ImpactLevelLayers(Node2D fx, Color col, float cut, int level)
+    {
+        if (level < 3) return;
+        Ring(fx, Vector2.Zero, col.Lightened(0.3f), 30, 190 + 30 * (level - 3), 0.4, delay: 0.03);
+        if (level < 4) return;
+        Flare(fx, Vector2.Zero, new Color(1f, 0.98f, 0.92f), 190, 0.28);
+        Beam(fx, Vector2.Zero, cut + Mathf.Pi / 2, new Color(1f, 0.98f, 0.92f), 300, 12, 0.22);
+        if (level < 5) return;
+        var gold = new Color(1f, 0.9f, 0.6f);
+        Rays(fx, Vector2.Zero, gold, 10, 260, 0.4, delay: 0.02);
+        Ring(fx, Vector2.Zero, gold, 50, 300, 0.5, delay: 0.08);
+        Burst(fx, Vector2.Zero, Ramp(new Color(1f, 0.97f, 0.85f), gold), "fx_spark", 16, 0.45, 260, 560, new Vector2(0, 500), 180,
+            0.2f, 0.4f, true, alignY: true);
     }
 
     // ------------------------------------------------------------------ building blocks
