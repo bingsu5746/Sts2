@@ -6,6 +6,7 @@ using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.CardPools;
 
@@ -58,10 +59,25 @@ public abstract class SwordTokenCard : ChoiceTokenCard
     protected SwordTokenCard()
     {
         // what level 5 gives ("검의 완성", Swords/SwordMastery.cs) + the legend card itself
+        // 망령 상흔 explained right on Skofnung's token (user request 2026-10-15)
+        WithTips(card => ((SwordTokenCard)card).Sword == SwordId.Skofnung
+            ? [MegaCrit.Sts2.Core.HoverTips.HoverTipFactory.FromPower<Powers.SkofnungWoundPower>()]
+            : []);
         WithTips(card => SwordMastery.TokenTips(card, ((SwordTokenCard)card).Sword));
     }
 
     public abstract SwordId Sword { get; }
+
+    /// <summary>
+    /// {Text}: the sword's effect and cost with the numbers of its current level (the owner's level for selection copies,
+    /// level 0 for the canonical token shown when a new sword is offered). Swords/SwordEffectText.
+    /// </summary>
+    protected override void AddExtraArgsToDescription(LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        var owner = IsMutable ? Owner : null;
+        description.Add("Text", SwordEffectText.Full(Sword, owner, SwordEffectText.LevelOf(owner, Sword), withPartner: true));
+    }
 
     /// <summary>Canonical token for a sword.</summary>
     public static CardModel CanonicalFor(SwordId sword) => sword switch

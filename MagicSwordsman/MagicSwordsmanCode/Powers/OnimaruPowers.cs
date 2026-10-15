@@ -80,6 +80,7 @@ public abstract class OnimaruKindPower : MagicSwordsmanPower
         new DynamicVar("AutoHits", 0m),
         new DynamicVar("AutoBlock", 0m),
         new DynamicVar("AutoWeak", 0m),
+        new StringVar("Wild", ""),
     ];
 
     protected override string SmartDescriptionLocKey
@@ -88,6 +89,7 @@ public abstract class OnimaruKindPower : MagicSwordsmanPower
         {
             if (IsMutable && Owner?.Player is { } player)
             {
+                if (DynamicVars["Wild"] is StringVar wild) wild.StringValue = SwordEffectText.OnimaruWildLine(player);
                 var n = OnimaruAttack.Compute(player, Kind);
                 DynamicVars["AutoDamage"].BaseValue = n.PerHit;
                 DynamicVars["AutoHits"].BaseValue = n.Hits;

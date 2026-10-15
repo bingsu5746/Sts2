@@ -562,7 +562,7 @@ public static partial class SwordVisuals
         try
         {
             var level = SwordCombat.LevelOf(player, sword);
-            var desc = $"{Text(Events.SwordLore.StageName(sword, level))} ({level})\n{Text(Events.SwordLore.Line(sword, "EFFECT"))}";
+            var desc = $"{Text(Events.SwordLore.StageName(sword, level))} ({level})\n{Swords.SwordEffectText.Effect(sword, player, level)}";
             var affinity = Dialogue.SwordAffinity.TipLine(player, sword);
             if (affinity.Length > 0) desc += "\n" + affinity;
             desc += Cards.Union.UnionCatalog.SwordTipLine(player, sword); // 【조합】 cards of this sword

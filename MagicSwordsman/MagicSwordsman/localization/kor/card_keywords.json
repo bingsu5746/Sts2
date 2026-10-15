@@ -6,7 +6,7 @@
   "MAGICSWORDSMAN-TWIN_SWORD.title": "쌍검",
   "MAGICSWORDSMAN-TWIN_SWORD.description": "간장과 막야 둘 다로 취급하는 카드입니다. 처음 쓰면 둘 다 소환합니다. 간장 효과(피해)와 막야 효과(방어도)가 함께 붙고, 쓴 뒤 현재 검은 간장입니다.",
   "MAGICSWORDSMAN-COMMAND.title": "명령",
-  "MAGICSWORDSMAN-COMMAND.description": "[gold]오니마루[/gold]가 그 자리에서 현재 종류로 자동 공격을 1번 합니다. 현재 검 보너스가 붙고, 무작위 종류는 나오지 않습니다.",
+  "MAGICSWORDSMAN-COMMAND.description": "[gold]오니마루[/gold]가 즉시 현재 자세대로 1번 행동합니다. 현재 검 보너스가 붙고, 무작위 자세는 나오지 않습니다.",
   "MAGICSWORDSMAN-DRAW_CUT.title": "발도",
   "MAGICSWORDSMAN-DRAW_CUT.description": "[gold]클라이브 솔라시[/gold]의 [gold]빛[/gold]을 모두 소모하는 공격입니다. 이 카드의 피해는 [gold]방어도[/gold]를 무시합니다.",
   "MAGICSWORDSMAN-CURRENT_SWORD.title": "현재 검",
