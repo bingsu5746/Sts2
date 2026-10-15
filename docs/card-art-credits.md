@@ -414,3 +414,11 @@ New side-view body (young face matching the card art, flat boots, cleaner hands)
 ## Character select v4 (2026-10-10)
 
 Centred composition: the hooded swordsman stands in the middle of the frame under a ruined arch. AI Horde txt2img (AlbedoBase XL, 1024×576, RealESRGAN ×2; prompt in `tools/charselect_art/jobs_v4.json`, seed 13), ring of floating swords composited from the mod's own sword sprites with a drawn glow.
+
+## Batch 42 (2026-10-15)
+
+- New card art (dainsleif_thirst, ganjiang_tortoise_shell, moye_pine_on_stone, solais_kingship_restored, union_anvil_and_rock, union_royal_treasures, union_serpent_slayers, union_sidhe_light, union_sunlit_hilt, union_turned_blow, union_twenty_four_berserkers): AI Horde txt2img (AlbedoBase XL, 1024×768, seeds 11/29).
+- twin_mated_pair: AI Horde txt2img, two crossed swords on a red/blue yin-yang.
+- Power icons (tools/power_art, 51): AI Horde txt2img badges, cropped to a circle.
+- 만검총 relic: AI Horde txt2img gate (RealESRGAN ×2), plaque 萬劍塚 and swords composited by `tools/relic_art/compose_mangeomchong.py`.
+- Character select: same v4 composition rebuilt from a RealESRGAN ×4 upscale of the seed-13 base, swords composited at 2× and downscaled.
