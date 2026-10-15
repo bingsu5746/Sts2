@@ -632,9 +632,9 @@ public static class SwordTalk
     // on the actual node, mapped through that node's global transform.
 
     /// <summary>Rest site: right edge of Ensifer's face in magic_swordsman_rest.tscn (ControlRoot space).</summary>
-    private static readonly Vector2 RestFace = new(132, -352);
+    private static readonly Vector2 RestFace = new(168, -330);
     /// <summary>Rest site: where a talking sword hovers, left of his head (ControlRoot space).</summary>
-    private static readonly Vector2 RestSword = new(-70, -300);
+    private static readonly Vector2 RestSword = new(-34, -278);
     /// <summary>Shop: right edge of Ensifer's face in magic_swordsman_merchant.tscn (node space).</summary>
     private static readonly Vector2 ShopFace = new(26, -356);
     /// <summary>Shop: where a talking sword hovers, left of him (node space).</summary>
