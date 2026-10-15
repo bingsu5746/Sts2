@@ -3,12 +3,14 @@ from PIL import Image, ImageFilter
 import numpy as np, cv2
 R='/home/user/Sts2/MagicSwordsman/MagicSwordsman/images/relics/'
 ses=new_session('isnet-general-use')
+shared=None
 for src,name in (('final_closed.png','mangeomchong'),('final_open.png','opened_mangeomchong')):
-    rgb=Image.open(src).convert('RGB'); cut=remove(rgb,session=ses)
-    a=np.array(cut); m=(a[...,3]>40).astype(np.uint8)*255
+    rgb=Image.open(src).convert('RGB')
+    if shared is None: shared=np.array(remove(rgb,session=ses))[...,3]
+    a=np.zeros(np.array(rgb).shape[:2]+(4,),np.uint8); a[...,3]=shared; m=(a[...,3]>40).astype(np.uint8)*255
     h,w=m.shape; mask=np.zeros((h+2,w+2),np.uint8); ff=m.copy(); cv2.floodFill(ff,mask,(0,0),128)
     filled=(ff!=128); alpha=np.where(filled,255,0).astype(np.uint8)
-    cut=Image.fromarray(np.dstack([np.array(rgb),alpha])); cut=cut.crop(cut.getbbox())
+    cut=Image.fromarray(np.dstack([np.array(rgb),alpha])); cut=cut.crop(Image.fromarray(alpha).getbbox())
     for size,margin,path in ((256,10,R+'big/'+name+'.png'),(94,4,R+name+'.png')):
         c=cut.copy(); sc=(size-2*margin)/max(c.size); c=c.resize((round(c.width*sc),round(c.height*sc)),Image.LANCZOS)
         o=Image.new('RGBA',(size,size),(0,0,0,0)); o.alpha_composite(c,((size-c.width)//2,(size-c.height)//2)); o.save(path)

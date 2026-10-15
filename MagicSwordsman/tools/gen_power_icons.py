@@ -6,6 +6,7 @@ every power shows the sword it belongs to (user request 2026-10-08: no placehold
   <sword>_*_power           : that sword's sprite
   skofnung_wound_power      : violet scar marks (망령 상흔)
   other (shared) powers     : three swords fanned over a magic circle
+Hand-painted icons in tools/power_art/<id>.png (256px cutouts) override the generated ones.
 Re-run after adding a power:  python3 tools/gen_power_icons.py
 """
 import os,re,glob,math
@@ -61,7 +62,10 @@ def stance_glyph(kind,S):
     return im
 def onimaru_stance_icon(kind,S):
     im=sword_icon('onimaru',S); im.alpha_composite(stance_glyph(kind,S)); return im
+ART=os.path.join(HERE,'power_art')
 def save(img_fn,fn):
+    if os.path.exists(f'{ART}/{fn}.png'):
+        big=Image.open(f'{ART}/{fn}.png').convert('RGBA'); img_fn=lambda S,big=big: big.resize((S,S),Image.LANCZOS)
     for S,sub in ((64,''),(256,'big/')):
         img_fn(S).save(f'{A}/powers/{sub}{fn}.png')
 ids=set()
