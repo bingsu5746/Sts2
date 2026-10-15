@@ -1,8 +1,0 @@
-{
-  "MAGICSWORDSMAN-UNION_SIDHE_LIGHT_POWER.title": "Light of the Síde",
-  "MAGICSWORDSMAN-UNION_SIDHE_LIGHT_POWER.description": "Whenever an attack hits 2 or more enemies, gain 1 [gold]Light[/gold] (max 2 per turn). Right before your Light fades as [gold]Claíomh Solais[/gold]' cost, deal damage per Light to ALL enemies.",
-  "MAGICSWORDSMAN-UNION_SIDHE_LIGHT_POWER.smartDescription": "Whenever an attack hits 2 or more enemies, gain 1 [gold]Light[/gold] (max 2 per turn). Right before your Light fades as [gold]Claíomh Solais[/gold]' cost, deal {Amount} damage per Light to ALL enemies.",
-  "MAGICSWORDSMAN-UNION_DWARVEN_EDGE_POWER.title": "Dwarven Edge",
-  "MAGICSWORDSMAN-UNION_DWARVEN_EDGE_POWER.description": "Attack cards forged by [gold]Dwarven Craft[/gold] deal more damage this combat.",
-  "MAGICSWORDSMAN-UNION_DWARVEN_EDGE_POWER.smartDescription": "Attack cards forged by [gold]Dwarven Craft[/gold] deal more damage this combat (forged {Amount} {Amount:plural:time|times})."
-}
