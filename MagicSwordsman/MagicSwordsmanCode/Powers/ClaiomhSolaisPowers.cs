@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace MagicSwordsman.MagicSwordsmanCode.Powers;
@@ -17,11 +18,28 @@ namespace MagicSwordsman.MagicSwordsmanCode.Powers;
 /// 빛 (Light) — Claíomh Solais' charge. Amount = Light. Charged at the end of the turn while Claíomh Solais is
 /// current, lost when another sword is current at the end of the turn, consumed by 【발도】 cards.
 /// It has no effect of its own; the behavior and the cards read the amount.
+/// Presentation: every change of the amount refreshes Claíomh Solais' Light layers (SwordVisuals.OnSolaisLightChanged;
+/// a slow poll there also catches the removal).
 /// </summary>
 public sealed class SolaisLightPower : MagicSwordsmanPower
 {
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override Task AfterPowerAmountChanged(PlayerChoiceContext choiceContext, PowerModel power, decimal amount,
+        Creature? applier, CardModel? cardSource)
+    {
+        try
+        {
+            if (ReferenceEquals(power, this) && Owner.Player is { } player)
+                Visuals.SwordVisuals.OnSolaisLightChanged(player);
+        }
+        catch (Exception)
+        {
+            // presentation only
+        }
+        return Task.CompletedTask;
+    }
 }
 
 /// <summary>

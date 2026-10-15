@@ -30,7 +30,6 @@ public static class MotionDirector
     private static readonly string[] Powers = ["Power_Rise", "Power_Focus", "Power_Burst"];
     private static readonly string[] Blocks = ["Block", "Block_Cross", "Block_Brace", "Block_Palm"];
     private static readonly string[] Swaps = ["Swap_1", "Swap_2", "Swap_3"];
-    private static readonly string[] SummonGestures = ["Summon_Raise", "Summon_Beckon", "Summon_Chest"];
     private static readonly string[] Fidgets =
         ["Idle_Look", "Idle_Flex", "Idle_Weave", "Idle_Breath", "Idle_Shift", "Idle_Glance", "Idle_Wrist",
          "Idle_Roll", "Idle_Ready", "Idle_Gem", "Idle_Hair"];
@@ -113,12 +112,13 @@ public static class MotionDirector
     }
 
     /// <summary>
-    /// A summon gesture (user request 2026-10-10 "검들 소환 모션도 좀 더 늘려줘"): the sword's own palm-up call half the
-    /// time, else one of the generic gestures — a hand raised high, a beckoning draw out of the air, or the palm laid
-    /// over the chest gem and opened outward (tools/gen_combat_scene.py). No body scaling in any of them.
+    /// The summoned sword's own gesture, always (user request 2026-10-15 "엔시페르의 소환 손동작을 검마다 고유하게"): Gram
+    /// is hammered out like a blade on the anvil, Tyrfing drawn reluctantly, Dainsleif called with a cut across the palm,
+    /// Skofnung whispered to, Durandal prayed for, Claíomh Solais lifted like a light, Caladbolg heaved up, Kusanagi swept
+    /// in on the wind, Onimaru drawn iai-style, Ganjiang / Moye clasped and parted (Summon_&lt;sword&gt;,
+    /// tools/gen_combat_scene.py). PlayMotion falls back to the generic "Summon" if a clip is missing. No body scaling.
     /// </summary>
-    public static void OnSummoned(Player player, SwordId sword) =>
-        Play(player, Rng.NextDouble() < 0.45 ? "Summon_" + sword : Pick(SummonGestures));
+    public static void OnSummoned(Player player, SwordId sword) => Play(player, "Summon_" + sword);
 
     /// <summary>
     /// Onimaru attacks on its own (OnimaruAttack.Perform: 【명령】, auto attacks, kind cards — no "Attack" trigger from the

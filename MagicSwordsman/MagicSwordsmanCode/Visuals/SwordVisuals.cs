@@ -205,8 +205,12 @@ public static partial class SwordVisuals
             rig.Root.AddChild(fresh);
             fresh.Position = node.Position;
             fresh.Scale = node.Scale;
+            fresh.ZIndex = node.ZIndex;
+            fresh.Modulate = node.Modulate;
+            var up = (int)fresh.GetMeta("level", 0) > (int)node.GetMeta("level");
             node.QueueFree();
             rig.Swords[sw] = fresh;
+            if (up) SwordFx.LevelUp(rig.Root, fresh.Position, sw, (int)fresh.GetMeta("level", 0));
         }
 
         // new swords -> fly out of the character
@@ -370,6 +374,7 @@ public static partial class SwordVisuals
         rig = new Rig { Root = root, Player = player };
         Rigs[player] = rig;
         MainAnimationPlayer(player);
+        StartIdleSpecials(rig); // now and then a sword does something on its own (SwordVisuals.Idle.cs)
         return rig;
     }
 
@@ -406,29 +411,10 @@ public static partial class SwordVisuals
             bladeTex = tex;
             bladeScale = scale;
 
-            // faint violet aura behind the blade (user request 2026-10-08), breathing slowly
-            var auraPath = $"{MainFile.ResPath}/images/swords/aura/{id}.png";
-            if (ResourceLoader.Exists(auraPath))
-            {
-                var aura = new Sprite2D
-                {
-                    Texture = GD.Load<Texture2D>(auraPath), Scale = new Vector2(scale, scale),
-                    Material = new CanvasItemMaterial { BlendMode = CanvasItemMaterial.BlendModeEnum.Add },
-                    Modulate = new Color(AuraColor, 0.22f), Name = "Aura",
-                };
-                blade.AddChild(aura);
-                // stronger, larger aura the higher the sword's level (user request 2026-10-09)
-                var lv = Math.Clamp(SwordCombat.LevelOf(player, sword), 0, 5);
-                float lo = 0.08f + 0.05f * lv, hi = 0.18f + 0.07f * lv;
-                aura.Scale *= 1f + 0.03f * lv;
-                var breathe = aura.CreateTween().SetLoops();
-                breathe.TweenProperty(aura, "modulate:a", hi, lv >= 5 ? 0.9 : 1.8).SetTrans(Tween.TransitionType.Sine);
-                breathe.TweenProperty(aura, "modulate:a", lo, lv >= 5 ? 0.9 : 1.8).SetTrans(Tween.TransitionType.Sine);
-            }
-
-            var level = SwordCombat.LevelOf(player, sword);
+            // level look, aura, the broken Gram, Claíomh Solais' Light (SwordVisuals.Level.cs)
+            var level = Math.Clamp(SwordCombat.LevelOf(player, sword), 0, 5);
             holder.SetMeta("level", level);
-            AddBlade(blade, sword, level, tex, scale);
+            BuildSwordArt(blade, sword, level, tex, scale, player);
         }
         else
         {
@@ -500,49 +486,6 @@ public static partial class SwordVisuals
         flut.TweenProperty(blade, "skew", -flutter, 0.19).SetTrans(sine).SetEase(io);
     }
 
-    /// <summary>
-    /// The blade itself, by level: dull and greyed at 0 brightening to full colour at 5, motes of light from level 3.
-    /// Gram at level 0 is "부서진 그람": drawn as two shards with a gap (its stage name; Odin broke it).
-    /// </summary>
-    private static void AddBlade(Node2D blade, SwordId sword, int level, Texture2D tex, float scale)
-    {
-        level = Math.Clamp(level, 0, 5);
-        var t = level / 5f;
-        var tint = new Color(0.62f + 0.38f * t, 0.6f + 0.4f * t, 0.66f + 0.34f * t);
-        if (sword == SwordId.Gram && level == 0)
-        {
-            int w = tex.GetWidth(), h = tex.GetHeight();
-            var top = new Sprite2D
-            {
-                Texture = tex, RegionEnabled = true, RegionRect = new Rect2(0, 0, w, h * 0.47f), Scale = new Vector2(scale, scale),
-                Position = new Vector2(10, -h * 0.29f * scale), Rotation = 0.22f, Modulate = tint, TextureFilter = CanvasItem.TextureFilterEnum.Linear,
-            };
-            var bottom = new Sprite2D
-            {
-                Texture = tex, RegionEnabled = true, RegionRect = new Rect2(0, h * 0.53f, w, h * 0.47f), Scale = new Vector2(scale, scale),
-                Position = new Vector2(0, h * 0.27f * scale), Modulate = tint, TextureFilter = CanvasItem.TextureFilterEnum.Linear,
-            };
-            blade.AddChild(bottom);
-            blade.AddChild(top);
-            return;
-        }
-
-        blade.AddChild(new Sprite2D { Texture = tex, TextureFilter = CanvasItem.TextureFilterEnum.Linear, Scale = new Vector2(scale, scale), Modulate = tint });
-        if (level < 3) return;
-        var motes = new CpuParticles2D
-        {
-            Amount = 4 + level * 3, Lifetime = 1.8, Preprocess = 1.8,
-            EmissionShape = CpuParticles2D.EmissionShapeEnum.Rectangle,
-            EmissionRectExtents = new Vector2(tex.GetWidth() * scale * 0.3f, tex.GetHeight() * scale * 0.45f),
-            Gravity = new Vector2(0, -18), InitialVelocityMin = 2, InitialVelocityMax = 10,
-            ScaleAmountMin = 0.035f, ScaleAmountMax = 0.07f, Color = ColorOf(sword).Lightened(0.3f),
-            Material = new CanvasItemMaterial { BlendMode = CanvasItemMaterial.BlendModeEnum.Add },
-        };
-        var core = $"{MainFile.ResPath}/images/vfx/hand_core.png";
-        if (ResourceLoader.Exists(core)) motes.Texture = GD.Load<Texture2D>(core);
-        blade.AddChild(motes);
-    }
-
     private static float PointAt(Vector2 from, Vector2 to)
     {
         var d = to - from;
@@ -552,24 +495,35 @@ public static partial class SwordVisuals
     private static Vector2 Bezier(Vector2 a, Vector2 b, Vector2 c, float t) =>
         (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * c;
 
-    /// <summary>Fading copies of the sword left behind while it flies.</summary>
+    /// <summary>
+    /// Fading copies of the sword left behind while it flies. Scales with the sword's level (user request 2026-10-15):
+    /// at 0 a few faint, greyish, short-lived copies; at 5 a dense, bright, longer trail shedding sparks.
+    /// </summary>
     private static void Trail(Node2D node, double duration, Color col)
     {
         if (node.GetParent() is not Node2D parent) return;
-        var timer = new Godot.Timer { WaitTime = 0.025, Autostart = true };
+        var level = node.HasMeta("level") ? Math.Clamp((int)node.GetMeta("level"), 0, 5) : 2;
+        var every = 0.035 - 0.003 * level;           // 0.035 s .. 0.02 s between copies
+        var alpha = 0.22f + 0.08f * level;           // 0.22 .. 0.62
+        var life = 0.14 + 0.035 * level;             // 0.14 s .. 0.315 s
+        var tint = level >= 3 ? col.Lightened(0.3f + 0.05f * (level - 3)) : col.Lerp(new Color(0.7f, 0.7f, 0.75f), 0.4f - 0.15f * level);
+        var timer = new Godot.Timer { WaitTime = every, Autostart = true };
         var elapsed = 0.0;
+        var n = 0;
         timer.Timeout += () =>
         {
             elapsed += timer.WaitTime;
             if (elapsed > duration || !GodotObject.IsInstanceValid(node)) { timer.QueueFree(); return; }
             if (BladeCopy(node) is not { } ghost) return;
             ghost.ZIndex = Math.Max(ZBack, node.ZIndex - 1);
-            ghost.Modulate = new Color(col.Lightened(0.3f), 0.45f);
+            ghost.Modulate = new Color(tint, alpha);
             ghost.Material = new CanvasItemMaterial { BlendMode = CanvasItemMaterial.BlendModeEnum.Add };
             parent.AddChild(ghost);
             var fade = ghost.CreateTween();
-            fade.TweenProperty(ghost, "modulate:a", 0f, 0.22);
+            fade.TweenProperty(ghost, "modulate:a", 0f, life);
             fade.TweenCallback(Callable.From(ghost.QueueFree));
+            // level 4+: sparks shed along the trail (every other copy)
+            if (level >= 4 && n++ % 2 == 0) SwordFx.TrailSpark(parent, node.Position, col, level);
         };
         parent.AddChild(timer);
     }
@@ -638,14 +592,14 @@ public static partial class SwordVisuals
     private static readonly Dictionary<Node2D, ulong> LastStrike = new();
 
     /// <summary>
-    /// A strike, an Onimaru attack, a guard or a guard break is moving this sword right now. Each choreography ends by
+    /// A strike, an Onimaru attack, a guard, a guard break or an idle special (SwordVisuals.Idle.cs) is moving this sword right now. Each choreography ends by
     /// handing the sword back (Layout(only)), which clears its mark; the time limits are only a safety net for a
     /// choreography whose tween was killed. (These used to be fixed windows — 0.45 s after a strike, 0.8 s after a guard
     /// — that did not match the real lengths, so a Sync could skip a sword that had already gone home, or run while it
     /// was still on its way, and leave it in its old slot after a switch.)
     /// </summary>
     private static bool InFlight(Node2D node) =>
-        IsStriking(node) || (GuardAt.TryGetValue(node, out var g0) && Time.GetTicksMsec() < g0);
+        IsStriking(node) || IsIdling(node) || (GuardAt.TryGetValue(node, out var g0) && Time.GetTicksMsec() < g0);
 
     // Strike(): SwordVisuals.Strikes.cs
 

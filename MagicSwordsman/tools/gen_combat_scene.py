@@ -204,16 +204,93 @@ for k,tt in enumerate((0.15,0.3,0.45,0.6,0.75)):
 c.hand('R',0.15,0.3,0.6); c.hand('R',0.75,0.7,1.0); c.hand('R',0.9,0.7,0.0); rest(c,0.9); M.append(c)
 
 # ---------------------------------------------------------------- summons (one per sword) / swaps
-for sw,col in SWORD_COL.items():
-    c=Clip('Summon_'+sw,0.95); rest(c,0)
-    # one hand calls the sword out of the air, palm up; the other stays low (no two-arm raise)
-    c.pose(0.22,y=-8,x=4,ur=-0.45,fr=-0.35,ul=0.12,head=-0.08,cr=-0.03,tint=(1.35,1.18,1.7))
-    c.pose(0.32,fr=-0.7)
-    c.pose(0.6,y=-6,ur=-0.4,fr=-0.6,ul=0.1,head=-0.05)
-    c.hand('LR',0.15,0.6,0.9,col); c.hand('LR',0.3,0.85,1.0,col); c.hand('LR',0.6,0.85,1.0,col); c.hand('LR',0.9,0.85,0.0,col)
-    c.fx('Circle',0,0,col,scale=(0.8,0.27)).fx('Circle',0.2,0.9,col).fx('Circle',0.95,0,col,scale=(0.8,0.27))
-    c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1),scale=(1,1)).fx('Visuals/Rig/Sigil',0.3,1,col,scale=(1.5,1.5)).fx('Visuals/Rig/Sigil',0.95,0.4,(1,1,1),scale=(1,1))
-    rest(c,0.95); M.append(c)
+# Each sword has its own summon gesture (user request 2026-10-15 "엔시페르의 소환 손동작을 검마다 고유하게");
+# MotionDirector.OnSummoned always plays the summoned sword's clip. No body scaling (pose() asserts it).
+GLOW=(1.35,1.18,1.7)
+def summon_clip(sw,dur):
+    c=Clip('Summon_'+sw,dur); rest(c,0); return c
+def summon_end(c,col,sig_t,dur,circle=True):
+    if circle: c.fx('Circle',0,0,col,scale=(0.8,0.27)).fx('Circle',sig_t,0.9,col).fx('Circle',dur,0,col,scale=(0.8,0.27))
+    c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1),scale=(1,1)).fx('Visuals/Rig/Sigil',sig_t,1,col,scale=(1.5,1.5)).fx('Visuals/Rig/Sigil',dur,0.4,(1,1,1),scale=(1,1))
+    rest(c,dur); M.append(c)
+C_=SWORD_COL
+# Gram: the smith's hammer - right fist raised high, two blows down onto an anvil of the left forearm
+c=summon_clip('Gram',1.15)
+c.pose(0.2,ur=-1.35,fr=-0.9,ul=-0.15,fl=-1.0,head=0.06,x=-2)
+c.pose(0.34,ur=-0.25,fr=-0.35,ul=-0.15,fl=-1.0,y=5,head=0.12,tint=GLOW)      # blow 1
+c.pose(0.5,ur=-1.25,fr=-0.85,y=0,head=0.06)
+c.pose(0.64,ur=-0.2,fr=-0.3,y=6,head=0.13,tint=GLOW)                          # blow 2
+c.pose(0.88,ur=-0.55,fr=-0.5,ul=0.2,fl=0.3,y=-4,head=-0.06)                  # opens the hand: the blade rises
+c.hand('R',0.3,0.6,0.9); c.hand('R',0.36,0.85,1.0); c.hand('R',0.6,0.6,0.9); c.hand('R',0.66,0.9,1.0); c.hand('R',1.05,0.8,0.0)
+summon_end(c,C_['Gram'],0.66,1.15)
+# Tyrfing: drawn reluctantly - the hand goes to the hip, hesitates, head turned away, a slow unwilling pull
+c=summon_clip('Tyrfing',1.3)
+c.pose(0.25,ur=0.35,fr=-1.35,head=0.14,x=-3,rot=-0.01)
+c.pose(0.45,ur=0.32,fr=-1.3,head=0.16)                                         # holds - hesitates
+c.pose(0.55,ur=0.3,fr=-1.2); c.pose(0.62,ur=0.33,fr=-1.32)                    # a tremor
+c.pose(0.95,ur=-0.75,fr=-0.25,head=0.1,x=2,rot=0.01,cr=-0.03,tint=(1.4,1.1,0.95))  # pulled out at last
+c.hand('R',0.25,0.4,0.4); c.hand('R',0.6,0.5,0.6); c.hand('R',0.95,0.85,1.0); c.hand('R',1.2,0.8,0.0)
+summon_end(c,C_['Tyrfing'],0.95,1.3)
+# Dainsleif: a cut across the palm - the right hand slashes down over the open left palm, which then offers the blood
+c=summon_clip('Dainsleif',1.1)
+c.pose(0.2,ul=0.05,fl=-1.1,ur=-1.1,fr=-0.7,head=0.08)
+c.pose(0.32,ur=0.15,fr=-0.9,ul=0.05,fl=-1.1,head=0.12,x=3,tint=(1.4,0.95,1.0))  # the slash
+c.pose(0.55,ur=0.05,fr=-0.3,ul=0.3,fl=0.15,head=0.02)                          # left palm turned outward
+c.pose(0.85,ul=0.35,fl=0.2,ur=0.0,fr=-0.2,head=-0.02)
+c.hand('L',0.35,0.5,0.6); c.hand('L',0.55,0.8,1.0); c.hand('L',1.0,0.75,0.0)
+summon_end(c,C_['Dainsleif'],0.55,1.1)
+# Skofnung: whispered to - the palm raised beside the face, head leaning in, then opened forward softly
+c=summon_clip('Skofnung',1.25)
+c.pose(0.3,ur=-0.2,fr=-2.05,head=0.18,x=-2,rot=-0.01)
+c.pose(0.6,ur=-0.22,fr=-2.0,head=0.2)                                          # the whisper
+c.pose(0.9,ur=-0.85,fr=-0.35,head=0.05,x=3,rot=0.01)
+c.hand('R',0.3,0.35,0.5); c.hand('R',0.6,0.4,0.6); c.hand('R',0.9,0.8,0.9); c.hand('R',1.15,0.75,0.0)
+summon_end(c,C_['Skofnung'],0.9,1.25)
+# Durandal: hands together in prayer before the chest, head bowed, then both raised in offering
+c=summon_clip('Durandal',1.3)
+c.pose(0.3,ul=-0.45,fl=-1.6,ur=0.45,fr=1.6,head=0.18,y=2)
+c.pose(0.6,ul=-0.45,fl=-1.62,ur=0.45,fr=1.62,head=0.2,y=3)
+c.pose(0.95,ul=0.75,fl=0.35,ur=-0.75,fr=-0.35,head=-0.14,y=-8,cl=0.04,cr=-0.04,tint=(1.5,1.4,1.2))
+c.hand('LR',0.3,0.4,0.4); c.hand('LR',0.95,0.85,1.0); c.hand('LR',1.2,0.8,0.0)
+summon_end(c,C_['Durandal'],0.95,1.3)
+# Claiomh Solais: lifting the light - both palms cupped low, then the right lifts it slowly overhead, gaze following
+c=summon_clip('ClaiomhSolais',1.2)
+c.pose(0.25,ur=0.1,fr=-1.0,ul=-0.1,fl=1.0,head=0.12,y=2)
+c.pose(0.6,ur=-0.65,fr=-0.6,ul=0.2,fl=0.6,head=-0.06,y=-4,tint=(1.4,1.4,1.15))
+c.pose(0.9,ur=-1.25,fr=-0.2,ul=0.1,fl=0.2,head=-0.16,y=-8,tint=(1.55,1.5,1.2))
+c.hand('LR',0.25,0.5,0.7); c.hand('R',0.9,0.95,1.0); c.hand('L',0.7,0.5,0.0); c.hand('R',1.12,0.85,0.0)
+summon_end(c,C_['ClaiomhSolais'],0.9,1.2)
+# Caladbolg: a wide heave - he sinks with both arms low, then heaves them up and apart as if lifting a hill
+c=summon_clip('Caladbolg',1.2)
+c.pose(0.3,y=10,ul=-0.25,fl=0.3,ur=0.25,fr=-0.3,head=0.12,rot=0.01)
+c.pose(0.62,y=-12,ul=0.95,fl=0.25,ur=-0.95,fr=-0.25,head=-0.12,rot=-0.015,cl=0.06,cr=-0.06,tint=GLOW)
+c.pose(0.85,y=-9,ul=0.85,fl=0.2,ur=-0.85,fr=-0.2,head=-0.1)
+c.hand('LR',0.3,0.4,0.3); c.hand('LR',0.62,0.95,1.0); c.hand('LR',1.1,0.85,0.0)
+summon_end(c,C_['Caladbolg'],0.62,1.2)
+# Kusanagi: a wind sweep - the right arm swings across from his left side out to the right, the coat flaring
+c=summon_clip('Kusanagi',1.0)
+c.pose(0.2,ur=0.45,fr=-1.0,rot=-0.02,head=0.08,x=-4)
+c.pose(0.5,ur=-1.1,fr=-0.15,rot=0.03,head=-0.04,x=5,cl=-0.05,cr=-0.07,tint=(1.2,1.4,1.2))
+c.pose(0.75,ur=-0.95,fr=-0.25,rot=0.015,cr=-0.04)
+c.hand('R',0.2,0.4,0.5); c.hand('R',0.5,0.9,1.0); c.hand('R',0.92,0.8,0.0)
+summon_end(c,C_['Kusanagi'],0.5,1.0)
+# Onimaru: iai - left hand on the hip, right hand crossed to it, a crouch of stillness, then one flash of a draw
+c=summon_clip('Onimaru',1.1)
+c.pose(0.22,ul=-0.15,fl=-0.8,ur=0.5,fr=-1.3,y=6,head=0.1,x=-3)
+c.pose(0.48,ul=-0.15,fl=-0.8,ur=0.5,fr=-1.32,y=7,head=0.11)                   # stillness
+c.pose(0.54,ur=-1.0,fr=0.0,y=-2,x=6,head=0.02,cr=-0.05,tint=(1.3,1.2,1.6))    # the draw
+c.pose(0.8,ur=-0.95,fr=-0.05,y=-1,x=5)
+c.hand('R',0.48,0.35,0.0); c.hand('R',0.54,0.9,1.0); c.hand('R',1.0,0.8,0.0)
+summon_end(c,C_['Onimaru'],0.54,1.1)
+# Ganjiang / Moye: both hands clasped before him, then drawn apart - the pair parting; Moye's left hand leads
+for sw,lead in (('Ganjiang','R'),('Moye','L')):
+    c=summon_clip(sw,1.1)
+    c.pose(0.28,ul=-0.35,fl=-1.3,ur=0.35,fr=1.3,head=0.12,y=2)
+    c.pose(0.48,ul=-0.37,fl=-1.35,ur=0.37,fr=1.35,head=0.13,y=2)
+    if lead=='R': c.pose(0.75,ul=0.45,fl=0.3,ur=-0.95,fr=-0.25,head=-0.04,x=3,y=-5,tint=GLOW)
+    else: c.pose(0.75,ul=0.95,fl=0.25,ur=-0.45,fr=-0.3,head=-0.06,x=-3,y=-5,tint=GLOW)
+    c.hand('LR',0.28,0.45,0.5); c.hand('LR',0.75,0.85,1.0); c.hand('LR',1.0,0.8,0.0)
+    summon_end(c,C_[sw],0.75,1.1)
 c=Clip('Summon',0.95); [c.tr.update({k:list(v)}) for k,v in M[-1].tr.items()]; M.append(c)  # generic = last sword's
 # more summon gestures (user request 2026-10-10 "검들 소환 모션도 좀 더 늘려줘"); MotionDirector picks one of these or the
 # sword's own clip. Colour-neutral: the palm circles take the sword's colour at runtime, the sigil glows white.
