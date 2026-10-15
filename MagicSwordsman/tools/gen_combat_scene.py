@@ -283,6 +283,18 @@ c.pose(0.28,x=-13,rot=-0.02,ur=-0.35,fr=-0.45,head=0.03)
 c.pose(0.42,x=-6,rot=-0.008,ur=-0.15,fr=-0.2,head=0.01,tint=(1,1,1))
 c.hand('R',0.0,0.5,0.0,(0.75,0.85,1.0)); c.hand('R',0.08,0.7,1.0,(0.75,0.85,1.0)); c.hand('R',0.45,0.7,0.0,(0.75,0.85,1.0))
 rest(c,0.55); M.append(c)
+# Guard broken (user 2026-10-15 "방어진이 무너지는 모션"): SwordVisuals.GuardBreak — the blades snap up by 0.09 s and the
+# blow breaks through them. He braces behind the palm (0-0.09), is driven back hard as the guard shatters (0.15, red
+# flash), stumbles a second step (0.32), catches himself (0.55) and straightens while his swords come home (~1.3 s).
+c=Clip('Hit_Break',1.0); rest(c,0)
+c.pose(0.07,x=-4,rot=-0.01,ur=-0.45,fr=-0.55,ul=0.12,head=0.04,cr=0.03)
+c.pose(0.15,x=-34,rot=-0.07,ur=-0.1,fr=-0.15,ul=0.4,fl=0.3,head=-0.14,cl=0.06,cr=0.07,y=3,tint=(1.8,0.78,0.78))
+c.pose(0.24,x=-30,rot=-0.05,ur=0.05,fr=0.0,ul=0.32,fl=0.25,head=-0.1,tint=(1.25,1,1))
+c.pose(0.34,x=-44,rot=-0.06,ur=-0.05,ul=0.3,fl=0.2,head=-0.08,y=5,cl=0.05,cr=0.05)
+c.pose(0.55,x=-30,rot=-0.02,ur=-0.2,fr=-0.2,ul=0.15,head=0.04,y=3,tint=(1,1,1))
+c.pose(0.8,x=-10,rot=-0.005,ur=-0.08,head=0.01)
+c.hand('R',0.0,0.5,0.0,(0.75,0.85,1.0)); c.hand('R',0.07,0.7,1.0,(0.75,0.85,1.0)); c.hand('R',0.18,0.6,0.0,(0.75,0.85,1.0))
+rest(c,1.0); M.append(c)
 # Death (user 2026-10-10 "본인이 소환한 마검들이 본인을 공격해서 마검들과 싸우다가 몸에 박힌 채로 털썩 주저앉는 모션", then
 # "죽을 때 ... 내가 보내준 사진처럼 쓰러졌으면": a warrior on both knees, upright, head bowed, bristling with blades).
 # His own swords turn on him (SwordVisuals.DeathBetrayal — keep the times in step). 0.15-0.5 they circle him and he turns

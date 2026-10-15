@@ -78,6 +78,50 @@ public static partial class SwordFx
         }
     }
 
+    /// <summary>
+    /// The guard breaks (SwordVisuals.GuardBreak, user request 2026-10-15): a hard white flash, jagged cracks of light
+    /// splitting outward from the contact as if the formation were glass, shards of light thrown away from the blow
+    /// (toward Ensifer: the blow carries through), a broken ring, and a breath of the lead sword's colour going out.
+    /// <paramref name="fail"/>: no Block at all — the swords only got in the way: a smaller crack, fewer shards.
+    /// </summary>
+    internal static void GuardBreakFx(Node2D rigRoot, Vector2 pos, SwordId lead, float side, bool fail)
+    {
+        try
+        {
+            Sfx.Guard();
+            var col = SwordVisuals.ColorOf(lead);
+            var k = fail ? 0.7f : 1f;
+            var fx = Root(rigRoot, pos, 1.0, 3);
+            var mid = Root(rigRoot, pos, 1.0, 1);
+            Flare(fx, Vector2.Zero, new Color(1f, 0.98f, 0.95f), 210 * k, 0.2);
+            Flare(mid, Vector2.Zero, col, 170 * k, 0.4);
+            // the cracks: a fan of jagged streaks, mostly back toward him and up/down, a short kinked tail on each
+            var rng = new Random();
+            var cracks = fail ? 4 : 7;
+            for (var i = 0; i < cracks; i++)
+            {
+                var a = (side > 0 ? Mathf.Pi : 0f) + (i - (cracks - 1) / 2f) * (fail ? 0.55f : 0.42f) + (float)(rng.NextDouble() - 0.5) * 0.25f;
+                var len = (110f + (float)rng.NextDouble() * 110f) * k;
+                var dir = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+                var crackCol = new Color(1f, 0.97f, 1f).Lerp(col.Lightened(0.4f), 0.35f);
+                Beam(fx, dir * len * 0.5f, a + Mathf.Pi / 2, crackCol, len, 5.5f, 0.3, delay: i * 0.008);
+                var kink = a + ((i % 2 == 0) ? 0.6f : -0.6f);
+                var kdir = new Vector2(Mathf.Cos(kink), Mathf.Sin(kink));
+                Beam(fx, dir * len + kdir * len * 0.2f, kink + Mathf.Pi / 2, crackCol, len * 0.4f, 3.5f, 0.26, delay: 0.03 + i * 0.008);
+            }
+            Ring(mid, Vector2.Zero, col.Lightened(0.3f), 20, 170 * k, 0.32, squash: 1.15f);
+            // shards of the broken guard, carried on by the blow
+            Burst(fx, Vector2.Zero, Ramp(new Color(0.95f, 0.95f, 1f), col.Lightened(0.3f)), "fx_shard", fail ? 8 : 18, 0.6,
+                220, 560 * k, new Vector2(0, 900), 70, 0.25f, 0.5f, true, dir: side > 0 ? 200 : -20, spin: 540, alignY: false);
+            Burst(fx, Vector2.Zero, Ramp(new Color(1f, 0.95f, 0.8f), new Color(1f, 0.7f, 0.4f)), "fx_spark", fail ? 10 : 22, 0.4,
+                200, 480 * k, new Vector2(0, 700), 120, 0.12f, 0.24f, true, dir: side > 0 ? 190 : -10, alignY: true);
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordFx] guard break {lead}: {e.Message}");
+        }
+    }
+
     /// <summary>A planted blade: a flat ring of dust where its point bites into the ground.</summary>
     internal static void GroundBite(Node2D rigRoot, Vector2 pos, Color col)
     {
