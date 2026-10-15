@@ -442,7 +442,7 @@ public static class SwordTalk
     /// </summary>
     private static bool TryBanter(Player player, SwordId arrived, TalkState st)
     {
-        if (!LocalContext.IsMe(player) || st.BanterDone || st.Busy) return false;
+        if (!LocalContext.IsMe(player) || st.BanterDone || st.Busy || HardQuiet(player)) return false;
         var combat = SwordCombat.Get(player);
         if (combat == null) return false;
         var now = Time.GetTicksMsec();
@@ -481,6 +481,7 @@ public static class SwordTalk
                 var (text, who) = lines[0];
                 // a sword that went back into the tomb mid-exchange cannot finish it
                 if (who is { } w && SwordCombat.Get(player) is { } combat && !combat.Present.Contains(w)) return;
+                if (!await WaitForCalm(player)) return;
                 var seconds = Math.Max(2.4, CharCount(text) * 0.13);
                 if (!Show(player, text, who, seconds, st)) return;
                 await Wait(seconds - 0.2);
@@ -506,6 +507,7 @@ public static class SwordTalk
         if (!LocalContext.IsMe(player)) return;
         var st = StateOf(player);
         if (st.Busy) return;
+        if (HardQuiet(player)) return;
         if (!MaySpeak(player, sword, situation)) return;
         var inCombat = situation is Situation.Summon or Situation.CombatStart or Situation.LowHp or Situation.Switch
             or Situation.EliteStart or Situation.BossStart;
@@ -541,6 +543,70 @@ public static class SwordTalk
     }
 
     internal static string SwordKey(SwordId sword) => sword.ToString().ToUpperInvariant();
+
+    // ------------------------------------------------------------------ quiet times
+    // Bug 2026-10-15 "게임 시작하고 만검총에서 검 랜덤으로 얻을 때 배경에서 갑자기 검 대화가 표시되는 버그": the run-start pick
+    // is an EventRoom (TombResonanceEvent, not an Ancient), so entering it rolled the ordinary-event remark and a sword
+    // spoke behind the pick screen / the "new sword" popup. Two gates now:
+    //   HardQuiet  - nothing is even scheduled: the run-start sequence (act 0 until the start pick is done, outside
+    //                combat) and every one of our own sword events (pick, legends, epitaph...);
+    //   ScreenBusy - a line about to be shown waits (up to CalmWaitSeconds, else the exchange is dropped) while one of
+    //                our popups / choice screens (CanvasLayers named "MagicSword*" under the scene root: new sword,
+    //                mastery, union unlocked, event choice, boss cut-in, sword viewer) or a game overlay / capstone
+    //                screen (card selection, rewards, deck view, map...) is open.
+
+    private const double CalmWaitSeconds = 8.0;
+
+    private static bool HardQuiet(Player player)
+    {
+        try
+        {
+            if (SwordCombat.Get(player) != null) return false;
+            var rs = player.RunState;
+            if (rs.CurrentActIndex == 0 && player.GetRelic<Mangeomchong>() is { } tomb &&
+                tomb.GetRunCounter(Events.TombResonanceEvent.DoneKey(0)) == 0)
+                return true;
+            return rs.CurrentRoom is EventRoom { CanonicalEvent: { } ev } &&
+                   (ev.GetType().Namespace ?? "").StartsWith("MagicSwordsman", StringComparison.Ordinal);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>A popup, choice screen or game overlay covers the scene right now.</summary>
+    internal static bool ScreenBusy()
+    {
+        try
+        {
+            if (Engine.GetMainLoop() is SceneTree { Root: { } root })
+                foreach (var child in root.GetChildren())
+                    if (child.Name.ToString().StartsWith("MagicSword", StringComparison.Ordinal) &&
+                        !child.IsQueuedForDeletion())
+                        return true;
+            if (MegaCrit.Sts2.Core.Nodes.Screens.Overlays.NOverlayStack.Instance is { } overlays && overlays.ScreenCount > 0)
+                return true;
+            return MegaCrit.Sts2.Core.Nodes.Screens.Capstones.NCapstoneContainer.Instance is { InUse: true };
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>Waits while a screen is open (<see cref="ScreenBusy"/>); false = still busy / now quiet: drop the line.</summary>
+    private static async Task<bool> WaitForCalm(Player player)
+    {
+        var waited = 0.0;
+        while (ScreenBusy() && waited < CalmWaitSeconds)
+        {
+            await Wait(0.25);
+            waited += 0.25;
+        }
+
+        return !ScreenBusy() && !HardQuiet(player);
+    }
 
     /// <summary>Base key of a random unused variant (…&lt;n&gt;), or null when the sword has no line for this moment.</summary>
     private static string? PickLine(Player player, SwordId sword, Situation situation, TalkState st)
@@ -588,6 +654,7 @@ public static class SwordTalk
             {
                 // a sword that went back into the tomb mid-exchange cannot finish it
                 if (speaker is { } s && SwordCombat.Get(player) is { } combat && !combat.Present.Contains(s)) return;
+                if (!await WaitForCalm(player)) return;
                 var seconds = Math.Max(2.4, CharCount(text) * 0.13);
                 if (!Show(player, text, speaker, seconds, st)) return;
                 await Wait(seconds - 0.2);
@@ -773,8 +840,24 @@ public static class SwordTalk
             if (visuals == null) return null;
             if (visuals.TalkPosition != null) return visuals.TalkPosition.GlobalPosition;
             if (visuals.FindChild("Head", true, false) is not Sprite2D head || head.Texture == null) return null;
-            var rect = head.GetRect();
-            return head.ToGlobal(new Vector2(rect.End.X + 10f, rect.Position.Y + rect.Size.Y * 0.45f));
+            // 2026-10-15 "말풍선이 조금씩 왼쪽이나 오른쪽에": the texture rect includes transparent padding, so its right
+            // edge was well right of the face. Use the opaque pixels of the head art instead (centred texture space ->
+            // the sprite's local space: + half size when not centred, + offset; mirrored when FlipH), and take
+            // whichever side is on the screen's right (the bubble opens to the right of the tail).
+            var used = SpriteBounds.Used(head.Texture);
+            if (!head.Centered) used.Position += head.Texture.GetSize() / 2f;
+            used.Position += head.Offset;
+            var y = used.Position.Y + used.Size.Y * 0.42f;
+            float x0 = used.Position.X, x1 = used.End.X;
+            if (head.FlipH)
+            {
+                var c = head.Centered ? head.Offset.X : head.Offset.X + head.Texture.GetWidth() / 2f;
+                (x0, x1) = (2 * c - x1, 2 * c - x0);
+            }
+
+            var a = head.ToGlobal(new Vector2(x0, y));
+            var b = head.ToGlobal(new Vector2(x1, y));
+            return (a.X > b.X ? a : b) + new Vector2(4f, 0f);
         }
         catch (Exception)
         {
@@ -799,7 +882,7 @@ public static class SwordTalk
             {
                 if (child is not Node2D node || node.Name != $"Sword_{sword}" || node.IsQueuedForDeletion() ||
                     !node.IsVisibleInTree() || node.Modulate.A < 0.2f) continue;
-                return node.ToGlobal(new Vector2(20f, -95f));
+                return SwordVisuals.SpeechPointOf(node) ?? node.ToGlobal(new Vector2(0f, -95f));
             }
 
             return null;
@@ -840,7 +923,14 @@ public static class SwordTalk
                 st.Ghosts[sword] = ghost;
             }
 
-            return ghost.ToGlobal(new Vector2(18f, -GhostHeight * 0.32f));
+            // tail just above the top of the drawn blade, centred on it (the old +18 px put it right of the sword)
+            if (ghost.GetNodeOrNull<Sprite2D>("Sprite") is { Texture: { } gt } gs)
+            {
+                var used = SpriteBounds.Used(gt);
+                return ghost.ToGlobal(new Vector2(used.GetCenter().X * gs.Scale.X, used.Position.Y * gs.Scale.Y - 6f));
+            }
+
+            return ghost.ToGlobal(new Vector2(0f, -GhostHeight * 0.5f));
         }
         catch (Exception e)
         {
