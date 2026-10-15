@@ -21,14 +21,19 @@ internal static class SkofnungTips
     public static TooltipSource Wound => new(_ => HoverTipFactory.FromPower<SkofnungWoundPower>());
 }
 
-/// <summary>광전사의 혼 (Basic): 6 damage (+1/L). Apply 1 extra wound (2 with the current-sword effect).</summary>
+/// <summary>
+/// 광전사의 혼 (Basic): 5 damage (+1/L), then apply 2 Spectral Scars to the target (3 with the current-sword effect).
+/// User request 2026-10-15 (#9): Skofnung's two starter cards must clearly include one that applies Scars — the old
+/// text "1 more Scar" read as if the card itself applied none. The card now states its own 2 Scars outright (damage
+/// 6 -> 5 to pay for the extra Scar). Lore: the souls of King Hrólfr's twelve berserkers dwell in the blade.
+/// </summary>
 public sealed class SkofnungBerserkerSoul : SkofnungCard
 {
     public SkofnungBerserkerSoul() : base(1, CardType.Attack, CardRarity.Basic, TargetType.AnyEnemy)
     {
-        WithDamage(6);
+        WithDamage(5);
         WithDamagePerLevel(1);
-        WithVar("Wounds", 1);
+        WithVar("Wounds", 2);
         WithTip(SkofnungTips.Wound);
     }
 
