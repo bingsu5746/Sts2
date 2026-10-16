@@ -40,15 +40,9 @@ public sealed class ClaiomhSolaisBehavior : SwordBehavior
         if (SolaisLight.TryGetActiveEffect(player, out var effectCtx))
         {
             // [확정] charge 1 (inherited: half of 1 -> min 1 = 1)
+            // (네 개의 보물 no longer adds to this charge since 2026-10-15: it gains Light on card plays instead.)
             var amount = effectCtx.Scale(SolaisLight.ChargePerTurn);
-
-            // 네 가지 보물: +1 Light per stack; from level 3 also 3 Block per stack.
-            var treasures = ctx.Creature.GetPower<SolaisFourTreasuresPower>();
-            if (treasures != null) amount += treasures.Amount;
-
             await SolaisLight.Gain(choiceContext, player, amount, null);
-
-            if (treasures != null) await treasures.AfterLightCharged(SwordCombat.LevelOf(player, Id));
         }
         else
         {

@@ -7,6 +7,8 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace MagicSwordsman.MagicSwordsmanCode.Cards.Durandal;
 
@@ -71,18 +73,36 @@ public sealed class DurandalUnscathed : DurandalCard
     }
 }
 
-/// <summary>성 드니의 머리카락 (Common): cost 0, 3 Block (+1/L).</summary>
+/// <summary>
+/// 성 드니의 머리카락 (Common): cost 0, 3 Block (+1/L). Each time you play it, its Block increases by 2 this combat.
+/// Reworked 2026-10-16 (near-clone pass): it was a plain "3 Block" — the starter 성유물의 칼자루 at cost 0. Now the
+/// relic's protection accumulates (field per combat card, 되풀이 / DainsleifRecurrence pattern).
+/// </summary>
 public sealed class DurandalStDenissHair : DurandalCard
 {
+    public const int Growth = 2;
+    private int _bonus;
+
     public DurandalStDenissHair() : base(0, CardType.Skill, CardRarity.Common, TargetType.Self)
     {
         WithBlock(3);
         WithBlockPerLevel(1);
+        WithVar("Growth", Growth);
+    }
+
+    public override decimal ModifyBlockAdditive(Creature target, decimal block, ValueProp props, CardModel? cardSource,
+        CardPlay? cardPlay)
+    {
+        var bonus = base.ModifyBlockAdditive(target, block, props, cardSource, cardPlay);
+        if (ReferenceEquals(cardSource, this)) bonus += _bonus;
+        return bonus;
     }
 
     protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        AssertMutable();
+        _bonus += Growth;
     }
 }
 

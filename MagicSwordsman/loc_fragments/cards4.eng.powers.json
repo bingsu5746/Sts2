@@ -1,0 +1,17 @@
+{
+  "MAGICSWORDSMAN-SOLAIS_DAZZLE_POWER.title": "Dazzle",
+  "MAGICSWORDSMAN-SOLAIS_DAZZLE_POWER.description": "Until your next turn, whenever an enemy without [gold]Vulnerable[/gold] attacks you, automatically spend 1 [gold]Light[/gold] to apply Vulnerable to it.",
+  "MAGICSWORDSMAN-SOLAIS_DAZZLE_POWER.smartDescription": "Until your next turn, whenever an enemy without [gold]Vulnerable[/gold] attacks you, automatically spend 1 [gold]Light[/gold] to apply {Amount} Vulnerable to it.",
+  "MAGICSWORDSMAN-SOLAIS_SRENG_POWER.title": "Sreng's Blow",
+  "MAGICSWORDSMAN-SOLAIS_SRENG_POWER.description": "Until your next turn, whenever an enemy attack deals unblocked damage to you, gain 1 [gold]Light[/gold].",
+  "MAGICSWORDSMAN-SOLAIS_SRENG_POWER.smartDescription": "Until your next turn, whenever an enemy attack deals unblocked damage to you, gain 1 [gold]Light[/gold] ({Amount} left).",
+  "MAGICSWORDSMAN-SOLAIS_KINGSHIP_POWER.title": "Kingship Restored",
+  "MAGICSWORDSMAN-SOLAIS_KINGSHIP_POWER.description": "While you have 3 or more [gold]Light[/gold], your attacks deal more damage per hit.",
+  "MAGICSWORDSMAN-SOLAIS_KINGSHIP_POWER.smartDescription": "While you have 3 or more [gold]Light[/gold], your attacks deal {Amount} more damage per hit.",
+  "MAGICSWORDSMAN-SOLAIS_DAWN_POWER.title": "Dawn of Findias",
+  "MAGICSWORDSMAN-SOLAIS_DAWN_POWER.description": "At the start of your next turn, gain [gold]Light[/gold].",
+  "MAGICSWORDSMAN-SOLAIS_DAWN_POWER.smartDescription": "At the start of your next turn, gain {Amount} [gold]Light[/gold].",
+  "MAGICSWORDSMAN-SOLAIS_LIT_SHEATH_POWER.title": "Glowing Sheath",
+  "MAGICSWORDSMAN-SOLAIS_LIT_SHEATH_POWER.description": "Whenever you gain [gold]Block[/gold] from a card, gain 1 [gold]Light[/gold] (limited per turn).",
+  "MAGICSWORDSMAN-SOLAIS_LIT_SHEATH_POWER.smartDescription": "Whenever you gain [gold]Block[/gold] from a card, gain 1 [gold]Light[/gold] (at most {Amount} times per turn)."
+}

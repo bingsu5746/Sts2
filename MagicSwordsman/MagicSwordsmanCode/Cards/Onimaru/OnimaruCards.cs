@@ -133,16 +133,31 @@ public sealed class OnimaruTaiheiki : OnimaruCard
         Command(choiceContext, cardPlay, DynamicVars["Times"].IntValue);
 }
 
-/// <summary>다섯 중 으뜸 (Rare, cost 2): 【명령】 three times.</summary>
+/// <summary>
+/// 다섯 중 으뜸 (Rare, cost 2): 【명령】 2 times. Each time you play it, it Commands 1 more time this combat (max 5).
+/// Reworked 2026-10-16 (near-clone pass): it was "【명령】 three times", the Uncommon 태평기의 기록 (twice) with one
+/// more. Now it escalates over the fight (field per combat card, 되풀이 / DainsleifRecurrence pattern).
+/// Lore (high confidence): Onimaru Kunitsuna is counted among the Tenka-Goken, the "five swords under heaven".
+/// </summary>
 public sealed class OnimaruFirstAmongFive : OnimaruCard
 {
+    public const int BaseTimes = 2;
+    public const int MaxTimes = 5;
+    private int _extra;
+
     public OnimaruFirstAmongFive() : base(2, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy)
     {
-        WithVar("Times", 3);
+        WithCalculatedVar("Times", BaseTimes, static (card, _) => card is OnimaruFirstAmongFive f ? f._extra : 0);
+        WithVar("MaxTimes", MaxTimes);
     }
 
-    protected override Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay) =>
-        Command(choiceContext, cardPlay, DynamicVars["Times"].IntValue);
+    protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        var times = Math.Min(MaxTimes, BaseTimes + _extra);
+        AssertMutable();
+        if (BaseTimes + _extra < MaxTimes) _extra++;
+        await Command(choiceContext, cardPlay, times);
+    }
 }
 
 /// <summary>
