@@ -38,7 +38,9 @@ namespace MagicSwordsman.MagicSwordsmanCode.Relics;
 ///  - RunCounters     string "key=value;..." free-form per-run counters for content (Tyrfing curse count...)
 ///
 /// First sword (사용자 결정 2026-10-09): there is no fixed starting sword any more. When the run is created the relic
-/// grants one random sword out of all 10 (간장·막야 = one pair) with its starter cards — see GrantStartingSword.
+/// rolls one random sword out of all 10 (간장·막야 = one pair) — see RollStartingSword. The roll stays SEALED (only a
+/// saved run counter, nothing owned, no cards) until the run-start roulette reveals it (AwakenFirstSword), so nothing
+/// (deck, relic text, sword viewer, rewards at Neow) shows it before that (bug report 2026-10-16).
 ///
 /// Effects:
 ///  - Card rewards and shops only offer common cards + cards of owned swords.
@@ -54,7 +56,7 @@ public class Mangeomchong : MagicSwordsmanRelic
 {
     private const string SwordListVar = "SwordList";
 
-    // Empty until the run's random first sword is granted (AfterObtained -> GrantStartingSword, 2026-10-09).
+    // Empty until the run's random first sword is awakened (AwakenFirstSword, run-start roulette or fallback).
     private int[] _ownedSwordIds = [];
     private int[] _swordLevels = new int[16];
     private int[] _everOwnedIds = [];
@@ -153,6 +155,7 @@ public class Mangeomchong : MagicSwordsmanRelic
         {
             AssertMutable();
             _runCounters = value ?? "";
+            UpdateSwordList(); // the sealed first sword (a run counter) changes the description line
         }
     }
 
@@ -185,11 +188,11 @@ public class Mangeomchong : MagicSwordsmanRelic
         ExtraSlots = Math.Max(0, _extraSlots + amount);
     }
 
-    /// <summary>Not owned yet and the sword + its partners fit into the free slots.</summary>
+    /// <summary>Not owned yet, not the sealed first sword, and the sword + its partners fit into the free slots.</summary>
     public bool CanAcquire(SwordId sword)
     {
         var group = SwordRegistry.WithPartners(sword);
-        if (group.Any(Owns)) return false;
+        if (group.Any(Owns) || group.Any(IsSealedFirstSword)) return false;
         return SwordRegistry.GroupSlotCost(sword) <= FreeSlots;
     }
 
@@ -400,6 +403,13 @@ public class Mangeomchong : MagicSwordsmanRelic
             // Short description (사용자 요청 2026-10-04): the owned-sword list only appears once there is one, on its own lines.
             var lines = OwnedSwords.Select(s =>
                 $"- {SwordRegistry.DisplayName(s)} ({GetLevel(s)}/{SwordRegistry.MaxLevel})").ToList();
+            // The run's first sword before the run-start roulette: a sealed line that never names it.
+            if (SealedFirstSword != null)
+            {
+                var sealedLine = MegaCrit.Sts2.Core.Localization.LocString.GetIfExists(Events.SwordLore.Table,
+                    Events.SwordLore.Prefix + "." + SealedLineKey);
+                lines.Add("- " + (sealedLine?.GetFormattedText() ?? "???"));
+            }
             sv.StringValue = lines.Count == 0 ? "" : "\n" + string.Join("\n", lines);
         }
         catch (Exception)
@@ -425,55 +435,126 @@ public class Mangeomchong : MagicSwordsmanRelic
     {
         await base.AfterObtained();
         // New run: RunManager.FinalizeStartingRelics calls this for every player's starting relics on every client.
-        // Not on load (the saved properties already hold the swords), and not after the Ancient upgrade
-        // (OpenedMangeomchong copies the run data before RelicCmd.Replace obtains it).
-        if (_ownedSwordIds.Length == 0 && _everOwnedIds.Length == 0) GrantStartingSword();
+        // Not on load (the saved properties already hold the swords / the sealed roll), and not after the Ancient
+        // upgrade (OpenedMangeomchong copies the run data, RunCounters included, before RelicCmd.Replace obtains it).
+        if (_ownedSwordIds.Length == 0 && _everOwnedIds.Length == 0 && StartingSword == null && SealedFirstSword == null)
+            RollStartingSword();
         UpdateSwordList();
     }
 
-    /// <summary>Run counter: the run's random first sword as (int)SwordId + 1 (0 = none / run from before 2026-10-09).</summary>
+    /// <summary>
+    /// Run counter: the run's random first sword as (int)SwordId + 1, set when it is AWAKENED (granted)
+    /// (0 = not awakened yet / run from before 2026-10-09).
+    /// </summary>
     public const string StartingSwordCounter = "start.first_sword";
 
-    /// <summary>The run's random first sword (pair leader), or null for runs started before the rule existed.</summary>
+    /// <summary>
+    /// Run counter: the seeded first-sword roll as (int)SwordId + 1 while it is still sealed (0 = nothing sealed).
+    /// Saved with the relic (RunCounters). Never shown anywhere; cleared by <see cref="AwakenFirstSword"/>.
+    /// </summary>
+    public const string SealedFirstSwordCounter = "start.first_sword_sealed";
+
+    /// <summary>SwordLore generic key of the relic description line for the sealed first sword.</summary>
+    private const string SealedLineKey = "SEALED_FIRST_SWORD";
+
+    /// <summary>The run's random first sword (pair leader) once awakened, or null (sealed / runs before the rule).</summary>
     public SwordId? StartingSword =>
         GetRunCounter(StartingSwordCounter) is var v and > 0 ? (SwordId)(v - 1) : null;
+
+    /// <summary>
+    /// The rolled first sword (pair leader) while it is still sealed, else null. Only the run-start event
+    /// (TombResonanceEvent, roulette target) may read it; UI must not show it.
+    /// </summary>
+    public SwordId? SealedFirstSword =>
+        GetRunCounter(SealedFirstSwordCounter) is var v and > 0 ? (SwordId)(v - 1) : null;
+
+    /// <summary>True for the sealed first sword and its partner (reserved: never offered while sealed).</summary>
+    public bool IsSealedFirstSword(SwordId sword) =>
+        SealedFirstSword is { } sealedSword && SwordRegistry.WithPartners(sealedSword).Contains(sword);
 
     /// <summary>
     /// 사용자 결정 2026-10-09: the first sword is no longer Gram but one of all 10 swords (간장·막야 = one pair) at random.
     /// Seeded: a named Rng on the player's own seed (run seed + player slot), so the roll is fixed for a seed, differs
     /// between the players of a multiplayer run, is identical on every client, and advances no game Rng.
-    /// The run is still being created here (no room, no UI), so this works like Player.PopulateStartingDeck: the sword's
-    /// StarterCards (the same cards an acquisition grants: 2 per sword or pair) go straight into the deck without
-    /// commands or previews, and OnAcquiredAsStartingSword runs the run-level part of OnAcquired (currently nothing: the
-    /// 간장·막야 Max HP cost is waived for the random first sword, 사용자 결정 2026-10-09).
-    /// The sword's 1-of-3 card pick (SwordCardPick) needs a synced screen, so it is offered by the run-start pick instead.
-    /// The presentation (popup + the text naming the sword) is the run-start pick (TombResonanceEvent START page).
-    /// Saved through OwnedSwordIds / EverOwnedIds / RunCounters like every other acquisition.
+    /// Bug report 2026-10-16: granting it here (deck cards + owned sword) showed it in the deck view / relic text while
+    /// Neow's gift was still being chosen. So only the roll is stored here (sealed, saved run counter); the sword and its
+    /// StarterCards are granted by <see cref="AwakenFirstSword"/> at the run-start roulette (or the fallback before the
+    /// first other room, see <see cref="BeforeRoomEntered"/>).
     /// </summary>
-    private void GrantStartingSword()
+    private void RollStartingSword()
     {
         var candidates = SwordRegistry.StartingSwordCandidates();
         if (candidates.Count == 0) return;
         var rng = new MegaCrit.Sts2.Core.Random.Rng(Owner.PlayerRng.Seed, "magicswordsman_starting_sword");
         var sword = candidates[rng.NextInt(candidates.Count)];
+        SetRunCounter(SealedFirstSwordCounter, (int)SwordRegistry.GroupLeader(sword) + 1);
+        MainFile.Logger.Info("[Mangeomchong] starting sword rolled (sealed until the run-start reveal)");
+    }
+
+    /// <summary>
+    /// Grants the sealed first sword: owned + ever owned, its StarterCards (2 per sword or pair) into the deck, and
+    /// OnAcquiredAsStartingSword (the run-level part of OnAcquired; the 간장·막야 Max HP cost is waived for the random
+    /// first sword, 사용자 결정 2026-10-09). No slot check (it is the first sword), no SwordCardPick (offered by the
+    /// run-start pick, TombResonanceEvent.OfferStartCardPicks), no popup (the caller decides). Uses no Rng and runs on
+    /// every client in the same order (event option / room hooks), so multiplayer stays in sync.
+    /// Returns the sword, or null when nothing was sealed (already awakened, or a run from before this rule).
+    /// </summary>
+    public async Task<SwordId?> AwakenFirstSword(bool previewCards)
+    {
+        if (SealedFirstSword is not { } sword) return null;
+        SetRunCounter(SealedFirstSwordCounter, 0); // first: a re-entrant call finds nothing sealed
         var group = SwordRegistry.WithPartners(sword);
-
-        OwnedSwordIds = group.Select(s => (int)s).ToArray();
-        EverOwnedIds = group.Select(s => (int)s).ToArray();
         SetRunCounter(StartingSwordCounter, (int)sword + 1);
+        if (group.Any(Owns))
+        {
+            UpdateSwordList();
+            return sword;
+        }
 
-        foreach (var s in group)
+        var firstTime = group.Where(s => !EverOwned(s)).ToList();
+        OwnedSwordIds = _ownedSwordIds.Concat(group.Select(s => (int)s)).Distinct().ToArray();
+        EverOwnedIds = _everOwnedIds.Concat(group.Select(s => (int)s)).Distinct().ToArray();
+
+        var results = new List<CardPileAddResult>();
+        foreach (var s in firstTime)
         {
             foreach (var canonical in SwordRegistry.Get(s).StarterCards)
             {
                 var card = Owner.RunState.CreateCard(canonical, Owner);
-                card.FloorAddedToDeck = 1;
-                Owner.Deck.AddInternal(card);
+                results.Add(await CardPileCmd.Add(card, PileType.Deck));
             }
         }
 
+        if (previewCards && results.Count > 0) CardCmd.PreviewCardPileAdd(results);
         foreach (var s in group) SwordRegistry.Get(s).OnAcquiredAsStartingSword(Owner);
-        MainFile.Logger.Info($"[Mangeomchong] starting sword: {string.Join(",", group)}");
+        UpdateSwordList();
+        Flash();
+        MainFile.Logger.Info($"[Mangeomchong] first sword awakened: {string.Join(",", group)}");
+        return sword;
+    }
+
+    /// <summary>
+    /// Fallback for the sealed first sword: the run-start pick (TombResonanceEvent, act 0) normally awakens it. If any
+    /// other room is entered first (a combat, shop, rest site, ? event, or anything after act 0 — e.g. the pick was
+    /// skipped or lost), the sword is granted right before that room starts, so the run is never swordless. Combat rooms
+    /// set up the fight in room.Enter, which runs after this hook (RunManager.EnterRoomInternal). The Ancient (Neow)
+    /// room and the run-start pick itself are exempt. Not called for the map room or for pre-finished rooms on load.
+    /// </summary>
+    public override async Task BeforeRoomEntered(AbstractRoom room)
+    {
+        await base.BeforeRoomEntered(room);
+        if (SealedFirstSword == null || IsRunStartRoom(room)) return;
+        await AwakenWithoutRoulette();
+    }
+
+    private bool IsRunStartRoom(AbstractRoom room) =>
+        Owner.RunState.CurrentActIndex == 0 &&
+        room is EventRoom { CanonicalEvent: AncientEventModel or Events.TombResonanceEvent };
+
+    private async Task AwakenWithoutRoulette()
+    {
+        if (await AwakenFirstSword(previewCards: false) is { } sword && LocalContext.IsMe(Owner))
+            SwordAcquiredPopup.Show(sword, "POPUP_HEADER_FIRST");
     }
 
     public override async Task AfterRoomEntered(AbstractRoom room)
@@ -563,10 +644,11 @@ public class Mangeomchong : MagicSwordsmanRelic
     // Combat hooks: sword state + owned-sword lifecycle
     // =====================================================================================
 
-    public override Task BeforeCombatStart()
+    public override async Task BeforeCombatStart()
     {
+        // Last-resort fallback (normally BeforeRoomEntered already did it): never fight with the first sword sealed.
+        if (SealedFirstSword != null) await AwakenWithoutRoulette();
         SwordCombat.Reset(Owner);
-        return Task.CompletedTask;
     }
 
     public override async Task BeforeHandDraw(Player player, PlayerChoiceContext choiceContext,

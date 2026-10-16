@@ -15,7 +15,8 @@ public static class SwordEventHelper
 
     /// <summary>
     /// Swords an event may offer: offerable (every sword incl. Gram since 2026-10-09; not Moye — the pair is offered as
-    /// Ganjiang) and not owned.
+    /// Ganjiang) and not owned. The run's still-sealed first sword (Mangeomchong.SealedFirstSword) counts as owned here:
+    /// the run-start pick rolls its three candidates before the roulette awakens it, and must not offer it.
     /// Unlike <see cref="SwordRegistry.RollAcquisitionCandidates"/> this ignores free slots on purpose: content doc §6.1
     /// lets the player release a sword when Mangeomchong is full.
     /// </summary>
@@ -24,7 +25,7 @@ public static class SwordEventHelper
             .Where(s => SwordRegistry.GetDefinition(s).OfferedByAcquisition)
             .Select(SwordRegistry.GroupLeader)
             .Distinct()
-            .Where(s => !SwordRegistry.WithPartners(s).Any(tomb.Owns))
+            .Where(s => !SwordRegistry.WithPartners(s).Any(p => tomb.Owns(p) || tomb.IsSealedFirstSword(p)))
             .ToList();
 
     /// <summary>Up to <paramref name="count"/> distinct unowned swords, rolled with a game Rng.</summary>

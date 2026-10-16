@@ -13,7 +13,8 @@ namespace MagicSwordsman.MagicSwordsmanCode.Character;
 /// 마검사 (Magic Swordsman). Spec: docs/magic-swordsman-spec.md §1, §6.
 /// HP 68, gold 99 / energy 3 come from the character base defaults.
 /// Starting deck (2026-10-09): Strike x4, Defend x4, 검 바꾸기 — no sword card. The run's random first sword adds its
-/// own 2 starter cards (Mangeomchong.GrantStartingSword) and the run-start pick 2 more (13 cards after the pick).
+/// own 2 starter cards when the run-start roulette awakens it (Mangeomchong.AwakenFirstSword) and the run-start pick 2
+/// more (13 cards after the pick).
 /// </summary>
 public class MagicSwordsmanCharacter : PlaceholderCharacterModel
 {

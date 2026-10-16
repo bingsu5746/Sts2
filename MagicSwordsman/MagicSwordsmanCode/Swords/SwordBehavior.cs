@@ -57,8 +57,8 @@ public abstract class SwordBehavior
 
     /// <summary>
     /// The run-level part of <see cref="OnAcquired"/> (firstTime = true) for the random first sword of a run, which is
-    /// granted while the run is still being created (Mangeomchong.AfterObtained via RunManager.FinalizeStartingRelics,
-    /// before any room or UI exists). Must change state directly and synchronously — no commands, no visuals.
+    /// granted when it is awakened (Mangeomchong.AwakenFirstSword: the run-start roulette, or the fallback right before
+    /// the first other room). Should change state directly and synchronously — no visuals.
     /// Default: nothing. (간장·막야 no longer uses it: the pair's Max HP cost is waived when it is the random first sword,
     /// 사용자 결정 2026-10-09.)
     /// </summary>

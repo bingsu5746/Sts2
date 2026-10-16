@@ -11,7 +11,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Visuals;
 /// <summary>
 /// Presentation only (user report #4): the run-start "첫 검을 깨운다" roulette. A framed slot cycles through every
 /// sword's art with a tick sound, slowing down over ~2.6 s, and stops on <paramref name="target"/> — the first sword
-/// that Mangeomchong already rolled (seeded, Mangeomchong.GrantStartingSword), so the animation only REVEALS it and can
+/// that Mangeomchong already rolled and keeps sealed (seeded, Mangeomchong.RollStartingSword), so the animation only REVEALS it and can
 /// never change the result. Local player only; failures complete the task immediately; a click skips to the end.
 /// UNVERIFIED in game: look at non-1080p resolutions.
 /// </summary>

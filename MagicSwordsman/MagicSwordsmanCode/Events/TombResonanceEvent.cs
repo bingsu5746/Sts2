@@ -61,8 +61,8 @@ public sealed class TombResonanceEvent : CustomEventModel
 
     /// <summary>
     /// Run start (act index 0): pick 1 of 3 swords next to the run's random first sword, no PASS (사용자 결정 2026-10-04;
-    /// the first sword is random since 2026-10-09, see Mangeomchong.GrantStartingSword). The page names the first sword
-    /// and shows its "new sword" popup, because the sword itself was granted before any UI existed.
+    /// the first sword is random since 2026-10-09, see Mangeomchong.RollStartingSword). The first sword is rolled at run
+    /// creation but stays sealed (not owned, no cards) until "첫 검을 깨운다" awakens it here (bug report 2026-10-16).
     /// </summary>
     private bool IsStart => ActIndex == 0;
 
@@ -78,8 +78,9 @@ public sealed class TombResonanceEvent : CustomEventModel
 
     /// <summary>
     /// Run start (user report #4): the first sword is hidden until the player presses "첫 검을 깨운다", which plays the
-    /// roulette (Visuals/SwordRoulette) landing on the sword Mangeomchong already rolled with the run seed.
-    /// Per event instance: a reload shows the button (and the same sword) again.
+    /// roulette (Visuals/SwordRoulette) landing on the sword Mangeomchong already rolled with the run seed, and only then
+    /// grants it (Mangeomchong.AwakenFirstSword). Per event instance: a reload shows the button again; the roll is saved
+    /// with the relic (sealed run counter), so it is the same sword, and an awakened sword is never granted twice.
     /// </summary>
     private bool _firstSwordRevealed;
 
@@ -97,11 +98,12 @@ public sealed class TombResonanceEvent : CustomEventModel
         return desc;
     }
 
-    /// <summary>The run's random first sword (older runs: the first owned sword).</summary>
+    /// <summary>The run's random first sword: still sealed, or awakened (older runs: the first owned sword).</summary>
     private static SwordId? FirstSword(Relics.Mangeomchong? tomb) =>
         tomb == null
             ? null
-            : tomb.StartingSword ?? tomb.OwnedSwords.Select(SwordRegistry.GroupLeader).Cast<SwordId?>().FirstOrDefault();
+            : tomb.SealedFirstSword ?? tomb.StartingSword ??
+              tomb.OwnedSwords.Select(SwordRegistry.GroupLeader).Cast<SwordId?>().FirstOrDefault();
 
     protected override Task BeforeEventStarted(bool isPreFinished)
     {
@@ -165,18 +167,22 @@ public sealed class TombResonanceEvent : CustomEventModel
     private void ShowStart() => SetEventState(InitialDescription, GenerateInitialOptionsWrapper());
 
     /// <summary>
-    /// "첫 검을 깨운다": roulette (local player only, presentation) -> the "new sword" popup (header "가장 먼저 깨어난
-    /// 마검") -> the usual 1-of-3 page. The sword itself was granted at run creation with the seeded roll; nothing here
-    /// touches an Rng or the run state, so every client stays in sync.
+    /// "첫 검을 깨운다": roulette (local player only, presentation) -> the sealed sword is granted
+    /// (Mangeomchong.AwakenFirstSword: owned + its starter cards) -> the "new sword" popup (header "가장 먼저 깨어난
+    /// 마검") -> the usual 1-of-3 page. The option runs on every client (EventSynchronizer replays a non-shared event's
+    /// option for its chooser on each client); the grant uses no Rng, only the roll saved at run creation, so every
+    /// client stays in sync. The three candidates never include the sealed sword (SwordEventHelper.Unowned skips it).
     /// </summary>
     private async Task RevealFirstSword()
     {
         _firstSwordRevealed = true;
         var tomb = Owner != null ? SwordEventHelper.Tomb(Owner) : null;
-        if (tomb != null && FirstSword(tomb) is { } first && LocalContext.IsMe(Owner))
+        if (tomb != null && FirstSword(tomb) is { } first)
         {
-            await SwordRoulette.Play(first);
-            SwordAcquiredPopup.Show(first, "POPUP_HEADER_FIRST");
+            var isMe = LocalContext.IsMe(Owner);
+            if (isMe) await SwordRoulette.Play(first);
+            await tomb.AwakenFirstSword(previewCards: isMe);
+            if (isMe) SwordAcquiredPopup.Show(first, "POPUP_HEADER_FIRST");
         }
         ShowStart();
     }

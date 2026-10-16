@@ -12,7 +12,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 
 /// <summary>
 /// 그람. Since 2026-10-09 an ordinary sword: no longer the fixed first sword of a run (that is random, see
-/// Mangeomchong.GrantStartingSword) and offered by every acquisition pool like the others.
+/// Mangeomchong.RollStartingSword) and offered by every acquisition pool like the others.
 /// Spec §7: current-sword effect "공격 피해 +강화 단계" [확정]; Kusanagi inherits "+강화 단계의 절반".
 /// Cost [확정]: on reaching level 5, curse "니벨룽의 보물" (content doc §3.2 / §0.4 #18: only the FIRST time
 /// level 5 is reached in a run, one card per run).
