@@ -2192,5 +2192,6 @@
   "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.START_SEALED.description": "Before you set out, the Tomb of Ten Thousand Swords hums at your back.\nSomewhere inside, a sword is stirring. No one knows yet which one will answer.",
   "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.START_SEALED.options.AWAKEN.title": "Wake the First Sword",
   "MAGICSWORDSMAN-TOMB_RESONANCE_EVENT.pages.START_SEALED.options.AWAKEN.description": "Lay your hand on the tomb and call the first sword that answers.",
-  "MAGICSWORDSMAN-SWORD_LORE.ROULETTE_HEADER": "The tomb rings..."
+  "MAGICSWORDSMAN-SWORD_LORE.ROULETTE_HEADER": "The tomb rings...",
+  "MAGICSWORDSMAN-SWORD_LORE.SEALED_FIRST_SWORD": "1 [gold]sealed sword[/gold] — about to awaken"
 }
