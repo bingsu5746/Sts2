@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Runs;
 
 namespace MagicSwordsman.MagicSwordsmanCode.Visuals;
 
@@ -200,8 +201,15 @@ public static class MotionDirector
                     SwordVisuals.Strike(player, target, HintFor(player));
                     return AttackVariant(player);
                 case "Dead":
-                    // the only death: his swords turn on him (SwordVisuals.DeathBetrayal + body clip Dead_Swords). "Dead"
-                    // itself is the same clip, so the body is right even if this redirect never happens.
+                    // killed at the end of a won run, in the Architect's room: the swords fight the Architect, it takes
+                    // them, they kill him (SwordVisuals.DeathArchitect + body clip Dead_Architect)
+                    if (IsArchitectEnding(player, out var architect))
+                    {
+                        SwordVisuals.DeathArchitect(player, architect);
+                        return "Dead_Architect";
+                    }
+                    // every other death: his swords turn on him (SwordVisuals.DeathBetrayal + body clip Dead_Swords).
+                    // "Dead" itself is the same clip, so the body is right even if this redirect never happens.
                     SwordVisuals.DeathBetrayal(player);
                     return "Dead_Swords";
                 default:
@@ -212,6 +220,29 @@ public static class MotionDirector
         {
             MainFile.Logger.Warn($"[MotionDirector] redirect failed: {e.Message}");
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Is this the death in the Architect's room? A won run always ends there: RunManager.WinRun kills every player with
+    /// CreatureCmd.Kill(force) while the current room is the TheArchitect event (AbstractRoom.IsVictoryRoom); see
+    /// SwordVisuals.Architect.cs. Also true with an Architect among his enemies anywhere else (it only appears in
+    /// TheArchitectEventEncounter, but should it ever kill him elsewhere it is still the Architect). Not when the run is
+    /// being abandoned (RunManager.AbandonInternal kills the players the same way, in whatever room they are).
+    /// </summary>
+    private static bool IsArchitectEnding(Player player, out Creature? architect)
+    {
+        architect = null;
+        try
+        {
+            if (RunManager.Instance.IsAbandoned) return false;
+            architect = SwordVisuals.ArchitectOf(player);
+            return architect != null || player.RunState.CurrentRoom?.IsVictoryRoom == true;
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[MotionDirector] Architect check failed: {e.Message}");
+            return false;
         }
     }
 

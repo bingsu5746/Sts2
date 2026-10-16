@@ -24,7 +24,9 @@ namespace MagicSwordsman.MagicSwordsmanCode.Visuals;
 ///  - <see cref="DeathBetrayal"/>: the death — his swords (and spectral copies, six in all) turn on him, he parries two
 ///    cuts, then the blades drive into him one at a time and stay in his body (sprites that follow the body) while he
 ///    drops onto his knees and stays kneeling upright, head bowed (body clip "Dead_Swords", tools/gen_combat_scene.py;
-///    the timings below match its keys). ≈ 2.8 s.
+///    the timings below match its keys). ≈ 2.8 s. Once he is down on his knees the painted kneeling figure
+///    (Visuals/Rig/Kneel) replaces the rig parts. The death to the Architect plays the same betrayal 1.5 s later, after
+///    the blades fought the Architect and were taken (SwordVisuals.Architect.cs, body clip "Dead_Architect").
 /// Presentation only; every entry point swallows its errors.
 /// UNVERIFIED in game: positions against very large enemies, the pierce points after the body art is replaced.
 /// </summary>
@@ -718,7 +720,7 @@ public static partial class SwordVisuals
     /// </summary>
     public static void DeathBetrayal(Player player)
     {
-        try { DeathInner(player); }
+        try { DeathInner(player, null); }
         catch (Exception e) { MainFile.Logger.Warn($"[SwordVisuals] death choreography failed: {e.Message}"); }
     }
 
@@ -765,20 +767,28 @@ public static partial class SwordVisuals
     private static readonly Vector2 DeathCenter = new(0, -260);
     private static ulong _deathStart;
 
-    private static void DeathInner(Player player)
+    /// <summary>Seconds into the death at which the betrayal starts (0, or <see cref="ArchitectPrelude"/>).</summary>
+    private static double _deathOffset;
+
+    /// <param name="architect">null: the plain death. Otherwise the death to the Architect (<see cref="DeathArchitect"/>):
+    /// the blades first fight the Architect and are taken over, then the same betrayal runs
+    /// <see cref="ArchitectPrelude"/> s later.</param>
+    private static void DeathInner(Player player, ArchitectTarget? architect)
     {
         var rig = GetRig(player, create: true);
         if (rig == null || rig.Dead) return;
         rig.Dead = true;
         _deathStart = Time.GetTicksMsec();
+        _deathOffset = architect != null ? ArchitectPrelude : 0.0;
         foreach (var m in rig.Moves.Values)
             if (GodotObject.IsInstanceValid(m)) m.Kill();
         rig.Moves.Clear();
+        KeepWithBody(player, rig);
 
         var present = rig.Swords
             .Where(kv => GodotObject.IsInstanceValid(kv.Value))
             .OrderByDescending(kv => kv.Key == rig.Current).ThenBy(kv => (int)kv.Key)
-            .Select(kv => (Sword: kv.Key, Node: kv.Value)).ToList();
+            .Select(kv => (Sword: kv.Key, Node: kv.Value, Spectral: false)).ToList();
         var blades = present.Take(DeathBlades).ToList();
         var extra = present.Skip(DeathBlades).ToList();
         if (blades.Count < DeathBlades)
@@ -793,34 +803,68 @@ public static partial class SwordVisuals
                 rig.Root.AddChild(ghost);
                 ghost.Position = SpawnPos;
                 ghost.Scale = Vector2.One;
-                ghost.Modulate = new Color(0.8f, 0.82f, 1f, 0f);
-                blades.Add((s, ghost));
+                // against the Architect they are his swords, called up in full colour; otherwise pale copies
+                ghost.Modulate = architect != null ? new Color(1f, 1f, 1f, 0f) : new Color(0.8f, 0.82f, 1f, 0f);
+                blades.Add((s, ghost, true));
             }
         }
         if (blades.Count == 0) return; // no swords at all: the body clip alone
 
         var body = BodyNode(player);
+        var seized = architect != null ? SeizeMaterial(rig) : null;
         // roles: blade 0 (the current sword) strikes first, through the chest; blades 1 and 2 are the parried cuts
         // and strike third and fourth; the rest fill the other blows in order
         int[] spotOf = { 0, 2, 3, 1, 4, 5 };
         for (var i = 0; i < blades.Count; i++)
-            DeathBlade(rig, body, blades[i].Sword, blades[i].Node, i, blades.Count, spotOf[i]);
-        foreach (var (_, node) in extra) FallIntoGround(node);
+        {
+            var (sword, node, spectral) = blades[i];
+            var tw = node.CreateTween();
+            if (architect != null) ArchitectBlade(tw, rig, sword, node, i, blades.Count, architect, seized!);
+            // taken by the Architect: colourless (the material) and solid; otherwise his own swords or pale copies
+            var pale = spectral && architect == null;
+            var look = pale ? new Color(0.86f, 0.88f, 1f, 0.9f) : Colors.White;
+            var col = architect != null ? SeizedColor : ColorOf(sword);
+            DeathBlade(tw, _deathOffset, rig, body, node, i, blades.Count, spotOf[i], pale, look, col);
+        }
+        foreach (var (_, node, _) in extra) FallIntoGround(node, _deathOffset);
     }
 
-    /// <summary>One blade of the death: circles him, maybe gets parried, then aims, draws back and drives in.</summary>
-    private static void DeathBlade(Rig rig, Node2D? body, SwordId sword, Node2D node, int index, int count, int spot)
+    /// <summary>
+    /// The swords must stay with him once he is dead. When the last player dies the game opens its game over screen at
+    /// once (CreatureCmd.Kill -> NRun.ShowGameOverScreen), and that screen moves every creature's NCreatureVisuals onto
+    /// its own layer above a backstop (NGameOverScreen.MoveCreaturesToDifferentLayerAndDisableUi; in an event room such
+    /// as the Architect's a full black one fades in over 0.2 s) — the rig, a sibling of the visuals, would stay behind in
+    /// the covered room. So the rig moves into the visuals now, as their first child (still behind the body), keeping
+    /// its place on screen.
+    /// </summary>
+    private static void KeepWithBody(Player player, Rig rig)
     {
-        var col = ColorOf(sword);
-        var spectral = node.Modulate.A < 0.01f;
-        var look = spectral ? new Color(0.86f, 0.88f, 1f, 0.9f) : Colors.White;
+        try
+        {
+            var visuals = NCombatRoom.Instance?.GetCreatureNode(player.Creature)?.Visuals;
+            if (visuals == null || rig.Root.GetParent() == visuals) return;
+            rig.Root.Reparent(visuals, true);
+            visuals.MoveChild(rig.Root, 0);
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordVisuals] death rig move failed: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// One blade of the death, appended to <paramref name="tw"/> from <paramref name="t0"/> s on: circles him, maybe gets
+    /// parried, then aims, draws back and drives in.
+    /// </summary>
+    private static void DeathBlade(Tween tw, double t0, Rig rig, Node2D? body, Node2D node, int index, int count, int spot,
+        bool spectral, Color look, Color col)
+    {
         var scale = Vector2.One * (spectral ? 1.22f : 1.3f); // larger than in the layout: they must read in the corpse pose
         var th0 = -Mathf.Pi / 2 + Mathf.Tau * index / Math.Max(3, count);
         Vector2 Orbit(float th) => DeathCenter + new Vector2(Mathf.Cos(th) * 270f, Mathf.Sin(th) * 130f);
         const float speed = 2.2f; // radians per second
-        node.ZIndex = ZFlying;
-        var tw = node.CreateTween();
-        var clock = 0.0;
+        tw.TweenCallback(Callable.From(() => { if (GodotObject.IsInstanceValid(node)) node.ZIndex = ZFlying; }));
+        var clock = t0;
         void Until(double t)
         {
             if (t > clock + 1e-4) tw.TweenInterval(t - clock);
@@ -832,7 +876,7 @@ public static partial class SwordVisuals
         tw.Parallel().TweenProperty(node, "rotation", PointAt(Orbit(th0), DeathCenter), 0.18);
         tw.Parallel().TweenProperty(node, "modulate", look, 0.18);
         tw.Parallel().TweenProperty(node, "scale", scale, 0.18);
-        clock = 0.18;
+        clock = t0 + 0.18;
 
         var hitAt = PierceAt[spot];
         var parry = index is 1 or 2 ? Parries[index - 1] : ((float At, Vector2 Clash, Vector2 Thrown)?)null;
@@ -845,7 +889,7 @@ public static partial class SwordVisuals
             node.Rotation = PointAt(node.Position, DeathCenter);
             node.ZIndex = Mathf.Sin(th) > 0 ? ZFlying : ZBack; // passes behind him on the far side
         }), th0, endTh, leave - 0.18f);
-        clock = leave;
+        clock = t0 + leave;
         tw.TweenCallback(Callable.From(() => node.ZIndex = ZFlying));
         var from = Orbit(endTh);
 
@@ -862,8 +906,8 @@ public static partial class SwordVisuals
             from = p.Thrown;
         }
 
-        Until(hitAt - 0.34f);
-        DriveIn(tw, rig, body, node, from, PierceSpots[spot], spectral, col, spot == PierceSpots.Length - 1);
+        Until(t0 + hitAt - 0.34f);
+        DriveIn(tw, rig, body, node, from, PierceSpots[spot], look, col, spot == PierceSpots.Length - 1);
     }
 
     /// <summary>
@@ -871,7 +915,7 @@ public static partial class SwordVisuals
     /// a little (0.06 s), drives in (0.06 s) and is replaced by a copy stuck in the body.
     /// </summary>
     private static void DriveIn(Tween tw, Rig rig, Node2D? body, Node2D node, Vector2 from,
-        (Vector2 Point, Vector2 Dir, StuckKind Kind, float Depth) spot, bool spectral, Color col, bool last)
+        (Vector2 Point, Vector2 Dir, StuckKind Kind, float Depth) spot, Color look, Color col, bool last)
     {
         var dir = spot.Dir.Normalized();
         var length = SwordSpriteHeight * node.Scale.Y;
@@ -906,7 +950,7 @@ public static partial class SwordVisuals
                 Shake(last ? MegaCrit.Sts2.Core.Nodes.Vfx.Utilities.ShakeStrength.Weak
                     : MegaCrit.Sts2.Core.Nodes.Vfx.Utilities.ShakeStrength.VeryWeak);
                 if (body == null || !GodotObject.IsInstanceValid(body)) return;
-                if (StuckSword(rig.Root, node, body, spot, spectral) != null) node.Visible = false;
+                if (StuckSword(rig.Root, node, body, spot, look) != null) node.Visible = false;
             }
             catch (Exception e)
             {
@@ -923,14 +967,13 @@ public static partial class SwordVisuals
     /// both: the hilt half on its entry side, the point on the other.
     /// </summary>
     private static Node2D? StuckSword(Node2D rigRoot, Node2D flying, Node2D body,
-        (Vector2 Point, Vector2 Dir, StuckKind Kind, float Depth) spot, bool spectral)
+        (Vector2 Point, Vector2 Dir, StuckKind Kind, float Depth) spot, Color look)
     {
         var sprite = flying.GetNodeOrNull<Node2D>("Blade")?.GetChildren().OfType<Sprite2D>()
             .FirstOrDefault(s => s.Name != "Aura" && s.Texture != null && !s.RegionEnabled);
         if (sprite?.Texture is not { } tex) return null;
         float w = tex.GetWidth(), h = tex.GetHeight();
         var depth = spot.Depth;
-        var look = spectral ? new Color(0.86f, 0.88f, 1f, 0.9f) : Colors.White;
         var anchor = new RemoteTransform2D
         {
             Name = "StuckSwordAnchor", Position = spot.Point, Rotation = PointAt(Vector2.Zero, spot.Dir.Normalized()), UpdateScale = false,
@@ -948,6 +991,7 @@ public static partial class SwordVisuals
                 Texture = tex, Centered = false, TextureFilter = CanvasItem.TextureFilterEnum.Linear,
                 RegionEnabled = true, RegionRect = new Rect2(0, h * from, w, h * (to - from)),
                 Offset = new Vector2(-w / 2f, h * (from - depth)), Scale = sprite.Scale, Modulate = sprite.Modulate,
+                Material = sprite.Material, // the Architect's colourless blades stay colourless (SeizeMaterial)
             });
             rigRoot.AddChild(stuck);
             if (behind) rigRoot.MoveChild(stuck, 0);
@@ -967,7 +1011,7 @@ public static partial class SwordVisuals
             }
             // dimmed only a little with the body once he is down: the blades must stay readable
             var dim = stuck.CreateTween();
-            dim.TweenInterval(Math.Max(0.0, 2.5 - (Time.GetTicksMsec() - _deathStart) / 1000.0));
+            dim.TweenInterval(Math.Max(0.0, _deathOffset + 2.5 - (Time.GetTicksMsec() - _deathStart) / 1000.0));
             dim.TweenProperty(stuck, "modulate", look * new Color(0.9f, 0.88f, 0.94f), 0.3);
         }
 
@@ -982,11 +1026,11 @@ public static partial class SwordVisuals
     }
 
     /// <summary>A sword beyond the six that pierce him: drops point-down into the ground beside him and stays.</summary>
-    private static void FallIntoGround(Node2D node)
+    private static void FallIntoGround(Node2D node, double t0)
     {
         var x = node.Position.X < 0 ? -170f - 50f * GD.Randf() : 160f + 50f * GD.Randf();
         var tw = node.CreateTween();
-        tw.TweenInterval(2.3);
+        tw.TweenInterval(t0 + 2.3);
         tw.TweenProperty(node, "rotation", Mathf.Pi + (GD.Randf() - 0.5f) * 0.3f, 0.15);
         tw.TweenProperty(node, "position", new Vector2(x, -80), 0.18).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
         tw.TweenProperty(node, "modulate", new Color(0.7f, 0.68f, 0.76f), 0.4);
