@@ -508,5 +508,15 @@
   "MAGICSWORDSMAN-UNION_SUNLIT_HILT.description": "[purple]Union[/purple] {SwordA} + {SwordB}\nConsume all [gold]Light[/gold].\nApply 1 [gold]Scar[/gold] per Light consumed to ALL enemies, twice as many to enemies that already had Scars.",
   "MAGICSWORDSMAN-UNION_TURNED_BLOW.title": "The Turned Blow",
   "MAGICSWORDSMAN-UNION_TURNED_BLOW.description": "[purple]Union[/purple] {SwordA} + {SwordB}\nDeal {Damage:diff()} damage.\nFor each enemy hit, you may put a card from your discard pile on top of your draw pile.\nCombined level {UnionLevel} (+1 damage every 2).",
-  "MAGICSWORDSMAN-UNION_TURNED_BLOW.selectionScreenPrompt": "Choose cards to put on top of your draw pile."
+  "MAGICSWORDSMAN-UNION_TURNED_BLOW.selectionScreenPrompt": "Choose cards to put on top of your draw pile.",
+  "MAGICSWORDSMAN-SOLAIS_SRENGS_BLOW.title": "Sreng's Blow",
+  "MAGICSWORDSMAN-SOLAIS_SRENGS_BLOW.description": "Draw {Cards:diff()} {Cards:plural:card|cards}.\nUntil your next turn, whenever an enemy attack deals unblocked damage to you, gain 1 [gold]Light[/gold] (at most {SolaisSrengPower} times).\n[gold]Claíomh Solais[/gold] level {SwordLevel}.",
+  "MAGICSWORDSMAN-SOLAIS_VICTORY_TORCH.title": "Victory Torch",
+  "MAGICSWORDSMAN-SOLAIS_VICTORY_TORCH.description": "Deal {Damage:diff()} damage.\n[gold]Fatal[/gold]: If this kills an enemy, gain {KillLight} [gold]Light[/gold].\n[gold]Claíomh Solais[/gold] level {SwordLevel} (+1 damage per level).",
+  "MAGICSWORDSMAN-SOLAIS_LIT_SHEATH.title": "Glowing Sheath",
+  "MAGICSWORDSMAN-SOLAIS_LIT_SHEATH.description": "This combat, whenever you gain [gold]Block[/gold] from a card, gain 1 [gold]Light[/gold] (at most {SolaisLitSheathPower} times per turn).\n[gold]Claíomh Solais[/gold] level {SwordLevel}.",
+  "MAGICSWORDSMAN-SOLAIS_MEASURE_LIGHT.title": "Weigh the Light",
+  "MAGICSWORDSMAN-SOLAIS_MEASURE_LIGHT.description": "The effect depends on your current [gold]Light[/gold].\n0 Light: gain {EmptyLight} Light and draw {Cards:diff()} {Cards:plural:card|cards}.\n1-2 Light: gain {Block:diff()} [gold]Block[/gold].\n{HighLight}+ Light: spend {HighLight} Light and gain {StrengthGain} [gold]Strength[/gold].\n[gold]Claíomh Solais[/gold] level {SwordLevel} (+1 Block per level).",
+  "MAGICSWORDSMAN-SOLAIS_HAND_ON_SHEATH.selectionScreenPrompt": "Choose a card to Retain this turn (spends 1 Light).",
+  "MAGICSWORDSMAN-GRAM_BLADE_BETWEEN.selectionScreenPrompt": "Choose a Gram Attack to cost 1 less this turn."
 }
