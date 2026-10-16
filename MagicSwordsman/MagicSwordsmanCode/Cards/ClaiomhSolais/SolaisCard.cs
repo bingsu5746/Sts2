@@ -125,4 +125,17 @@ public static class SolaisLightSpend
         await MegaCrit.Sts2.Core.Commands.PowerCmd.ModifyAmount(choiceContext, power, -amount, null, source);
         return true;
     }
+
+    /// <summary>
+    /// Spends half of the player's Light, rounded up (1 Light -> 1, 5 -> 3). Returns how much was spent (0 without
+    /// Light). Used by 백광 (user request 2026-10-15 #2: spend patterns that differ in kind, not only in numbers).
+    /// </summary>
+    public static async Task<int> SpendHalf(PlayerChoiceContext choiceContext,
+        MegaCrit.Sts2.Core.Entities.Players.Player player, CardModel? source)
+    {
+        var light = SolaisLight.Get(player);
+        if (light <= 0) return 0;
+        var amount = (light + 1) / 2;
+        return await TrySpend(choiceContext, player, amount, source) ? amount : 0;
+    }
 }

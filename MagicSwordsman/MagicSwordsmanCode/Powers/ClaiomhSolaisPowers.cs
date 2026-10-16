@@ -1,5 +1,7 @@
 using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
+using MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -43,25 +45,47 @@ public sealed class SolaisLightPower : MagicSwordsmanPower
 }
 
 /// <summary>
-/// 네 가지 보물 (SolaisFourTreasures): when you end your turn with Claíomh Solais current, charge Amount more Light;
-/// from Claíomh Solais level 3 also gain 3 Block per stack. Applied by ClaiomhSolaisBehavior.OnPlayerTurnEnd.
+/// 네 개의 보물 (SolaisFourTreasures): each turn, the first time you play an Attack, a Skill and a Power, gain Amount
+/// Light each; from Claíomh Solais level 3 also gain 2 Block per stack each time. Reworked 2026-10-15 (it used to add
+/// Light to the end-of-turn charge). Per-turn memory: internal data (game OutbreakPower pattern), cleared at the start
+/// of the owner's turn. Note: the 네 개의 보물 card itself counts as that turn's Power (AfterCardPlayed runs after its
+/// OnPlay applied this power).
 /// </summary>
 public sealed class SolaisFourTreasuresPower : MagicSwordsmanPower
 {
     public const int BlockFromLevel = 3;
-    public const int BlockPerStack = 3;
+    public const int BlockPerStack = 2;
+
+    private sealed class Data
+    {
+        public readonly HashSet<CardType> SeenThisTurn = new();
+    }
 
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<SolaisLightPower>()];
 
-    /// <summary>Called by ClaiomhSolaisBehavior after the end-of-turn charge (which already included +Amount Light).</summary>
-    public async Task AfterLightCharged(int solaisLevel)
+    protected override object InitInternalData() => new Data();
+
+    public override async Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (cardPlay.Card.Owner?.Creature != Owner || Owner.IsDead || Owner.Player is not { } player) return;
+        var type = cardPlay.Card.Type;
+        if (type is not (CardType.Attack or CardType.Skill or CardType.Power)) return;
+        if (!GetInternalData<Data>().SeenThisTurn.Add(type)) return;
+
         Flash();
-        if (solaisLevel < BlockFromLevel || Owner.IsDead) return;
-        await CreatureCmd.GainBlock(Owner, BlockPerStack * Amount, ValueProp.Unpowered, null);
+        await SolaisLight.Gain(choiceContext, player, Amount, null);
+        if (SwordCombat.LevelOf(player, SwordId.ClaiomhSolais) >= BlockFromLevel)
+            await CreatureCmd.GainBlock(Owner, BlockPerStack * Amount, ValueProp.Unpowered, null);
+    }
+
+    public override Task AfterSideTurnStart(CombatSide side, IReadOnlyList<Creature> participants,
+        ICombatState combatState)
+    {
+        if (side == Owner.Side) GetInternalData<Data>().SeenThisTurn.Clear();
+        return Task.CompletedTask;
     }
 }
 

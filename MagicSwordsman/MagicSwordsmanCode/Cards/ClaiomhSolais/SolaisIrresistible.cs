@@ -1,44 +1,35 @@
 using BaseLib.Utils;
 using MagicSwordsman.MagicSwordsmanCode.Powers;
-using MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
-using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
-using MegaCrit.Sts2.Core.ValueProps;
 
 namespace MagicSwordsman.MagicSwordsmanCode.Cards.ClaiomhSolais;
 
 /// <summary>
-/// 저항할 수 없는 빛 (Uncommon): 【발도】 5 damage (+1/L), ignores Block. Instead of adding damage, each Light
-/// consumed applies 1 Vulnerable to the target (max 3). Source: 「아무도 저항할 수 없었다」.
+/// 눈부심 (Uncommon skill): 6 Block (+1/L). Until your next turn, whenever an enemy that is not Vulnerable attacks
+/// you, spend 1 Light automatically and apply 2 Vulnerable to it (<see cref="SolaisDazzlePower"/>).
+/// Reworked 2026-10-15 (user request: Light spending too samey): it used to be a 【발도】 card (consume all Light,
+/// Vulnerable per Light). Now Light spends ITSELF on the enemy's turn, one dose per attacker — so it only works if you
+/// ended the turn with Claíomh Solais current (otherwise the Light has already faded).
+/// Source: 「아무도 저항할 수 없었다」 — whoever swings at the bearer is blinded by the glare.
 /// </summary>
-public sealed class SolaisIrresistible : SolaisDrawCutCard
+public sealed class SolaisIrresistible : SolaisCard
 {
-    public const int MaxVulnerable = 3;
-
-    public SolaisIrresistible() : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy)
+    public SolaisIrresistible() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self)
     {
-        WithDamage(5);
-        WithDamagePerLevel(1);
-        WithVar("MaxVuln", MaxVulnerable);
+        WithBlock(6);
+        WithBlockPerLevel(1);
+        WithPower<SolaisDazzlePower>(SolaisDazzlePower.VulnerablePerTrigger);
         WithTip(typeof(SolaisLightPower));
         WithTip(typeof(VulnerablePower));
     }
 
-    protected override int LightMultiplier => 0;
-
-    protected override async Task OnDrawCut(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await DrawCutAttack(cardPlay).WithHitFx("vfx/vfx_attack_slash").Execute(choiceContext);
-    }
-
-    protected override async Task AfterLightConsumed(PlayerChoiceContext choiceContext, CardPlay cardPlay, int consumed)
-    {
-        var amount = Math.Min(consumed, MaxVulnerable);
-        if (amount <= 0 || cardPlay.Target is not { IsAlive: true } target) return;
-        await PowerCmd.Apply<VulnerablePower>(choiceContext, target, amount, Owner.Creature, this);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await PowerCmd.Apply<SolaisDazzlePower>(choiceContext, Owner.Creature,
+            DynamicVars["SolaisDazzlePower"].BaseValue, Owner.Creature, this);
     }
 }

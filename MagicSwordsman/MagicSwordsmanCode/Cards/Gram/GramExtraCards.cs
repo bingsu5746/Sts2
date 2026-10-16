@@ -1,4 +1,6 @@
 using BaseLib.Utils;
+using MegaCrit.Sts2.Core.CardSelection;
+using MegaCrit.Sts2.Core.Models;
 using MagicSwordsman.MagicSwordsmanCode.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -11,8 +13,11 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.Gram;
 // half rate; block is not raised by Gram's current-sword effect, so it scales at the normal +1/L).
 
 /// <summary>
-/// 사이에 놓인 검 — Gram, Skill, Common, cost 1, self. Gain 7 (+1/L) Block. 【연속】 gain 3 more Block
-/// (separate unpowered gain, so the per-level bonus and Dexterity are not counted twice).
+/// 사이에 놓인 검 — Gram, Skill, Common, cost 1, self. Gain 7 (+1/L) Block. 【연속】 choose a Gram Attack in your hand:
+/// it costs 1 less this turn.
+/// Reworked 2026-10-16 (near-clone pass): its combo was "3 more Block", the same Block-then-more-Block shape as 간직한
+/// 조각 (Block, combo draw). Now the blade laid down makes room for the next stroke (cost: EnergyCost.AddThisTurn,
+/// 야타의 거울 pattern; selection: CardSelectCmd.FromHand).
 /// Lore: Sigurd laid Gram between himself and Brynhild for the three nights he spent with her in Gunnar's shape.
 /// </summary>
 public sealed class GramBladeBetween : GramCard
@@ -21,17 +26,22 @@ public sealed class GramBladeBetween : GramCard
     {
         WithBlock(7);
         WithBlockPerLevel(1);
-        WithVar("ComboBlock", 3);
+        WithVar("CostDown", 1);
     }
 
     protected override bool HasComboEffect => true;
+
+    private static bool IsGramAttack(CardModel c) =>
+        c is GramCard && c.Type == CardType.Attack && !c.EnergyCost.CostsX;
 
     protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var combo = IsCombo;
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        if (combo)
-            await CreatureCmd.GainBlock(Owner.Creature, DynamicVars["ComboBlock"].IntValue, ValueProp.Unpowered, null);
+        if (!combo || !PileType.Hand.GetPile(Owner).Cards.Any(IsGramAttack)) return;
+        var chosen = (await CardSelectCmd.FromHand(choiceContext, Owner,
+            new CardSelectorPrefs(SelectionScreenPrompt, 1), IsGramAttack, this)).FirstOrDefault();
+        chosen?.EnergyCost.AddThisTurn(-1, reduceOnly: true);
     }
 }
 

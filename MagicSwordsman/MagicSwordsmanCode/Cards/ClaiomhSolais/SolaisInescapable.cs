@@ -8,30 +8,26 @@ using MegaCrit.Sts2.Core.Models.Powers;
 namespace MagicSwordsman.MagicSwordsmanCode.Cards.ClaiomhSolais;
 
 /// <summary>
-/// 백광 (Uncommon): 5 damage (+1/L) to ALL enemies. Then, if you have 2+ Light, spend 2 Light: apply 1 Weak to ALL
-/// enemies (2 from level 3).
-/// Reworked 2026-10-15 (user request #38): it used to be a third "consume all Light, X + K per Light" 【발도】 card.
-/// Now it spends a fixed 2 Light for a blinding debuff instead (Weak = enemies swing half-blind).
-/// Source: 「누구도 벗어나지 못했고」 — when the sword of light was drawn none could escape it; here no one escapes
-/// the glare.
+/// 백광 (Uncommon): 5 damage (+1/L) to ALL enemies. Then spend HALF your Light (rounded up) and apply that much Weak
+/// to ALL enemies (1 Light -> 1 Weak, 4 -> 2, 5 -> 3). Nothing happens without Light.
+/// Reworked again 2026-10-15 (user request: spending differed only by numbers — "spend 1 / spend 2 / spend 3"): the
+/// fixed "spend 2" became "spend half", so the card scales with a big store of Light but never empties it.
+/// Source: 「누구도 벗어나지 못했고」 — when the sword of light was drawn none could escape it; half the light is
+/// enough to blind everyone.
 /// </summary>
 public sealed class SolaisInescapable : SolaisCard
 {
-    public const int LightCost = 2;
-
     public SolaisInescapable() : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AllEnemies)
     {
         WithDamage(5);
         WithDamagePerLevel(1);
-        WithVar("LightCost", LightCost);
-        WithCalculatedVar("Weak", 1, static (card, _) => card is MagicSwordCard { SwordLevel: >= 3 } ? 1 : 0);
+        WithCalculatedVar("HalfLight", 0,
+            static (card, _) => card is SolaisInescapable s ? (s.Light + 1) / 2 : 0);
         WithTip(typeof(SolaisLightPower));
         WithTip(typeof(WeakPower));
     }
 
-    private int WeakAmount => SwordLevel >= 3 ? 2 : 1;
-
-    protected override bool ShouldGlowGoldInternal => Light >= LightCost;
+    protected override bool ShouldGlowGoldInternal => Light > 0;
 
     protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
@@ -40,7 +36,8 @@ public sealed class SolaisInescapable : SolaisCard
         if (Owner.Creature.CombatState is not { } cs) return;
         var enemies = cs.HittableEnemies.ToList();
         if (enemies.Count == 0) return;
-        if (!await SolaisLightSpend.TrySpend(choiceContext, Owner, LightCost, this)) return;
-        await PowerCmd.Apply<WeakPower>(choiceContext, enemies, WeakAmount, Owner.Creature, this);
+        var spent = await SolaisLightSpend.SpendHalf(choiceContext, Owner, this);
+        if (spent <= 0) return;
+        await PowerCmd.Apply<WeakPower>(choiceContext, enemies, spent, Owner.Creature, this);
     }
 }
