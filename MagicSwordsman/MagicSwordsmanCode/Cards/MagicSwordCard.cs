@@ -26,6 +26,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards;
 /// - Level scaling: <see cref="WithDamagePerLevel"/> / <see cref="WithBlockPerLevel"/> add N per sword level to
 ///   this card's own attacks / block through the game's damage/block hooks (so the in-combat preview turns green
 ///   like Strength). For any other number use <see cref="WithLevelVar"/> + <see cref="LevelVar"/>.
+///   Outside the hand (deck, rewards, shop…) the same numbers are shown by <see cref="LevelPreviewPatches"/>.
 /// </summary>
 [Pool(typeof(MagicSwordsmanCardPool))]
 public abstract class MagicSwordCard : ConstructedCardModel
@@ -104,7 +105,8 @@ public abstract class MagicSwordCard : ConstructedCardModel
     /// <summary>
     /// A level-scaled number for card text: shows base + perLevel*level in combat (BaseLib calculated var named
     /// <paramref name="name"/>, use {name} in the description). Read the value at play time with <see cref="LevelVar"/>.
-    /// Outside combat the text shows the base value (CalculatedVar only evaluates in combat).
+    /// Outside combat the game would show the base value (CalculatedVar only evaluates in combat); LevelPreviewPatches
+    /// makes sword cards show the leveled value there too.
     /// </summary>
     protected MagicSwordCard WithLevelVar(string name, int baseValue, int perLevel)
     {

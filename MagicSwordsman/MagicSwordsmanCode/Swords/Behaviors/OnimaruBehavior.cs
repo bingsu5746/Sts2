@@ -191,7 +191,9 @@ public static class OnimaruAttack
         var level = SwordCombat.LevelOf(player, SwordId.Onimaru);
         var n = BaseNumbers(kind, level);
         var bonus = CurrentBonus(player, kind, level, assumeCurrent);
-        if (IsEliteOrBoss(player)) bonus += EliteBonus(kind);
+        // elite/boss bonus only during the fight (outside combat CurrentRoom can still be the elite room: card text in
+        // the deck view must not show it — Cards/LevelPreviewPatches)
+        if (player.PlayerCombatState != null && IsEliteOrBoss(player)) bonus += EliteBonus(kind);
         if (kind == OnimaruKind.Iai) bonus += IaiBonus(player);
         return kind == OnimaruKind.Goei ? n with { Block = n.Block + bonus } : n with { PerHit = n.PerHit + bonus };
     }
