@@ -59,7 +59,13 @@ def BODY_RECT(cut=0.0): return f'Rect2(0, 0, {BODY_W}, {BODY_H-cut:.1f})'
 REST={**{JOINTS[j]+':rotation':'0.0000' for j in JOINTS},'Visuals/Rig/Body:region_rect':BODY_RECT(),'Visuals:position':V(0,REST_Y),'Visuals:rotation':'0.0000',
       'Visuals:scale':V(1,1),'Visuals:modulate':C(1,1,1),'Circle:modulate':C(*PURPLE,0),
       'Shield:modulate':C(1,1,1,0),'Visuals/Rig/Sigil:modulate':C(1,1,1,0.4),'Visuals/Rig/Sigil:scale':V(1,1),
-      **{HAND[h]+':scale':V(HAND_REST[0],HAND_REST[0]) for h in HAND},**{HAND[h]+':modulate':C(1,1,1,HAND_REST[1]) for h in HAND}}
+      **{HAND[h]+':scale':V(HAND_REST[0],HAND_REST[0]) for h in HAND},**{HAND[h]+':modulate':C(1,1,1,HAND_REST[1]) for h in HAND},
+      'Visuals/Rig/Kneel:modulate':C(1,1,1,0)}
+# the rig's body parts (the painted kneeling figure Visuals/Rig/Kneel replaces them in the death clips: their
+# self_modulate fades, so children — the palm circles — are untouched); every other clip keeps them at 1
+PART_PATHS=['Visuals/Rig/Body','Visuals/Rig/Head','Visuals/Rig/CoatL','Visuals/Rig/CoatR','Visuals/Rig/UpperL',
+            'Visuals/Rig/UpperL/ForeL','Visuals/Rig/UpperR','Visuals/Rig/UpperR/ForeR']
+REST.update({pp+':self_modulate':C(1,1,1) for pp in PART_PATHS})
 def emit(clip,aid):
     tracks=dict(clip.tr)
     for k,v in REST.items():  # every clip resets what it does not animate
@@ -386,36 +392,72 @@ rest(c,1.0); M.append(c)
 DEAD_TINT=(0.62,0.56,0.68)
 HURT=(1.25,0.88,0.92)
 KNEEL=96
-def dead_swords(name):
-    c=Clip(name,2.8); rest(c,0)
-    c.pose(0.15,x=-3,head=-0.1,ul=0.12,ur=-0.18,fr=-0.25)                              # startled: looks up at them
-    c.pose(0.42,x=-6,rot=-0.015,head=0.06,ul=0.25,ur=-0.55,fr=-0.5,cl=0.02,cr=0.03)   # wary, palm raised
-    c.pose(0.6,x=-13,rot=-0.045,head=-0.06,ur=-1.0,fr=-0.3,ul=0.3,cr=0.05)            # parries the first cut (front)
-    c.pose(0.76,x=-9,rot=-0.02,head=0.0,ur=-0.6,fr=-0.4,ul=0.4,fl=0.3)
-    c.pose(0.92,x=-4,rot=0.02,head=-0.14,ur=-0.3,fr=-0.2,ul=0.95,fl=0.65,cl=0.05)     # turns: parries behind, left palm up
-    c.pose(1.04,x=-6,rot=0.0,head=-0.04,ur=-0.45,fr=-0.35,ul=0.5,fl=0.35)
-    c.pose(1.12,x=-18,rot=-0.07,head=-0.16,ul=0.4,fl=0.25,ur=-0.4,fr=0.05,cl=0.06,cr=0.07,tint=HURT)  # through the chest
-    c.pose(1.24,x=-12,rot=-0.03,head=-0.05,ul=0.25,ur=-0.25,fr=-0.1,tint=(1.05,0.96,0.98))
-    c.pose(1.34,x=8,rot=0.06,head=0.16,ul=0.15,fl=0.35,ur=-0.1,fr=-0.35,cl=-0.02,cr=-0.03,tint=HURT)  # through the back
-    c.pose(1.46,x=4,rot=0.03,head=0.1,ul=0.12,ur=-0.12,tint=(1.05,0.96,0.98))
-    c.pose(1.56,x=-8,y=6,rot=-0.035,head=0.02,ul=0.2,fl=0.1,ur=-0.3,fr=-0.2,cl=0.05,cr=0.06,tint=HURT)   # the right side
-    c.pose(1.68,x=-5,y=16,rot=0.0,head=0.12,ul=0.06,fl=0.12,ur=-0.06,fr=-0.12,tint=(1.05,0.95,0.98))   # the knees go
-    c.pose(1.88,x=-2,y=KNEEL+6,rot=0.04,head=0.2,ul=0.02,fl=0.1,ur=-0.02,fr=-0.1,cl=0.05,cr=-0.04)     # down onto them
-    c.pose(2.0,x=-2,y=KNEEL+2,rot=-0.03,head=0.02,ul=0.12,ur=-0.12,fl=0.15,fr=-0.15,tint=HURT)         # right shoulder
-    c.pose(2.09,x=-1,y=KNEEL-1,rot=0.0,head=0.12)
-    c.pose(2.18,x=2,y=KNEEL+3,rot=0.045,head=0.22,ul=0.08,ur=-0.08,fl=0.18,fr=-0.12,tint=HURT)          # left shoulder
-    c.pose(2.27,x=1,y=KNEEL,rot=0.025,head=0.18,tint=(1.05,0.95,0.98))
-    c.pose(2.36,x=5,y=KNEEL+2,rot=0.05,head=0.26,ul=0.06,ur=-0.06,fl=0.12,fr=-0.1,cl=-0.02,tint=HURT)   # small of the back
-    c.pose(2.55,x=2,y=KNEEL,rot=0.03,head=0.3,ul=-0.02,ur=0.03,fl=0.08,fr=-0.06,cl=0.03,cr=-0.03,tint=(0.85,0.78,0.88))
-    c.pose(2.8,x=1,y=KNEEL,rot=0.025,head=0.32,ul=-0.04,ur=0.05,fl=0.06,fr=-0.04,cl=0.03,cr=-0.03,tint=DEAD_TINT)  # kneeling upright
+def betrayal(c,o=0.0):
+    """The betrayal keys of the death (SwordVisuals.DeathBetrayal), starting at o s. o=0: Dead_Swords; o=1.5: Dead_Architect."""
+    P=lambda t,**j: c.pose(o+t,**j)
+    P(0.15,x=-3,head=-0.1,ul=0.12,ur=-0.18,fr=-0.25)                              # startled: looks up at them
+    P(0.42,x=-6,rot=-0.015,head=0.06,ul=0.25,ur=-0.55,fr=-0.5,cl=0.02,cr=0.03)   # wary, palm raised
+    P(0.6,x=-13,rot=-0.045,head=-0.06,ur=-1.0,fr=-0.3,ul=0.3,cr=0.05)            # parries the first cut (front)
+    P(0.76,x=-9,rot=-0.02,head=0.0,ur=-0.6,fr=-0.4,ul=0.4,fl=0.3)
+    P(0.92,x=-4,rot=0.02,head=-0.14,ur=-0.3,fr=-0.2,ul=0.95,fl=0.65,cl=0.05)     # turns: parries behind, left palm up
+    P(1.04,x=-6,rot=0.0,head=-0.04,ur=-0.45,fr=-0.35,ul=0.5,fl=0.35)
+    P(1.12,x=-18,rot=-0.07,head=-0.16,ul=0.4,fl=0.25,ur=-0.4,fr=0.05,cl=0.06,cr=0.07,tint=HURT)  # through the chest
+    P(1.24,x=-12,rot=-0.03,head=-0.05,ul=0.25,ur=-0.25,fr=-0.1,tint=(1.05,0.96,0.98))
+    P(1.34,x=8,rot=0.06,head=0.16,ul=0.15,fl=0.35,ur=-0.1,fr=-0.35,cl=-0.02,cr=-0.03,tint=HURT)  # through the back
+    P(1.46,x=4,rot=0.03,head=0.1,ul=0.12,ur=-0.12,tint=(1.05,0.96,0.98))
+    P(1.56,x=-8,y=6,rot=-0.035,head=0.02,ul=0.2,fl=0.1,ur=-0.3,fr=-0.2,cl=0.05,cr=0.06,tint=HURT)   # the right side
+    P(1.68,x=-5,y=16,rot=0.0,head=0.12,ul=0.06,fl=0.12,ur=-0.06,fr=-0.12,tint=(1.05,0.95,0.98))   # the knees go
+    P(1.88,x=-2,y=KNEEL+6,rot=0.04,head=0.2,ul=0.02,fl=0.1,ur=-0.02,fr=-0.1,cl=0.05,cr=-0.04)     # down onto them
+    P(2.0,x=-2,y=KNEEL+2,rot=-0.03,head=0.02,ul=0.12,ur=-0.12,fl=0.15,fr=-0.15,tint=HURT)         # right shoulder
+    P(2.09,x=-1,y=KNEEL-1,rot=0.0,head=0.12)
+    P(2.18,x=2,y=KNEEL+3,rot=0.045,head=0.22,ul=0.08,ur=-0.08,fl=0.18,fr=-0.12,tint=HURT)          # left shoulder
+    P(2.27,x=1,y=KNEEL,rot=0.025,head=0.18,tint=(1.05,0.95,0.98))
+    P(2.36,x=5,y=KNEEL+2,rot=0.05,head=0.26,ul=0.06,ur=-0.06,fl=0.12,fr=-0.1,cl=-0.02,tint=HURT)   # small of the back
+    P(2.55,x=2,y=KNEEL,rot=0.03,head=0.3,ul=-0.02,ur=0.03,fl=0.08,fr=-0.06,cl=0.03,cr=-0.03,tint=(0.85,0.78,0.88))
+    P(2.8,x=1,y=KNEEL,rot=0.025,head=0.32,ul=-0.04,ur=0.05,fl=0.06,fr=-0.04,cl=0.03,cr=-0.03,tint=DEAD_TINT)  # kneeling upright
     for t,y in ((0,0),(1.56,6),(1.68,16),(1.88,KNEEL+6),(2.0,KNEEL+2),(2.09,KNEEL-1),(2.18,KNEEL+3),(2.27,KNEEL),(2.36,KNEEL+2),(2.55,KNEEL),(2.8,KNEEL)):
-        c.key('Visuals/Rig/Body:region_rect',t,BODY_RECT(2*y))  # feet (then knees) stay on the ground line
-    c.hand('R',0.42,0.5,0.6,(0.8,0.85,1.0)); c.hand('R',0.6,0.75,1.0,(0.8,0.85,1.0)); c.hand('R',0.85,0.6,0.0,(0.8,0.85,1.0))
-    c.hand('L',0.76,0.5,0.0,(0.8,0.85,1.0)); c.hand('L',0.92,0.75,1.0,(0.8,0.85,1.0)); c.hand('L',1.1,0.6,0.0,(0.8,0.85,1.0))
-    c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1)).fx('Visuals/Rig/Sigil',1.12,0.9,(1,0.6,0.6)).fx('Visuals/Rig/Sigil',2.55,0,(1,1,1))
+        c.key('Visuals/Rig/Body:region_rect',o+t,BODY_RECT(2*y))  # feet (then knees) stay on the ground line
+    c.hand('R',o+0.42,0.5,0.6,(0.8,0.85,1.0)); c.hand('R',o+0.6,0.75,1.0,(0.8,0.85,1.0)); c.hand('R',o+0.85,0.6,0.0,(0.8,0.85,1.0))
+    c.hand('L',o+0.76,0.5,0.0,(0.8,0.85,1.0)); c.hand('L',o+0.92,0.75,1.0,(0.8,0.85,1.0)); c.hand('L',o+1.1,0.6,0.0,(0.8,0.85,1.0))
+    c.fx('Visuals/Rig/Sigil',o+0,0.4,(1,1,1)).fx('Visuals/Rig/Sigil',o+1.12,0.9,(1,0.6,0.6)).fx('Visuals/Rig/Sigil',o+2.55,0,(1,1,1))
+    # down on his knees (1.88): the painted kneeling figure (images/character/parts/kneel.png) takes over from the rig
+    # parts; Visuals moves / tilts / tints it like the rest, the blades already in him stay where they are
+    # (it is drawn over the parts: it comes in first, 1.84-1.94, then the parts go, 1.9-1.98 — never two half-faded figures)
+    for t,a in ((1.84,0.0),(1.94,1.0)): c.key('Visuals/Rig/Kneel:modulate',o+t,C(1,1,1,a))
+    for t,a in ((1.9,1.0),(1.98,0.0)):
+        for pp in PART_PATHS: c.key(pp+':self_modulate',o+t,C(1,1,1,a))
     return c
+def dead_swords(name):
+    c=Clip(name,2.8); rest(c,0); return betrayal(c)
+
+# Death to the Architect (user 2026-10-16 "3막까지 다 깨고 아키텍트한테 죽을 때도 마검들로 아키텍트한테 저항하다가 아키텍트가
+# 마검의 조종을 뺏고 죽이는 모션"): after the victory the game kills every player in the Architect's room
+# (RunManager.WinRun -> GuaranteeKillAllPlayers -> CreatureCmd.Kill(force)); MotionDirector plays this instead of
+# Dead_Swords there (SwordVisuals.DeathArchitect — keep the times in step). 0-0.2 he calls the swords up in front of him,
+# right palm out at the Architect; three waves (0.36, 0.56, 0.76) — he drives his palm forward each time, the blades
+# strike and are repelled; 1.02 the Architect takes them: they freeze, he jerks as the link is torn from his hand
+# (1.05), they lose their colour (1.05-1.3) and turn their points on him (1.3-1.5) while he backs away; from 1.5 the
+# betrayal of Dead_Swords (betrayal(c,1.5)): 4.3 s in all.
+ARCH_O=1.5
+def dead_architect(name):
+    c=Clip(name,ARCH_O+2.8); rest(c,0)
+    c.pose(0.2,x=6,rot=0.02,head=-0.04,ur=-0.9,fr=-0.35,ul=0.15,cl=-0.02,cr=0.03)        # palm out at the Architect
+    for k,t in enumerate((0.36,0.56,0.76)):
+        c.pose(t-0.08,x=2,rot=0.0,head=-0.02,ur=-0.8,fr=-0.5,ul=0.18,cl=-0.01,cr=0.02)  # draws the hand back
+        c.pose(t,x=14+2*k,rot=0.04,head=-0.06,ur=-1.15,fr=-0.1,ul=0.2,cl=-0.04,cr=0.05)  # drives it forward: strike
+    c.pose(0.92,x=10,rot=0.025,head=-0.05,ur=-1.0,fr=-0.25,ul=0.18,cl=-0.03,cr=0.04)
+    c.pose(1.05,x=-4,rot=-0.05,head=-0.14,ur=-0.55,fr=-0.7,ul=0.3,fl=0.2,cl=0.04,cr=0.06,tint=(1.12,1.0,1.08))  # torn from his hand
+    c.pose(1.2,x=-8,rot=-0.03,head=-0.1,ur=-0.4,fr=-0.55,ul=0.25,fl=0.15,cl=0.03,cr=0.04,tint=(1,1,1))
+    c.pose(ARCH_O,x=-6,rot=-0.015,head=0.04,ul=0.22,ur=-0.45,fr=-0.45,cl=0.02,cr=0.03)   # backs away, wary
+    c.hand('R',0.15,0.5,0.0); c.hand('R',0.3,0.8,1.0); c.hand('R',0.92,0.85,1.0)
+    c.hand('R',1.0,0.95,1.0); c.hand('R',1.05,1.1,0.25); c.hand('R',1.1,0.7,0.8); c.hand('R',1.2,0.6,0.0)  # flickers out
+    c.fx('Visuals/Rig/Sigil',0,0.4,(1,1,1)).fx('Visuals/Rig/Sigil',0.3,0.9,(1,1,1)).fx('Visuals/Rig/Sigil',1.05,1.2,(0.75,0.75,0.8))
+    c.fx('Visuals/Rig/Sigil',ARCH_O,0.4,(1,1,1))
+    return betrayal(c,ARCH_O)
+
 M.append(dead_swords('Dead_Swords'))
 M.append(dead_swords('Dead'))  # the game's own trigger name: identical, so the body is right even without the redirect
+M.append(dead_architect('Dead_Architect'))
 c=Clip('Victory',1.4); rest(c,0); c.pose(0.4,y=-8,ur=-1.2,fr=-0.7,head=-0.12,cl=0.03,cr=-0.03); c.pose(1.0,y=-6,ur=-1.1,fr=-0.65,head=-0.08)
 c.fx('Visuals/Rig/Sigil',0.4,1,(1,1,1),scale=(1.4,1.4)); c.hand('R',0.4,0.9,1.0); c.hand('R',1.2,0.9,0.0); rest(c,1.4); M.append(c)
 c=Clip('TurnStart',0.6); rest(c,0); c.pose(0.25,y=-6,head=-0.05,ul=0.1,ur=-0.1); c.hand('LR',0.25,0.55,0.8); c.hand('LR',0.55,0.55,0.0); rest(c,0.6); M.append(c)
@@ -487,6 +529,19 @@ tracks/{i}/keys = {{
 "update": 0,
 "values": [0.0, {turns*2*math.pi:.5f}]
 }}''')
+# the painted kneeling figure (death clips only; alpha 0 everywhere else). Same texture-px scale as body.png; placed in
+# the rig's space for the kneel pose (Visuals dropped by KNEEL): its bottom edge (knees / shins) on the standing feet
+# line (body.png feet at y 753 -> rig y 353 standing, i.e. 353 - 2*KNEEL once he is down), its chest and face over the
+# rig's (kneel.png x 267 = rig x 0). kneel.png: 357 x 540 (images/character/parts/kneel.png)
+KNEEL_TEX=(357,540)
+KNEEL_POS=(-267,(753-CY)-2*KNEEL-KNEEL_TEX[1])
+nodes+=f'''[node name="Kneel" type="Sprite2D" parent="Visuals/Rig"]
+modulate = Color(1, 1, 1, 0)
+position = {V(*KNEEL_POS)}
+centered = false
+texture = ExtResource("p_kneel")
+
+'''
 nodes+=f'''[node name="Sigil" type="Sprite2D" parent="Visuals/Rig"]
 material = SubResource("add")
 modulate = Color(1, 1, 1, 0.4)
@@ -513,9 +568,10 @@ libraries = {{
 autoplay = "spin"
 '''
 spin_res='[sub_resource type="Animation" id="spin"]\nresource_name = "spin"\nlength = 12.0\nloop_mode = 1\n'+'\n'.join(spin_tracks)+'\n\n[sub_resource type="AnimationLibrary" id="spinlib"]\n_data = {\n&"spin": SubResource("spin")\n}\n'
-head=f'''[gd_scene load_steps={len(M)+len(ORDER)+13} format=3]
+head=f'''[gd_scene load_steps={len(M)+len(ORDER)+14} format=3]
 
 {res}
+[ext_resource type="Texture2D" path="{P}character/parts/kneel.png" id="p_kneel"]
 [ext_resource type="Texture2D" path="{P}vfx/magic_circle.png" id="2_circle"]
 [ext_resource type="Texture2D" path="{P}vfx/shield.png" id="4_shield"]
 [ext_resource type="Texture2D" path="{P}charselect/glow.png" id="5_glow"]
