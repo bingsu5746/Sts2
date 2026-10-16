@@ -18,7 +18,7 @@ public abstract class CaladbolgCard(int cost, CardType type, CardRarity rarity, 
     public sealed override SwordId? Sword => SwordId.Caladbolg;
 
     /// <summary>Hittable enemies right now (0 outside combat).</summary>
-    protected int EnemyCount => IsMutable && Owner?.PlayerCombatState != null
+    protected int EnemyCount => IsMutable && Owner?.PlayerCombatState != null && !LevelPreviewPatches.NeutralCombatInputs
         ? CaladbolgSpread.HittableEnemyCount(Owner.Creature)
         : 0;
 

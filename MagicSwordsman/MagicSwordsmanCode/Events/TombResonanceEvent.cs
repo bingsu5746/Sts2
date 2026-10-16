@@ -84,7 +84,12 @@ public sealed class TombResonanceEvent : CustomEventModel
     /// </summary>
     private bool _firstSwordRevealed;
 
-    private bool IsSealedStart => IsStart && !_firstSwordRevealed;
+    /// <summary>
+    /// The sealed page (AWAKEN button) only while the first sword is really still sealed (review fix 2026-10-16): when
+    /// the event is reopened after the awakening (reload on the 1-of-3 page), the reveal must not play again.
+    /// </summary>
+    private bool IsSealedStart =>
+        IsStart && !_firstSwordRevealed && Owner != null && SwordEventHelper.Tomb(Owner)?.SealedFirstSword != null;
 
     private LocString StartDescription()
     {
@@ -124,7 +129,7 @@ public sealed class TombResonanceEvent : CustomEventModel
         var options = new List<EventOption>();
         var tomb = Owner != null ? SwordEventHelper.Tomb(Owner) : null;
 
-        if (IsSealedStart && tomb != null && FirstSword(tomb) != null)
+        if (IsSealedStart && tomb?.SealedFirstSword != null)
         {
             options.Add(new EventOption(this, RevealFirstSword, $"{PageKey("START_SEALED")}.options.AWAKEN"));
             return options;
@@ -177,7 +182,7 @@ public sealed class TombResonanceEvent : CustomEventModel
     {
         _firstSwordRevealed = true;
         var tomb = Owner != null ? SwordEventHelper.Tomb(Owner) : null;
-        if (tomb != null && FirstSword(tomb) is { } first)
+        if (tomb?.SealedFirstSword is { } first)
         {
             var isMe = LocalContext.IsMe(Owner);
             if (isMe) await SwordRoulette.Play(first);
@@ -236,6 +241,7 @@ public sealed class TombResonanceEvent : CustomEventModel
         }
 
         if (IsStart) await OfferStartCardPicks(tomb, sword, choiceContext);
+        else await OfferPendingFirstSwordPick(tomb, choiceContext);
 
         MarkDone();
         SetEventFinished(IsStart ? SwordEventHelper.StartAcquiredText(sword) : SwordEventHelper.AcquiredText(sword, firstTime));
@@ -251,13 +257,24 @@ public sealed class TombResonanceEvent : CustomEventModel
     /// </summary>
     private async Task OfferStartCardPicks(Relics.Mangeomchong tomb, SwordId chosen, PlayerChoiceContext choiceContext)
     {
-        if (tomb.StartingSword is { } first && tomb.Owns(first) && tomb.GetRunCounter(FirstSwordPickKey) == 0)
-        {
-            tomb.SetRunCounter(FirstSwordPickKey, 1);
-            await SwordCardPick.Offer(Owner!, first, choiceContext);
-        }
-
+        await OfferPendingFirstSwordPick(tomb, choiceContext);
         await SwordCardPick.Offer(Owner!, chosen, choiceContext);
+    }
+
+    /// <summary>
+    /// The first sword's 1-of-3 pick if it was never offered (run counter <see cref="FirstSwordPickKey"/>). Normally the
+    /// run-start page offers it. If the run-start event never ran, Mangeomchong's fallback (BeforeRoomEntered /
+    /// BeforeCombatStart) awakens the sword without a pick: a room hook has no synced player-choice context, so the pick
+    /// cannot be offered there multiplayer-safely. It is offered here instead, at the next 만검총 event (after the act 1
+    /// boss), from inside an event option — the same synced flow as every other SwordCardPick (review fix 2026-10-16).
+    /// Not when the first sword is no longer owned (released).
+    /// </summary>
+    private async Task OfferPendingFirstSwordPick(Relics.Mangeomchong tomb, PlayerChoiceContext choiceContext)
+    {
+        if (tomb.StartingSword is not { } first || !tomb.Owns(first) || tomb.GetRunCounter(FirstSwordPickKey) != 0)
+            return;
+        tomb.SetRunCounter(FirstSwordPickKey, 1);
+        await SwordCardPick.Offer(Owner!, first, choiceContext);
     }
 
     /// <summary>
@@ -322,6 +339,8 @@ public sealed class TombResonanceEvent : CustomEventModel
         // User report #42 (25 gold was too weak): a random relic instead, rarity rolled by the game like the
         // relic events (RoundTeaParty / UnrestSite: RelicFactory.PullNextRelicFromFront + RelicCmd.Obtain).
         await RelicCmd.Obtain(RelicFactory.PullNextRelicFromFront(Owner!).ToMutable(), Owner!);
+        if (SwordEventHelper.Tomb(Owner!) is { } tomb)
+            await OfferPendingFirstSwordPick(tomb, new BlockingPlayerChoiceContext());
         MarkDone();
         SetEventFinished(L10NLookup($"{PageKey("PASS")}.description"));
     }
@@ -340,6 +359,7 @@ public sealed class TombResonanceEvent : CustomEventModel
         }
 
         var outcome = await SwordForge.ApplyEventUpgrade(Owner!, sword, Rng);
+        if (tomb != null) await OfferPendingFirstSwordPick(tomb, new BlockingPlayerChoiceContext());
         MarkDone();
         var text = L10NLookup($"{PageKey("FORGO")}.description");
         text.Add("Sword", SwordLore.Name(sword));

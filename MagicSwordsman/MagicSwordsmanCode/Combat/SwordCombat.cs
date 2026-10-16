@@ -35,12 +35,14 @@ public static class SwordCombat
     /// Mangeomchong.BeforeCombatStart, Clear at the end of Mangeomchong.AfterCombatEnd, so it is still readable
     /// inside SwordBehavior.OnCombatEnd.)
     /// </summary>
-    public static SwordCombatState? Get(Player player) => States.TryGetValue(player, out var s) ? s : null;
+    /// Reads null inside Cards/LevelPreviewPatches' neutral scope (a deck card previewed during a fight).
+    public static SwordCombatState? Get(Player player) =>
+        !Cards.LevelPreviewPatches.NeutralCombatInputs && States.TryGetValue(player, out var s) ? s : null;
 
     /// <summary>Like <see cref="Get"/> but creates the state when missing (still null outside combat).</summary>
     public static SwordCombatState? GetOrCreate(Player player)
     {
-        if (player.PlayerCombatState == null) return null;
+        if (player.PlayerCombatState == null || Cards.LevelPreviewPatches.NeutralCombatInputs) return null;
         return States.GetValue(player, _ => new SwordCombatState());
     }
 

@@ -31,7 +31,7 @@ public static class CommonCardRules
     /// <summary>The card's owner while the card is a real combat card; null for canonical cards / out of combat.</summary>
     public static Player? CombatOwner(CardModel card)
     {
-        if (!card.IsMutable) return null;
+        if (!card.IsMutable || LevelPreviewPatches.NeutralCombatInputs) return null;
         var owner = card.Owner;
         return owner?.PlayerCombatState == null ? null : owner;
     }

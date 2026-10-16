@@ -275,7 +275,8 @@ public sealed class UnionMountainCleavers : UnionCard
     public UnionMountainCleavers() : base(2, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy)
     {
         WithBlock(8);
-        WithCalculatedDamage(0, 1, static (card, _) => card.Owner?.Creature.Block ?? 0);
+        WithCalculatedDamage(0, 1, static (card, _) =>
+            LevelPreviewPatches.NeutralCombatInputs ? 0 : card.Owner?.Creature.Block ?? 0);
         WithTip(StaticHoverTip.Block);
     }
 
@@ -480,7 +481,7 @@ public sealed class UnionWildfireBlade : UnionCard
     {
         WithDamage(5);
         WithCalculatedVar("Hits", 1, 1, static (card, _) =>
-            card.IsMutable && card.Owner is { PlayerCombatState: not null } o
+            card.IsMutable && !LevelPreviewPatches.NeutralCombatInputs && card.Owner is { PlayerCombatState: not null } o
                 ? PileType.Hand.GetPile(o).Cards.Count(KusanagiPurify.IsStatusOrCurse)
                 : 0);
     }

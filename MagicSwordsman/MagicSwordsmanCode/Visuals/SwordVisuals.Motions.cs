@@ -1035,4 +1035,98 @@ public static partial class SwordVisuals
         tw.TweenProperty(node, "position", new Vector2(x, -80), 0.18).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
         tw.TweenProperty(node, "modulate", new Color(0.7f, 0.68f, 0.76f), 0.4);
     }
+
+    // ------------------------------------------------------------------ revived in combat
+
+    /// <summary>
+    /// Ensifer was brought back in the same combat (review fix 2026-10-16). The game calls NCreature.StartReviveAnim when a
+    /// dead creature is healed (CreatureCmd.Heal) or has its HP set above 0 (CreatureCmd.SetCurrentHp) during combat —
+    /// verified in the decompiled CreatureCmd. The death rig is final by design (<see cref="Rig.Dead"/> is never reset,
+    /// the rig was moved into NCreatureVisuals by <see cref="KeepWithBody"/>, blades are stuck in the body), so it is
+    /// torn down instead: the rig (with every stuck blade piece) is freed, the RemoteTransform2D anchors the stuck blades
+    /// left on the body node are removed, and a fresh rig is built by <see cref="Sync"/> from the combat state.
+    /// The body: the death clips fade the rig parts out and the kneeling figure in; every other clip resets those tracks
+    /// (tools/gen_combat_scene.py REST), so the body goes back to "idle" once the game's revive fade (AnimTempRevive:
+    /// alpha 0 over 0.2 s) has hidden it. Presentation only; never throws.
+    /// UNVERIFIED in game: no revive effect for players was tested.
+    /// </summary>
+    public static void OnRevived(Player player)
+    {
+        try
+        {
+            if (!Rigs.TryGetValue(player, out var rig)) return;
+            if (!rig.Dead) return; // never died visually: nothing to undo
+            Rigs.Remove(player);
+            foreach (var m in rig.Moves.Values)
+                if (GodotObject.IsInstanceValid(m)) m.Kill();
+            if (GodotObject.IsInstanceValid(rig.Root)) rig.Root.QueueFree();
+
+            var body = BodyNode(player);
+            if (body != null)
+                foreach (var anchor in body.GetChildren().OfType<RemoteTransform2D>()
+                             .Where(a => a.Name.ToString().StartsWith("StuckSwordAnchor")).ToList())
+                    anchor.QueueFree();
+
+            var creatureNode = NCombatRoom.Instance?.GetCreatureNode(player.Creature);
+            if (creatureNode != null)
+            {
+                var tw = creatureNode.CreateTween();
+                tw.TweenInterval(0.2);
+                tw.TweenCallback(Callable.From(() =>
+                {
+                    try
+                    {
+                        var anim = MainAnimationPlayer(player);
+                        if (anim != null && anim.CurrentAnimation.ToString().StartsWith("Dead") && anim.HasAnimation("idle"))
+                        {
+                            anim.Stop();
+                            anim.Play("idle");
+                        }
+                        // fallback when the clip did not reset them (e.g. no "idle" clip): the parts back, no kneeling figure
+                        var rigNode = body != null && GodotObject.IsInstanceValid(body) ? body.GetNodeOrNull<Node2D>("Rig") : null;
+                        if (rigNode != null && (anim == null || !anim.HasAnimation("idle")))
+                        {
+                            if (rigNode.GetNodeOrNull<CanvasItem>("Kneel") is { } kneel) kneel.Modulate = new Color(1, 1, 1, 0);
+                            foreach (var path in RevivePartPaths)
+                                if (rigNode.GetNodeOrNull<CanvasItem>(path) is { } part) part.SelfModulate = Colors.White;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        MainFile.Logger.Warn($"[SwordVisuals] revive body reset failed: {e.Message}");
+                    }
+                }));
+            }
+
+            Sync(player);
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordVisuals] revive teardown failed: {e.Message}");
+        }
+    }
+
+    /// <summary>The rig body parts the death clips fade (tools/gen_combat_scene.py PART_PATHS, relative to Visuals/Rig).</summary>
+    private static readonly string[] RevivePartPaths =
+        ["Body", "Head", "CoatL", "CoatR", "UpperL", "UpperL/ForeL", "UpperR", "UpperR/ForeR"];
+}
+
+/// <summary>Revived in combat -> tear the death rig down (<see cref="SwordVisuals.OnRevived"/>).</summary>
+[HarmonyLib.HarmonyPatch(typeof(MegaCrit.Sts2.Core.Nodes.Combat.NCreature),
+    nameof(MegaCrit.Sts2.Core.Nodes.Combat.NCreature.StartReviveAnim))]
+internal static class SwordVisualsRevivePatch
+{
+    [HarmonyLib.HarmonyPostfix]
+    private static void Postfix(MegaCrit.Sts2.Core.Nodes.Combat.NCreature __instance)
+    {
+        try
+        {
+            // the player's own creature only (a pet's revive, e.g. Osty, must not touch its owner's rig)
+            if (__instance.Entity is { IsPlayer: true, Player: { } player }) SwordVisuals.OnRevived(player);
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[SwordVisuals] revive hook failed: {e.Message}");
+        }
+    }
 }

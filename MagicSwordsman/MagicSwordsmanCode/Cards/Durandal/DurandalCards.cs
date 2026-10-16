@@ -154,7 +154,8 @@ public sealed class DurandalRolandsBreach : DurandalCard
 {
     public DurandalRolandsBreach() : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
     {
-        WithCalculatedDamage(0, 1, static (card, _) => card.Owner?.Creature.Block ?? 0);
+        WithCalculatedDamage(0, 1, static (card, _) =>
+            LevelPreviewPatches.NeutralCombatInputs ? 0 : card.Owner?.Creature.Block ?? 0);
         WithDamagePerLevel(2);
         WithTip(StaticHoverTip.Block);
     }

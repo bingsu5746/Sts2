@@ -55,7 +55,7 @@ public abstract class TyrfingCard(int cost, CardType type, CardRarity rarity, Ta
     /// <summary>Curse cards in the owner's hand, draw pile and discard pile.</summary>
     protected int CursesInPiles()
     {
-        if (!IsMutable || Owner?.PlayerCombatState == null) return 0;
+        if (!IsMutable || Owner?.PlayerCombatState == null || LevelPreviewPatches.NeutralCombatInputs) return 0;
         return PileType.Hand.GetPile(Owner).Cards
             .Concat(PileType.Draw.GetPile(Owner).Cards)
             .Concat(PileType.Discard.GetPile(Owner).Cards)

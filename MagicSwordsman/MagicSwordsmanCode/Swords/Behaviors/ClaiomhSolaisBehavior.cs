@@ -69,7 +69,9 @@ public static class SolaisLight
     /// <summary>⌈L/2⌉ — the part of K that comes from the level (used by the cards' text variables).</summary>
     public static int LevelBonus(int level) => (Math.Clamp(level, 0, SwordRegistry.MaxLevel) + 1) / 2;
 
-    public static int Get(Player player) => player.Creature.GetPowerAmount<SolaisLightPower>();
+    /// <summary>The player's Light; 0 inside Cards/LevelPreviewPatches' neutral scope (deck card previewed mid-fight).</summary>
+    public static int Get(Player player) =>
+        Cards.LevelPreviewPatches.NeutralCombatInputs ? 0 : player.Creature.GetPowerAmount<SolaisLightPower>();
 
     /// <summary>
     /// Whether Claíomh Solais' current-sword effect is active for this player right now: Solais is current, or the

@@ -26,7 +26,7 @@ public sealed class KusanagiSusanoosStrike : KusanagiCard
     }
 
     protected override decimal BonusDamage(Creature? target) =>
-        IsMutable && Owner?.PlayerCombatState != null ? PerExhausted * KusanagiPurify.ExhaustedThisCombat(Owner) : 0;
+        IsMutable && Owner?.PlayerCombatState != null && !LevelPreviewPatches.NeutralCombatInputs ? PerExhausted * KusanagiPurify.ExhaustedThisCombat(Owner) : 0;
 
     protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {

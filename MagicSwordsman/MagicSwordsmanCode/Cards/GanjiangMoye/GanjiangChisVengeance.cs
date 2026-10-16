@@ -40,7 +40,7 @@ public sealed class GanjiangChisVengeance : GanjiangMoyeCard
     {
         get
         {
-            if (!IsMutable || Owner?.PlayerCombatState == null) return 0;
+            if (!IsMutable || Owner?.PlayerCombatState == null || LevelPreviewPatches.NeutralCombatInputs) return 0;
             var creature = Owner.Creature;
             var lost = CombatManager.Instance.History.Entries.OfType<DamageReceivedEntry>()
                 .Where(e => e.Receiver == creature)

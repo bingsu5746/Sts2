@@ -14,7 +14,8 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.ClaiomhSolais;
 
 /// <summary>
 /// 승전의 횃불 (Common attack): 8 damage (+1/L). Fatal: if this kills an enemy, gain 3 Light.
-/// Light gained from a kill (kill check: game attack result WasTargetKilled, as 이미 뽑힌 칼 / 뽑을 때마다 한 목숨).
+/// Light gained from a kill (Fatal check as the game's HandOfGreed: target powers all ShouldOwnerDeathTriggerFatal
+/// before the attack, so minions/summons do not count, + attack result WasTargetKilled).
 /// </summary>
 public sealed class SolaisVictoryTorch : SolaisCard
 {
@@ -30,9 +31,11 @@ public sealed class SolaisVictoryTorch : SolaisCard
 
     protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        // Fatal = the game's rule (HandOfGreed / TyrfingGoldenHilt): checked before the attack, no minion/summon.
+        var fatal = cardPlay.Target != null && cardPlay.Target.Powers.All(p => p.ShouldOwnerDeathTriggerFatal());
         var attack = await CommonActions.CardAttack(this, cardPlay).WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        if (attack.Results.SelectMany(r => r).Any(r => r.WasTargetKilled) && !Owner.Creature.IsDead)
+        if (fatal && attack.Results.SelectMany(r => r).Any(r => r.WasTargetKilled) && !Owner.Creature.IsDead)
             await SolaisLight.Gain(choiceContext, Owner, KillLight, this);
     }
 }

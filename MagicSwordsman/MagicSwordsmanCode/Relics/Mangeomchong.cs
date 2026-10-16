@@ -539,6 +539,9 @@ public class Mangeomchong : MagicSwordsmanRelic
     /// skipped or lost), the sword is granted right before that room starts, so the run is never swordless. Combat rooms
     /// set up the fight in room.Enter, which runs after this hook (RunManager.EnterRoomInternal). The Ancient (Neow)
     /// room and the run-start pick itself are exempt. Not called for the map room or for pre-finished rooms on load.
+    /// The first sword's 1-of-3 card pick is NOT offered here (a room hook has no synced player-choice context, so it is
+    /// not multiplayer-safe); TombResonanceEvent.OfferPendingFirstSwordPick offers it at the next 만검총 event (after the
+    /// act 1 boss) instead, guarded by TombResonanceEvent.FirstSwordPickKey.
     /// </summary>
     public override async Task BeforeRoomEntered(AbstractRoom room)
     {
@@ -646,8 +649,18 @@ public class Mangeomchong : MagicSwordsmanRelic
 
     public override async Task BeforeCombatStart()
     {
-        // Last-resort fallback (normally BeforeRoomEntered already did it): never fight with the first sword sealed.
-        if (SealedFirstSword != null) await AwakenWithoutRoulette();
+        // Last-resort fallback: never fight with the first sword sealed. Should be unreachable — every combat room is
+        // entered through RunManager.EnterRoomInternal, which runs Hook.BeforeRoomEntered (our fallback) before
+        // room.Enter, and the only exempt rooms (Neow, the run-start TombResonanceEvent) start no fight (verified in the
+        // decompiled RunManager, 2026-10-16). If it ever happens, the starter cards go to the DECK only (this fight's
+        // piles were already built from the deck); they are deliberately not put into the draw pile (a combat copy +
+        // pile position here is untested), so this is only logged (review fix 2026-10-16).
+        if (SealedFirstSword != null)
+        {
+            MainFile.Logger.Warn("[Mangeomchong] first sword still sealed at combat start: awakened now; its starter " +
+                                 "cards join the deck from the next combat on");
+            await AwakenWithoutRoulette();
+        }
         SwordCombat.Reset(Owner);
     }
 
