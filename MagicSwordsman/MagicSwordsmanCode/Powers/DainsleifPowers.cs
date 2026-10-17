@@ -40,7 +40,8 @@ public sealed class DainsleifHjadningavigPower : MagicSwordsmanPower
     // BeforeCardPlayed runs after the energy was paid (CardModel.OnPlayWrapper), so the played card was still free.
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
-        if (IsOwnDainsleifCard(cardPlay.Card)) _freeUsedTurn = TurnNumber;
+        // A printed-0 Dainsleif card (선혈, 돌아온 칼) gained nothing from the discount, so it does not use it up.
+        if (IsOwnDainsleifCard(cardPlay.Card) && cardPlay.Card.EnergyCost.Canonical > 0) _freeUsedTurn = TurnNumber;
         return Task.CompletedTask;
     }
 }

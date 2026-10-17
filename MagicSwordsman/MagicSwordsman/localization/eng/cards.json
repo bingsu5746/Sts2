@@ -119,7 +119,7 @@
   "MAGICSWORDSMAN-TYRFING_DWARVEN_RANSOM.title": "Blood Price",
   "MAGICSWORDSMAN-TYRFING_DWARVEN_RANSOM.description": "Gain {Block:diff()} [gold]Block[/gold].\nYour next [gold]Tyrfing[/gold] attack this turn deals {Bonus} more damage.\n[gold]Tyrfing[/gold] level {SwordLevel} (+1 Block and +1 damage per level).",
   "MAGICSWORDSMAN-TYRFING_IRON_LIKE_CLOTH.title": "Steel Like Cloth",
-  "MAGICSWORDSMAN-TYRFING_IRON_LIKE_CLOTH.description": "Deal {Damage:diff()} damage.\nIf the target has [gold]Block[/gold], deal {Bonus} more.\n[gold]Tyrfing[/gold] level {SwordLevel} (+1 damage per level).",
+  "MAGICSWORDSMAN-TYRFING_IRON_LIKE_CLOTH.description": "Deal {Damage:diff()} damage.\nDeals extra damage equal to the target's [gold]Block[/gold] (at most {Bonus}).\n[gold]Tyrfing[/gold] level {SwordLevel} (+1 damage per level).",
   "MAGICSWORDSMAN-TYRFING_GOLDEN_HILT.title": "Golden Hilt",
   "MAGICSWORDSMAN-TYRFING_GOLDEN_HILT.description": "Deal {Damage:diff()} damage.\n[gold]Fatal[/gold]: If this kills an enemy, gain {Gold} gold.\n[gold]Tyrfing[/gold] level {SwordLevel} (+1 damage per level).",
   "MAGICSWORDSMAN-TYRFING_RUSTLESS.title": "Untarnished",

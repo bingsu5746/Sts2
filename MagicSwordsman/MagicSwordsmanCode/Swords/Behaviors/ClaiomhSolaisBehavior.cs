@@ -44,11 +44,14 @@ public sealed class ClaiomhSolaisBehavior : SwordBehavior
             var amount = effectCtx.Scale(SolaisLight.ChargePerTurn);
             await SolaisLight.Gain(choiceContext, player, amount, null);
         }
-        else
+        else if (!ctx.Creature.HasPower<SolaisShadedLightPower>())
         {
             // [확정] cost: not current at the end of the turn -> all Light fades.
             await SolaisLight.LoseAllAsCost(choiceContext, player);
         }
+
+        // 빛 갈무리 (2026-10-17) protects only the turn it was played in.
+        if (ctx.Creature.GetPower<SolaisShadedLightPower>() is { } shaded) await PowerCmd.Remove(shaded);
     }
 }
 

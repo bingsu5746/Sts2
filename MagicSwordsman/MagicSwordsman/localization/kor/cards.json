@@ -119,7 +119,7 @@
   "MAGICSWORDSMAN-TYRFING_DWARVEN_RANSOM.title": "피의 대가",
   "MAGICSWORDSMAN-TYRFING_DWARVEN_RANSOM.description": "[gold]방어도[/gold]를 {Block:diff()} 얻습니다.\n이번 턴 다음 [gold]티르빙[/gold] 공격의 피해가 {Bonus} 증가합니다.\n[gold]티르빙[/gold] {SwordLevel}단계 (단계마다 방어도 +1, 피해 +1).",
   "MAGICSWORDSMAN-TYRFING_IRON_LIKE_CLOTH.title": "강철을 천처럼",
-  "MAGICSWORDSMAN-TYRFING_IRON_LIKE_CLOTH.description": "피해를 {Damage:diff()} 줍니다.\n대상에게 [gold]방어도[/gold]가 있으면 피해 +{Bonus}.\n[gold]티르빙[/gold] {SwordLevel}단계 (단계마다 피해 +1).",
+  "MAGICSWORDSMAN-TYRFING_IRON_LIKE_CLOTH.description": "피해를 {Damage:diff()} 줍니다.\n대상의 [gold]방어도[/gold]만큼 피해가 증가합니다(최대 {Bonus}).\n[gold]티르빙[/gold] {SwordLevel}단계 (단계마다 피해 +1).",
   "MAGICSWORDSMAN-TYRFING_GOLDEN_HILT.title": "황금 칼자루",
   "MAGICSWORDSMAN-TYRFING_GOLDEN_HILT.description": "피해를 {Damage:diff()} 줍니다.\n[gold]치명[/gold]: 이 카드로 적을 처치하면 골드를 {Gold} 얻습니다.\n[gold]티르빙[/gold] {SwordLevel}단계 (단계마다 피해 +1).",
   "MAGICSWORDSMAN-TYRFING_RUSTLESS.title": "녹슬지 않는 날",

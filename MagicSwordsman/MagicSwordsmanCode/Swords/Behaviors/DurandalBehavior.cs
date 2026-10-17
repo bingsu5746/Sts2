@@ -1,6 +1,9 @@
 using MagicSwordsman.MagicSwordsmanCode.Cards.Durandal;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Curses;
+using MagicSwordsman.MagicSwordsmanCode.Powers;
+using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;
@@ -34,9 +37,58 @@ public sealed class DurandalBehavior : SwordBehavior
     /// <summary>Half reduction (rounded down, min 1) — Kusanagi inheritance and 몸 밑에 숨긴 검.</summary>
     public static int HalfReductionFor(int level) => Math.Max(1, ReductionFor(level) / 2);
 
-    /// <summary>Spec cost [확정]: HP 30% or less -> cannot switch to Durandal (cards still resolve, no switch).</summary>
+    /// <summary>
+    /// Spec cost [확정]: HP 30% or less -> cannot switch to Durandal (cards still resolve, no switch).
+    /// 롤랑의 최후 (<see cref="DurandalRolandsEndPower"/>, 2026-10-17) lifts the ban for the rest of the combat.
+    /// </summary>
     public override bool CanBecomeCurrent(SwordContext ctx, SwitchReason reason) =>
-        ctx.Creature.CurrentHp * 10 > ctx.Creature.MaxHp * 3;
+        !IsLowHp(ctx.Creature) || ctx.Creature.HasPower<DurandalRolandsEndPower>();
+
+    /// <summary>The cost's threshold: HP at or below 30% of max HP.</summary>
+    public static bool IsLowHp(Creature creature) => creature.CurrentHp * 10 <= creature.MaxHp * 3;
+
+    /// <summary>
+    /// Extra reduction from the 2026-10-17 mechanic cards, added on top of the level reduction while Durandal's effect
+    /// is active (not halved for Kusanagi): 단단한 날 (<see cref="DurandalHardEdgePower"/>) and 롤랑의 최후 at low HP.
+    /// </summary>
+    public static int BonusReduction(Creature creature)
+    {
+        var bonus = creature.GetPowerAmount<DurandalHardEdgePower>();
+        if (creature.HasPower<DurandalRolandsEndPower>() && IsLowHp(creature)) bonus += DurandalRolandsEndPower.LowHpBonus;
+        return bonus;
+    }
+
+    /// <summary>
+    /// The per-hit reduction Durandal's effect gives <paramref name="player"/> right now (level reduction, halved when
+    /// inherited by Kusanagi, + <see cref="BonusReduction"/>); 0 while the effect is not active.
+    /// </summary>
+    public static int ActiveReduction(Player player)
+    {
+        if (!IsSwordEffectActive(player, SwordId.Durandal, out var inherited)) return 0;
+        var level = SwordCombat.LevelOf(player, SwordId.Durandal);
+        var baseReduction = inherited ? HalfReductionFor(level) : ReductionFor(level);
+        return baseReduction + BonusReduction(player.Creature);
+    }
+
+    /// <summary>Counter (per combat, Durandal): enemy attack hits taken while the effect was active, since your last turn ended.</summary>
+    public const string ReducedHitsKey = "reduced_hits";
+
+    /// <summary>롤랑의 반격: hits Durandal's effect reduced since the end of your last turn.</summary>
+    public static int ReducedHitsSinceLastTurn(Player player) =>
+        SwordCombat.Get(player)?.GetCounter(SwordId.Durandal, ReducedHitsKey) ?? 0;
+
+    public override Task AfterDamageReceived(SwordContext ctx, PlayerChoiceContext choiceContext, Creature target,
+        DamageResult result, ValueProp props, Creature? dealer, CardModel? cardSource)
+    {
+        if (!ctx.IsPreview && IsEnemyAttackOn(ctx.Creature, target, props, dealer)) ctx.AddCounter(ReducedHitsKey, 1);
+        return Task.CompletedTask;
+    }
+
+    public override Task OnPlayerTurnEnd(SwordContext ctx, PlayerChoiceContext choiceContext)
+    {
+        ctx.SetCounter(ReducedHitsKey, 0);
+        return Task.CompletedTask;
+    }
 
     /// <summary>
     /// Incoming enemy attack hits against the owner deal (2,2,3,3,4,5 by level) less; Kusanagi: half.
@@ -48,7 +100,7 @@ public sealed class DurandalBehavior : SwordBehavior
         Creature? dealer, CardModel? cardSource)
     {
         if (!IsEnemyAttackOn(ctx.Creature, target, props, dealer)) return 0m;
-        var reduction = ctx.Scale(ReductionFor(ctx.Level));
+        var reduction = ctx.Scale(ReductionFor(ctx.Level)) + BonusReduction(ctx.Creature);
         return -Math.Min(reduction, Math.Max(0m, amount));
     }
 

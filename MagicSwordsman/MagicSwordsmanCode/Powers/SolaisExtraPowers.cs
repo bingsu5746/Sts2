@@ -198,3 +198,16 @@ public sealed class SolaisLitSheathPower : MagicSwordsmanPower
         return Task.CompletedTask;
     }
 }
+
+/// <summary>
+/// 빛 갈무리 (SolaisShadedLight, 2026-10-17): this turn, Light does not fade at the end of the turn even if Claíomh
+/// Solais is not current. Consumed (removed) by <see cref="ClaiomhSolaisBehavior.OnPlayerTurnEnd"/> whichever branch
+/// runs, so it never lasts past the turn it was played. Single.
+/// </summary>
+public sealed class SolaisShadedLightPower : MagicSwordsmanPower
+{
+    public override PowerType Type => PowerType.Buff;
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<SolaisLightPower>()];
+}

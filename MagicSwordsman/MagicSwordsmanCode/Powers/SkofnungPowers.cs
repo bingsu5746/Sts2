@@ -99,6 +99,9 @@ public sealed class SkofnungWoundPower : MagicSwordsmanPower
             {
                 var finest = player.Creature.GetPower<SkofnungFinestInNorthPower>();
                 if (finest != null) await finest.OnWoundBurst(choiceContext);
+                // 떠나지 않는 혼 (2026-10-17): the burst spreads Scars to the other enemies.
+                var souls = player.Creature.GetPower<SkofnungLingeringSoulsPower>();
+                if (souls != null) await souls.OnWoundBurst(choiceContext, Owner);
             }
         }
         finally
