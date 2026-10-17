@@ -21,6 +21,8 @@ public sealed class KusanagiThreeRegalia : KusanagiCard
 {
     public KusanagiThreeRegalia() : base(2, CardType.Power, CardRarity.Rare, TargetType.Self)
     {
+        WithTip(SwordMechTips.Inherit);
+        WithTip(SwordMechTips.KusanagiLimit);
         WithPower<KusanagiRegaliaPower>(1);
     }
 

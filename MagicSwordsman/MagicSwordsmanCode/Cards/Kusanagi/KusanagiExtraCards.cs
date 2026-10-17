@@ -17,6 +17,7 @@ public sealed class KusanagiCounterfire : KusanagiCard
 {
     public KusanagiCounterfire() : base(1, CardType.Attack, CardRarity.Common, TargetType.AllEnemies)
     {
+        WithTip(SwordMechTips.Purify);
         WithDamage(4);
         WithDamagePerLevel(1);
     }
@@ -59,6 +60,7 @@ public sealed class KusanagiOffering : KusanagiCard
 {
     public KusanagiOffering() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self)
     {
+        WithTip(SwordMechTips.Purify);
         WithCalculatedVar("PurgeBlock", 4, 1, static (card, _) => card is MagicSwordCard m ? m.SwordLevel / 2 : 0);
         WithTip(typeof(KusanagiOfferingPower));
     }
@@ -80,6 +82,7 @@ public sealed class KusanagiChippedTotsuka : KusanagiCard
 {
     public KusanagiChippedTotsuka() : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self)
     {
+        WithTip(SwordMechTips.Inherit);
         WithCards(2);
         WithTip(typeof(KusanagiChippedTotsukaPower));
     }

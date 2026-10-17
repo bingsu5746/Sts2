@@ -19,6 +19,7 @@ public sealed class CaladbolgGrowingBlade : CaladbolgCard
 {
     public CaladbolgGrowingBlade() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self)
     {
+        WithTip(SwordMechTips.ThreeHills);
         WithCalculatedVar("BlockPerHit", 2, 1, static (card, _) => card is MagicSwordCard m ? m.SwordLevel / 2 : 0);
         WithTip(typeof(CaladbolgGrowingBladePower));
     }

@@ -70,16 +70,24 @@ public static class KusanagiPurify
         if (debuff == null) return false;
         var offset = debuff.AllowNegative && debuff.Amount < 0 ? 1m : -1m;
         await PowerCmd.ModifyAmount(choiceContext, debuff, offset, null, source);
+        await NotifyDebuffPurified(choiceContext, creature);
         return true;
     }
 
     /// <summary>Remove one debuff type completely. Returns false if there was none.</summary>
-    public static async Task<bool> RemoveOneDebuff(Creature creature)
+    public static async Task<bool> RemoveOneDebuff(Creature creature, PlayerChoiceContext? choiceContext = null)
     {
         var debuff = StrongestDebuff(creature);
         if (debuff == null) return false;
         await PowerCmd.Remove(debuff);
+        await NotifyDebuffPurified(choiceContext ?? new ThrowingPlayerChoiceContext(), creature);
         return true;
+    }
+
+    /// <summary>미소기 (KusanagiMisogiPower, mech2 2026-10-17): one of the creature's debuffs was reduced / removed.</summary>
+    private static async Task NotifyDebuffPurified(PlayerChoiceContext choiceContext, Creature creature)
+    {
+        if (creature.GetPower<Powers.KusanagiMisogiPower>() is { } misogi) await misogi.OnDebuffPurified(choiceContext);
     }
 
     /// <summary>Choose 1 status/curse card in hand and exhaust it (nothing happens if there is none).</summary>

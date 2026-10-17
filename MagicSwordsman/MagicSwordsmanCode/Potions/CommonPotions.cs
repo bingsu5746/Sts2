@@ -63,7 +63,7 @@ public sealed class PurifyingWater : MagicSwordsmanPotion
     protected override async Task OnUse(PlayerChoiceContext choiceContext, Creature? target)
     {
         await KusanagiPurify.ExhaustAllFromHand(choiceContext, Owner);
-        await KusanagiPurify.RemoveOneDebuff(Owner.Creature);
+        await KusanagiPurify.RemoveOneDebuff(Owner.Creature, choiceContext);
     }
 }
 

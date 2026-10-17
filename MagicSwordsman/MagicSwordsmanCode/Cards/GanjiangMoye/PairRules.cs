@@ -20,6 +20,10 @@ public static class PairRules
 {
     private const string PrimedKey = "pair_primed";
     private const string AlwaysTurnKey = "pair_always_turn";
+    private const string CountKey = "pair_count";
+
+    /// <summary>How many times 【짝】 triggered for this player in this combat (삼 년의 담금질, mech2 2026-10-17).</summary>
+    public static int PairsThisCombat(Player player) => SwordCombat.Get(player)?.GetCounter(SwordId.Ganjiang, CountKey) ?? 0;
 
     /// <summary>Whether a card with this side/twin flag would trigger 【짝】 if played now (pure; for glow/preview).</summary>
     public static bool WouldTrigger(Player player, SwordId? side, bool isTwin, SwordId? swordBeforePlay)
@@ -51,6 +55,7 @@ public static class PairRules
 
         if (triggers)
         {
+            state?.AddCounter(SwordId.Ganjiang, CountKey, 1);
             Visuals.Sfx.Pair();
             var power = player.Creature.GetPower<MoyesSacrificePower>();
             if (power != null) await power.OnPairTriggered();

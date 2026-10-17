@@ -19,6 +19,7 @@ public sealed class KusanagiMirror : KusanagiCard
 {
     public KusanagiMirror() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self)
     {
+        WithTip(SwordMechTips.Inherit);
         WithCards(2);
     }
 

@@ -11,6 +11,7 @@ public sealed class GanjiangSlash : GanjiangMoyeCard
 {
     public GanjiangSlash() : base(1, CardType.Attack, CardRarity.Basic, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.PairBlades);
         WithDamage(6);
         WithDamagePerLevel(1);
         WithVar("PairDamage", 3);

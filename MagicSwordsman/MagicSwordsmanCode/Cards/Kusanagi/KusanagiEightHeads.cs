@@ -18,6 +18,7 @@ public sealed class KusanagiEightHeads : KusanagiCard
 
     public KusanagiEightHeads() : base(2, CardType.Attack, CardRarity.Uncommon, TargetType.RandomEnemy)
     {
+        WithTip(SwordMechTips.Inherit);
         WithDamage(2);
         WithVar("Hits", Hits);
     }

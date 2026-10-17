@@ -1,0 +1,16 @@
+{
+  "MAGICSWORDSMAN-MECH_GRAM_LEVEL.title": "Gram's Effect",
+  "MAGICSWORDSMAN-MECH_GRAM_LEVEL.description": "While [gold]Gram[/gold] is your [gold]current sword[/gold], each hit of your attacks deals extra damage equal to Gram's upgrade level (+0 at level 0 to +5 at level 5). The first time in a run Gram reaches level 5, you get the curse [gold]Nibelung Treasure[/gold] (cannot be removed).",
+  "MAGICSWORDSMAN-MECH_PAIR_BLADES.title": "Ganjiang and Moye",
+  "MAGICSWORDSMAN-MECH_PAIR_BLADES.description": "While [gold]Ganjiang[/gold] is your [gold]current sword[/gold], your attacks deal more damage; while [gold]Moye[/gold] is, you gain more [gold]Block[/gold] from cards. Alternating Ganjiang and Moye cards triggers [gold]Pair[/gold].",
+  "MAGICSWORDSMAN-MECH_INHERIT.title": "Inherit",
+  "MAGICSWORDSMAN-MECH_INHERIT.description": "While [gold]Kusanagi[/gold] is your [gold]current sword[/gold], it inherits the effect of the sword you held right before it, at half strength (rounded down, min 1). That sword's cost is not inherited.",
+  "MAGICSWORDSMAN-MECH_PURIFY.title": "Purification",
+  "MAGICSWORDSMAN-MECH_PURIFY.description": "Effects that [gold]Exhaust[/gold] Status or Curse cards, or reduce or remove your debuffs (the debuff with the largest amount first).",
+  "MAGICSWORDSMAN-MECH_KUSANAGI_LIMIT.title": "Kusanagi Switch-ins",
+  "MAGICSWORDSMAN-MECH_KUSANAGI_LIMIT.description": "You can switch into [gold]Kusanagi[/gold] from another sword at most 2 times per combat. Once they are used up, Kusanagi goes back into the tomb for the rest of the combat when it stops being current, and its cards can no longer be played.",
+  "MAGICSWORDSMAN-MECH_AUTO_ATTACK.title": "Onimaru's Auto Attack",
+  "MAGICSWORDSMAN-MECH_AUTO_ATTACK.description": "[gold]Onimaru[/gold] is out from the start of combat and acts once in its stance at the end of each of your turns: [gold]Iai[/gold] (one enemy) / [gold]Ranbu[/gold] (random enemies, several hits) / [gold]Giri[/gold] (all enemies) / [gold]Taima[/gold] (damage + Weak) / [gold]Goei[/gold] (Block). The stance follows the last stance card you played; in normal fights there is a 25% chance of a random stance.",
+  "MAGICSWORDSMAN-MECH_THREE_HILLS.title": "Caladbolg's Effect",
+  "MAGICSWORDSMAN-MECH_THREE_HILLS.description": "While [gold]Caladbolg[/gold] is your [gold]current sword[/gold], attacks that target one enemy also hit other random enemies, up to 3 in total, for the same damage. But when only one enemy is left, your attacks deal less damage (20% at level 0 to 10% at level 5)."
+}

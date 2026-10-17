@@ -16,6 +16,7 @@ public sealed class KusanagiAtsuta : KusanagiCard
 {
     public KusanagiAtsuta() : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self)
     {
+        WithTip(SwordMechTips.Purify);
         WithBlock(8);
         WithBlockPerLevel(2);
         WithKeywords(CardKeyword.Exhaust);
@@ -23,7 +24,7 @@ public sealed class KusanagiAtsuta : KusanagiCard
 
     protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KusanagiPurify.RemoveOneDebuff(Owner.Creature);
+        await KusanagiPurify.RemoveOneDebuff(Owner.Creature, choiceContext);
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
     }
 }

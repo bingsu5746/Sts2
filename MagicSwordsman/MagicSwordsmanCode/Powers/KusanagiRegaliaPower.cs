@@ -35,6 +35,9 @@ public sealed class KusanagiRegaliaPower : MagicSwordsmanPower, ISwordListener
 
     private int TurnNumber => OwnerPlayer?.PlayerCombatState?.TurnNumber ?? 0;
 
+    /// <summary>도교의 도둑질 (KusanagiDogyoTheft) changed which sword Kusanagi inherits without a switch.</summary>
+    public void SetInheritSource(SwordId sword) => _inheritSource = sword;
+
     public override Task AfterApplied(Creature? applier, CardModel? cardSource)
     {
         // The card that applied this power usually switched to Kusanagi just before: remember its inherit source.

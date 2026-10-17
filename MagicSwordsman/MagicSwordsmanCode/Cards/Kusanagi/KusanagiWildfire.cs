@@ -16,6 +16,7 @@ public sealed class KusanagiWildfire : KusanagiCard
 {
     public KusanagiWildfire() : base(1, CardType.Skill, CardRarity.Common, TargetType.Self)
     {
+        WithTip(SwordMechTips.Purify);
         WithBlock(4);
         WithBlockPerLevel(1);
     }

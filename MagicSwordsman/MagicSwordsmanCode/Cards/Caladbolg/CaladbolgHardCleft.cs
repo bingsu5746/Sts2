@@ -23,6 +23,7 @@ public sealed class CaladbolgHardCleft : CaladbolgCard
 
     public CaladbolgHardCleft() : base(0, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.ThreeHills);
         WithDamage(3);
         WithDamagePerLevel(1);
         WithVar("VigorPerEnemy", VigorPerEnemy);

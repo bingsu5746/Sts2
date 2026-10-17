@@ -62,6 +62,7 @@ public sealed class OnimaruLeapFromSheath : OnimaruCard
 
     public OnimaruLeapFromSheath() : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.AutoAttack);
         WithKindValueVar("IaiDamage", OnimaruKind.Iai);
     }
 

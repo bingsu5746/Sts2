@@ -15,6 +15,7 @@ public sealed class GramBalmungNothung : GramCard
 {
     public GramBalmungNothung() : base(2, CardType.Power, CardRarity.Rare, TargetType.Self)
     {
+        WithTip(SwordMechTips.GramLevel);
         WithCalculatedVar("Bonus", 1, 1, static (card, _) => card is MagicSwordCard m ? m.SwordLevel : 0);
         WithTip(typeof(BalmungNothungPower));
     }

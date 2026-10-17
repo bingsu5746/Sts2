@@ -19,6 +19,7 @@ public sealed class CaladbolgThreeHilltops : CaladbolgCard
 {
     public CaladbolgThreeHilltops() : base(3, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.ThreeHills);
         WithDamage(22);
         WithDamagePerLevel(3);
     }

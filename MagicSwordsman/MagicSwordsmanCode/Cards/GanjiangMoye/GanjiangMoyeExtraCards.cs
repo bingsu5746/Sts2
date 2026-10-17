@@ -93,6 +93,7 @@ public sealed class TwinYanpingDragons : GanjiangMoyeCard
 {
     public TwinYanpingDragons() : base(1, CardType.Power, CardRarity.Rare, TargetType.Self)
     {
+        WithTip(SwordMechTips.PairBlades);
         WithCalculatedVar("DragonDamage", 4, 1, static (card, _) => card is MagicSwordCard m ? m.SwordLevel / 2 : 0);
         WithTip(typeof(TwinDragonsPower));
     }
