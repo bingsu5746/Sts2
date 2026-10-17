@@ -436,3 +436,4 @@ Also replaced (seed 63, 2026-10-16): gram_anvil_splitter, gram_blade_between, gr
 ## Mechanic cards art (2026-10-17)
 
 mech1 (15 cards: skofnung_howling_blade/wraith_shroud/lingering_souls, durandal_hard_edge/rolands_riposte/springing_steel/rolands_end, dainsleif_blade_returns/risen_slain/shield_cast_aside, tyrfing_shield_splitter/life_price/hervors_demand, solais_radiance/shaded_light): AI Horde txt2img (AlbedoBase XL, seeds 11/29).
+mech2 (16 cards: gram_andvaris_curse/broken_on_spear/dragon_blood, ganjiang_three_years, moye_alone/female_blade_only, kusanagi_yamatohime/dogyo_theft/misogi/dannoura, onimaru_polish_rust/chained_orders/shifting_stance, caladbolg_gairech/cleave_host/cormac) and 9 power icons in tools/power_art: AI Horde txt2img (AlbedoBase XL, seeds 11/29/17).
