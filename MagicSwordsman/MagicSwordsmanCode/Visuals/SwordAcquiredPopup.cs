@@ -107,6 +107,9 @@ public static class SwordAcquiredPopup
 
         col.AddChild(MakeLabel(Lore(headerKey), 18, accent));
         col.AddChild(MakeLabel(SwordLore.NameText(sword), 46, Colors.White, bold: true));
+        // what the sword is for, in one line, right under its name (user feedback 2026-10-17)
+        var role = SwordRole.Text(sword, pair: true);
+        if (role.Length > 0) col.AddChild(MakeLabel(role, 24, accent.Lightened(0.3f), bold: true));
         col.AddChild(MakeLabel(Text(SwordLore.Line(sword, "TAGLINE")), 20, Muted));
         var origin = MakeLabel(Text(SwordLore.Line(sword, "ORIGIN")), 18, new Color(0.85f, 0.82f, 0.75f));
         col.AddChild(origin);

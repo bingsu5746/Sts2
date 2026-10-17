@@ -685,6 +685,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     {
         if (player != Owner) return;
         SwordVisuals.Sync(Owner); // presentation only (creates the rig once the combat room exists, e.g. Onimaru)
+        SwordRulesHint.OnTurnStart(Owner); // presentation only: first-combat rules hint, once per run, local player
         MotionDirector.OnTurnStart(Owner);
         foreach (var sword in OwnedSwords)
             await SwordRegistry.Get(sword).OnPlayerTurnStart(SwordCombat.ContextFor(Owner, sword), choiceContext);

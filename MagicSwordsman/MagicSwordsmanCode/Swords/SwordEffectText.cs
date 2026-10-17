@@ -120,6 +120,22 @@ public static class SwordEffectText
         }
     }
 
+    /// <summary>
+    /// <see cref="Effect"/> as it would be right after switching to <paramref name="sword"/> (sword-card hover tip): the
+    /// same text, except for Kusanagi while another sword is current — it would inherit THAT sword (the one current now).
+    /// </summary>
+    public static string EffectIfSwitched(SwordId sword, Player? player, int level)
+    {
+        if (sword == SwordId.Kusanagi && player != null && SwordCombat.CurrentSword(player) is { } cur &&
+            cur != SwordId.Kusanagi && SwordRegistry.Get(cur).CanBeInherited)
+        {
+            var inner = Effect(cur, player, SwordCombat.LevelOf(player, cur), inherited: true);
+            return Fmt("KUSANAGI") + "\n" + Fmt("KUSANAGI_FROM", ("Sword", SwordRegistry.DisplayName(cur)), ("Text", inner));
+        }
+
+        return Effect(sword, player, level);
+    }
+
     private static string KusanagiEffect(Player? player)
     {
         var text = Fmt("KUSANAGI");
@@ -129,6 +145,83 @@ public static class SwordEffectText
         if (inherited is not { } from || !SwordRegistry.Get(from).CanBeInherited) return text;
         var inner = Effect(from, player, SwordCombat.LevelOf(player, from), inherited: true);
         return text + "\n" + Fmt("KUSANAGI_FROM", ("Sword", SwordRegistry.DisplayName(from)), ("Text", inner));
+    }
+
+    /// <summary>
+    /// A few words of the current-sword effect with live numbers, plain text without BBCode (the current-sword tag under
+    /// the health bar, user feedback 2026-10-17): e.g. "받는 공격 피해 -3", "빛 3 (턴 종료 +1)". Same numbers as
+    /// <see cref="Effect"/>. Texts: MAGICSWORDSMAN-SWORD_FX.SHORT_* (fragment loc_fragments/clarity.&lt;lang&gt;.events.json).
+    /// </summary>
+    public static string Short(SwordId sword, Player? player, int level, bool inherited = false)
+    {
+        var half = inherited ? "_HALF" : "";
+        string text;
+        switch (sword)
+        {
+            case SwordId.Gram:
+                text = Fmt("SHORT_GRAM", ("Damage", Scale(level, inherited)));
+                break;
+            case SwordId.Ganjiang:
+                text = Fmt("SHORT_GANJIANG", ("Damage", Scale(GanjiangBehavior.DamageBonus(level), inherited)));
+                break;
+            case SwordId.Moye:
+                text = Fmt("SHORT_MOYE", ("Block", Scale(MoyeBehavior.BlockBonus(level), inherited)));
+                break;
+            case SwordId.Kusanagi:
+            {
+                text = Fmt("SHORT_KUSANAGI");
+                if (inherited || player == null || SwordCombat.Get(player) == null) break;
+                var from = SwordRegistry.Get(SwordId.Kusanagi)
+                    .GetInheritedSword(SwordCombat.ContextFor(player, SwordId.Kusanagi));
+                if (from is not { } f || !SwordRegistry.Get(f).CanBeInherited) break;
+                text = Fmt("SHORT_KUSANAGI_FROM", ("Sword", SwordRegistry.DisplayName(f)),
+                    ("Text", Short(f, player, SwordCombat.LevelOf(player, f), inherited: true)));
+                break;
+            }
+            case SwordId.Tyrfing:
+                text = Fmt("SHORT_TYRFING" + half);
+                break;
+            case SwordId.Dainsleif:
+                text = Fmt("SHORT_DAINSLEIF" + half);
+                break;
+            case SwordId.Durandal:
+                text = Fmt("SHORT_DURANDAL", ("Reduction", Scale(DurandalBehavior.ReductionFor(level), inherited)));
+                break;
+            case SwordId.Skofnung:
+                text = Fmt("SHORT_SKOFNUNG" + half);
+                break;
+            case SwordId.Onimaru:
+            {
+                var kind = player != null && SwordCombat.Get(player) != null ? OnimaruAttack.GetKind(player) : OnimaruKind.Iai;
+                var full = OnimaruAttack.CurrentBonus(player!, kind, level, assumeCurrent: true);
+                var bonus = inherited ? Math.Max(1, full / 2) : full;
+                text = Fmt(kind == OnimaruKind.Goei ? "SHORT_ONIMARU_BLOCK" : "SHORT_ONIMARU", ("Bonus", bonus));
+                break;
+            }
+            case SwordId.ClaiomhSolais:
+            {
+                var light = player?.Creature?.CombatState != null ? SolaisLight.Get(player) : 0;
+                text = Fmt("SHORT_CLAIOMHSOLAIS", ("Light", light), ("Charge", SolaisLight.ChargePerTurn));
+                break;
+            }
+            case SwordId.Caladbolg:
+            {
+                if (inherited)
+                {
+                    text = Fmt("SHORT_CALADBOLG", ("Targets", CaladbolgBehavior.InheritedMaxTargets));
+                    break;
+                }
+
+                var ulster = player?.Creature?.CombatState != null && player.Creature.HasPower<CaladbolgUlsterHeroPower>();
+                text = ulster ? Fmt("SHORT_CALADBOLG_ALL") : Fmt("SHORT_CALADBOLG", ("Targets", CaladbolgBehavior.MaxTargets));
+                break;
+            }
+            default:
+                text = "";
+                break;
+        }
+
+        return Plain(text);
     }
 
     /// <summary>The sword's cost (대가), with live numbers. Empty when the sword has none.</summary>

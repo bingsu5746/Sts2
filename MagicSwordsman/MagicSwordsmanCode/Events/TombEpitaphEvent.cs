@@ -123,6 +123,7 @@ public sealed class TombEpitaphEvent : CustomEventModel
         var desc = L10NLookup($"{PageKey("REVEAL")}.description");
         desc.Add("Sword", SwordLore.Name(sword));
         desc.Add("Tagline", SwordLore.Line(sword, "TAGLINE"));
+        desc.Add("Role", SwordRole.Loc(sword, pair: true));
 
         var costsHp = SwordEventHelper.CostsMaxHp(tomb, sword);
         var take = new EventOption(this, () => TakeRevealed(sword),

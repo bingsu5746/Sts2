@@ -278,6 +278,9 @@ public static class SwordViewer
         if (count > 1) header += $"   {index + 1} / {count}";
         col.AddChild(MakeLabel(header, 18, accent));
         col.AddChild(MakeLabel(SwordLore.NameText(sword), 46, Colors.White, bold: true));
+        // one-line role under the name (user feedback 2026-10-17)
+        var role = SwordRole.Text(sword, pair: true);
+        if (role.Length > 0) col.AddChild(MakeLabel(role, 24, accent.Lightened(0.3f), bold: true));
 
         var level = SwordCombat.LevelOf(player, sword);
         var levelText = new LocString(LocTable, $"{LocPrefix}.LEVEL");
@@ -290,7 +293,9 @@ public static class SwordViewer
         col.AddChild(MakeLabel(Text(SwordLore.Line(sword, "TAGLINE")), 20, Muted));
         col.AddChild(new HSeparator { MouseFilter = Control.MouseFilterEnum.Ignore });
 
-        AddEntry(col, Text(SwordLore.Generic("POPUP_EFFECT")), Text(SwordLore.Line(sword, "EFFECT")), accent);
+        // the effect and cost with this sword's live numbers (SwordEffectText) instead of the old number-less summary
+        AddEntry(col, Text(SwordLore.Generic("POPUP_EFFECT")), SwordEffectText.Effect(sword, player, level, withPartner: true), accent);
+        AddEntry(col, Text(SwordLore.Generic("POPUP_COST")), SwordEffectText.Cost(sword, player, level), new Color(0.9f, 0.4f, 0.4f));
         AddEntry(col, Text(SwordLore.Generic("POPUP_STYLE")), Text(SwordLore.Line(sword, "STYLE")), accent);
         var extra = "";
         try { extra = Dialogue.SwordAffinity.TipLine(player, sword); } catch (Exception) { /* optional line */ }

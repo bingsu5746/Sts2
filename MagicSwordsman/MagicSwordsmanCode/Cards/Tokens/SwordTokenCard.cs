@@ -76,7 +76,10 @@ public abstract class SwordTokenCard : ChoiceTokenCard
     {
         base.AddExtraArgsToDescription(description);
         var owner = IsMutable ? Owner : null;
-        description.Add("Text", SwordEffectText.Full(Sword, owner, SwordEffectText.LevelOf(owner, Sword), withPartner: true));
+        var full = SwordEffectText.Full(Sword, owner, SwordEffectText.LevelOf(owner, Sword), withPartner: true);
+        // the sword's one-line role first (Swords/SwordRole, user feedback 2026-10-17); the pair token uses the pair's role
+        var role = SwordRole.Rich(Sword, pair: this is GanjiangMoyeToken);
+        description.Add("Text", role.Length == 0 ? full : role + "\n" + full);
     }
 
     /// <summary>Canonical token for a sword.</summary>

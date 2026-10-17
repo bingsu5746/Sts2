@@ -87,7 +87,7 @@ public static partial class SwordVisuals
     {
         try { SyncInner(player); }
         catch (Exception e) { MainFile.Logger.Warn($"[SwordVisuals] Sync failed: {e.Message}"); }
-        OnimaruStanceHud.Refresh(player); // stance tag under the health bar (never throws)
+        SwordHud.Refresh(player); // current-sword + Onimaru stance tags under the health bar (never throws)
     }
 
     /// <summary>Removed by user decision (2026-10-04): no tomb object / door animation. Kept as a no-op for callers.</summary>
@@ -558,8 +558,29 @@ public static partial class SwordVisuals
     {
         try
         {
+            // role, then "현재 검 — 적용 중" / "현재 검일 때:" + effect, cost, then the stage line (user feedback 2026-10-17:
+            // lead with what the sword does; a floating sword that is not current does nothing until it becomes current)
             var level = SwordCombat.LevelOf(player, sword);
-            var desc = $"{Text(Events.SwordLore.StageName(sword, level))} ({level})\n{Swords.SwordEffectText.Effect(sword, player, level)}";
+            var isCurrent = SwordCombat.IsCurrent(player, sword);
+            var lines = new List<string>();
+            var role = Swords.SwordRole.Rich(sword);
+            if (role.Length > 0) lines.Add(role);
+            var head = new MegaCrit.Sts2.Core.Localization.LocString("events",
+                isCurrent ? "MAGICSWORDSMAN-SWORD_HUD.ACTIVE"
+                : sword == SwordId.Onimaru ? "MAGICSWORDSMAN-SWORD_HUD.WHEN_CURRENT_ONIMARU" // acts every turn anyway
+                : "MAGICSWORDSMAN-SWORD_HUD.WHEN_CURRENT");
+            lines.Add(Text(head));
+            lines.Add(Swords.SwordEffectText.Effect(sword, player, level));
+            var cost = Swords.SwordEffectText.Cost(sword, player, level);
+            if (cost.Length > 0)
+            {
+                var costLine = new MegaCrit.Sts2.Core.Localization.LocString("events", "MAGICSWORDSMAN-SWORD_FX.COST_LINE");
+                costLine.Add("Cost", cost);
+                lines.Add(Text(costLine));
+            }
+
+            lines.Add($"{Text(Events.SwordLore.StageName(sword, level))} ({level})");
+            var desc = string.Join("\n", lines);
             var affinity = Dialogue.SwordAffinity.TipLine(player, sword);
             if (affinity.Length > 0) desc += "\n" + affinity;
             desc += Cards.Union.UnionCatalog.SwordTipLine(player, sword); // 【조합】 cards of this sword

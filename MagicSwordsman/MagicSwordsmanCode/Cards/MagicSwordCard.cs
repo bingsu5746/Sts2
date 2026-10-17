@@ -37,6 +37,8 @@ public abstract class MagicSwordCard : ConstructedCardModel
     {
         // Hover tips for the mod's own terms (연속, 짝, 쌍검, 명령, 발도, 현재 검) — see MagicSwordsmanKeywords.
         WithTips(MagicSwordsmanKeywords.TipsFor);
+        // Sword cards: one tip "이 카드를 쓰면 <검>이 현재 검이 됩니다 + 그 검의 역할·효과·대가" (Swords/SwordCardTip.cs).
+        WithTips(SwordCardTip.TipsFor);
     }
 
     private int _damagePerLevel;
