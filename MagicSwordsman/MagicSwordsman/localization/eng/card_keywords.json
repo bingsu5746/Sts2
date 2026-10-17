@@ -20,5 +20,6 @@
   "MAGICSWORDSMAN-UNION.popupTitle": "A new union is open",
   "MAGICSWORDSMAN-UNION.popupPair": "{SwordA} + {SwordB}",
   "MAGICSWORDSMAN-UNION.popupBody": "While you hold both swords, this [purple]Union[/purple] card can appear in card rewards and shops.\nPlaying it summons both swords and they move together.",
-  "MAGICSWORDSMAN-UNION.popupContinue": "Click or press any key to continue"
+  "MAGICSWORDSMAN-UNION.popupContinue": "Click or press any key to continue",
+  "MAGICSWORDSMAN-MECH_SWORD_EFFECT.title": "{Sword} effect"
 }

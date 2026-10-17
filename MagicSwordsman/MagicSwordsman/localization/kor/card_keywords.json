@@ -20,5 +20,6 @@
   "MAGICSWORDSMAN-UNION.popupTitle": "새 조합이 열렸다",
   "MAGICSWORDSMAN-UNION.popupPair": "{SwordA} + {SwordB}",
   "MAGICSWORDSMAN-UNION.popupBody": "두 검을 함께 가진 동안 이 [purple]조합[/purple] 카드가 카드 보상·상점에 나옵니다.\n쓰면 두 검이 함께 소환되어 같이 움직입니다.",
-  "MAGICSWORDSMAN-UNION.popupContinue": "클릭하거나 아무 키나 눌러 계속"
+  "MAGICSWORDSMAN-UNION.popupContinue": "클릭하거나 아무 키나 눌러 계속",
+  "MAGICSWORDSMAN-MECH_SWORD_EFFECT.title": "{Sword} 효과"
 }

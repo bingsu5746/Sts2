@@ -17,7 +17,7 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.ClaiomhSolais;
 /// </summary>
 public sealed class SolaisRadiance : SolaisCard
 {
-    public SolaisRadiance() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self)
+    public SolaisRadiance() : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self)
     {
         WithKeywords(CardKeyword.Exhaust);
         WithTip(typeof(SolaisLightPower));
