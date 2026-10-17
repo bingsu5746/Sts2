@@ -29,6 +29,7 @@ public sealed class OnimaruOniSlash : OnimaruCard
 {
     public OnimaruOniSlash() : base(1, CardType.Attack, CardRarity.Basic, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.AutoAttack);
         WithKindValueVar("IaiDamage", OnimaruKind.Iai);
     }
 
@@ -41,6 +42,7 @@ public sealed class OnimaruGoei : OnimaruCard
 {
     public OnimaruGoei() : base(1, CardType.Power, CardRarity.Basic, TargetType.Self)
     {
+        WithTip(SwordMechTips.AutoAttack);
         WithKindValueVar("AutoBlock", OnimaruKind.Goei);
         WithTip(OnimaruTips.Goei);
     }
@@ -57,6 +59,7 @@ public sealed class OnimaruIai : OnimaruCard
 {
     public OnimaruIai() : base(0, CardType.Power, CardRarity.Common, TargetType.Self)
     {
+        WithTip(SwordMechTips.AutoAttack);
         WithCalculatedVar("IaiBonus", 2, static (card, _) => card is MagicSwordCard { SwordLevel: >= 3 } ? 1 : 0);
         WithTip(OnimaruTips.Iai);
     }
@@ -70,6 +73,7 @@ public sealed class OnimaruGiri : OnimaruCard
 {
     public OnimaruGiri() : base(1, CardType.Power, CardRarity.Common, TargetType.Self)
     {
+        WithTip(SwordMechTips.AutoAttack);
         WithKindValueVar("AutoDamage", OnimaruKind.Giri);
         WithTip(OnimaruTips.Giri);
     }
@@ -83,6 +87,7 @@ public sealed class OnimaruOniHunt : OnimaruCard
 {
     public OnimaruOniHunt() : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.AutoAttack);
         WithCards(1);
     }
 
@@ -98,6 +103,7 @@ public sealed class OnimaruRanbu : OnimaruCard
 {
     public OnimaruRanbu() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self)
     {
+        WithTip(SwordMechTips.AutoAttack);
         WithKindValueVar("AutoDamage", OnimaruKind.Ranbu);
         WithRanbuHitsVar("AutoHits");
         WithTip(OnimaruTips.Ranbu);
@@ -112,6 +118,7 @@ public sealed class OnimaruTaima : OnimaruCard
 {
     public OnimaruTaima() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self)
     {
+        WithTip(SwordMechTips.AutoAttack);
         WithKindValueVar("AutoDamage", OnimaruKind.Taima);
         WithTip(OnimaruTips.Taima);
         WithTip(new TooltipSource(_ => HoverTipFactory.FromPower<WeakPower>()));
@@ -126,6 +133,7 @@ public sealed class OnimaruTaiheiki : OnimaruCard
 {
     public OnimaruTaiheiki() : base(2, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.AutoAttack);
         WithVar("Times", 2);
     }
 
@@ -147,6 +155,7 @@ public sealed class OnimaruFirstAmongFive : OnimaruCard
 
     public OnimaruFirstAmongFive() : base(2, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.AutoAttack);
         WithCalculatedVar("Times", BaseTimes, static (card, _) => card is OnimaruFirstAmongFive f ? f._extra : 0);
         WithVar("MaxTimes", MaxTimes);
     }
@@ -168,6 +177,7 @@ public sealed class OnimaruSelfMovingBlade : OnimaruCard
 {
     public OnimaruSelfMovingBlade() : base(2, CardType.Power, CardRarity.Rare, TargetType.Self)
     {
+        WithTip(SwordMechTips.AutoAttack);
         WithTip(new TooltipSource(_ => HoverTipFactory.FromPower<OnimaruSelfMovingBladePower>()));
     }
 

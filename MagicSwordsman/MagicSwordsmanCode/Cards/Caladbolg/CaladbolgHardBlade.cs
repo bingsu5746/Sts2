@@ -18,6 +18,7 @@ public sealed class CaladbolgHardBlade : CaladbolgCard
 {
     public CaladbolgHardBlade() : base(1, CardType.Attack, CardRarity.Basic, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.ThreeHills);
         WithDamage(6);
         WithDamagePerLevel(1);
     }

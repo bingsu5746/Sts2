@@ -16,6 +16,7 @@ public sealed class CaladbolgFairyMound : CaladbolgCard
 {
     public CaladbolgFairyMound() : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self)
     {
+        WithTip(SwordMechTips.ThreeHills);
         WithBlock(5);
         WithBlockPerLevel(1);
         WithVar("ExtraBlock", 3);

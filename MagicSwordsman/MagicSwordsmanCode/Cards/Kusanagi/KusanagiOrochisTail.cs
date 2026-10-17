@@ -16,6 +16,7 @@ public sealed class KusanagiOrochisTail : KusanagiCard
 {
     public KusanagiOrochisTail() : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.Purify);
         WithDamage(7);
         WithDamagePerLevel(1);
     }

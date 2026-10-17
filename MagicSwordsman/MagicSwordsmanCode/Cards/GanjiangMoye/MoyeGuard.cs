@@ -11,6 +11,7 @@ public sealed class MoyeGuard : GanjiangMoyeCard
 {
     public MoyeGuard() : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self)
     {
+        WithTip(SwordMechTips.PairBlades);
         WithBlock(5);
         WithBlockPerLevel(1);
         WithCards(1);

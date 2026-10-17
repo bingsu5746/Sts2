@@ -16,6 +16,7 @@ public sealed class CaladbolgCattleRaid : CaladbolgCard
 {
     public CaladbolgCattleRaid() : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.ThreeHills);
         WithDamage(6);
         WithDamagePerLevel(1);
         WithCards(1);

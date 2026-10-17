@@ -14,6 +14,7 @@ public sealed class TwinMatedPair : GanjiangMoyeCard
 {
     public TwinMatedPair() : base(1, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.PairBlades);
         WithDamage(6);
         WithDamagePerLevel(1);
         WithBlock(6);

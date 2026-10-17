@@ -19,6 +19,7 @@ public sealed class CaladbolgUlsterHero : CaladbolgCard
 {
     public CaladbolgUlsterHero() : base(2, CardType.Power, CardRarity.Rare, TargetType.Self)
     {
+        WithTip(SwordMechTips.ThreeHills);
         WithTip(typeof(CaladbolgUlsterHeroPower));
     }
 

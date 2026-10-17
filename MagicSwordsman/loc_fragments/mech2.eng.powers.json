@@ -1,0 +1,17 @@
+{
+  "MAGICSWORDSMAN-GRAM_DRAGON_BLOOD_POWER.title": "Dragon's Blood",
+  "MAGICSWORDSMAN-GRAM_DRAGON_BLOOD_POWER.description": "This turn, whenever you play an Attack, gain [gold]Block[/gold].",
+  "MAGICSWORDSMAN-GRAM_DRAGON_BLOOD_POWER.smartDescription": "This turn, whenever you play an Attack, gain {Amount} [gold]Block[/gold].",
+  "MAGICSWORDSMAN-KUSANAGI_MISOGI_POWER.title": "Misogi",
+  "MAGICSWORDSMAN-KUSANAGI_MISOGI_POWER.description": "Whenever [gold]Purification[/gold] reduces or removes one of your debuffs, draw 1 card and gain [gold]Block[/gold].",
+  "MAGICSWORDSMAN-KUSANAGI_MISOGI_POWER.smartDescription": "Whenever [gold]Purification[/gold] reduces or removes one of your debuffs, draw 1 card and gain {Amount} [gold]Block[/gold].",
+  "MAGICSWORDSMAN-ONIMARU_POLISHED_POWER.title": "Polished Blade",
+  "MAGICSWORDSMAN-ONIMARU_POLISHED_POWER.description": "At the end of this turn, [gold]Onimaru[/gold]'s auto attack never takes a random stance and is stronger.",
+  "MAGICSWORDSMAN-ONIMARU_POLISHED_POWER.smartDescription": "At the end of this turn, [gold]Onimaru[/gold]'s auto attack never takes a random stance, and its damage (Block for Goei) is increased by {Amount}.",
+  "MAGICSWORDSMAN-ONIMARU_SHIFTING_STANCE_POWER.title": "Shifting Stance",
+  "MAGICSWORDSMAN-ONIMARU_SHIFTING_STANCE_POWER.description": "Whenever [gold]Onimaru[/gold]'s stance changes to a different stance, it acts again in the new stance.",
+  "MAGICSWORDSMAN-ONIMARU_SHIFTING_STANCE_POWER.smartDescription": "Whenever [gold]Onimaru[/gold]'s stance changes to a different stance, it acts {Amount} more {Amount:plural:time|times} in the new stance.",
+  "MAGICSWORDSMAN-CALADBOLG_RESTRAINT_POWER.title": "Cormac's Restraint",
+  "MAGICSWORDSMAN-CALADBOLG_RESTRAINT_POWER.description": "Whenever you play an Attack while only one enemy is left, gain [gold]Block[/gold].",
+  "MAGICSWORDSMAN-CALADBOLG_RESTRAINT_POWER.smartDescription": "Whenever you play an Attack while only one enemy is left, gain {Amount} [gold]Block[/gold]."
+}

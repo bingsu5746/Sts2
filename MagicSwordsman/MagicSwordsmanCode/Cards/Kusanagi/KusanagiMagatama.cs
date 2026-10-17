@@ -16,6 +16,7 @@ public sealed class KusanagiMagatama : KusanagiCard
 {
     public KusanagiMagatama() : base(0, CardType.Skill, CardRarity.Common, TargetType.Self)
     {
+        WithTip(SwordMechTips.Purify);
         WithCards(1);
     }
 

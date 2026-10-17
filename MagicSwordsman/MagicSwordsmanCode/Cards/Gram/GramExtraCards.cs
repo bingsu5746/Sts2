@@ -76,6 +76,7 @@ public sealed class GramFafnirsHeart : GramCard
 {
     public GramFafnirsHeart() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self)
     {
+        WithTip(SwordMechTips.GramLevel);
         WithPower<GramFafnirsHeartPower>(1);
     }
 

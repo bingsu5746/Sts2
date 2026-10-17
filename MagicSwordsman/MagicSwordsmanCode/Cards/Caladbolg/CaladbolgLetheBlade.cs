@@ -19,6 +19,7 @@ public sealed class CaladbolgLetheBlade : CaladbolgCard
 {
     public CaladbolgLetheBlade() : base(0, CardType.Skill, CardRarity.Uncommon, TargetType.Self)
     {
+        WithTip(SwordMechTips.ThreeHills);
         WithCalculatedVar("Attacks", 1, 1, static (card, _) => card is MagicSwordCard m && m.SwordLevel >= 3 ? 1 : 0);
         WithCards(1);
         WithTip(typeof(CaladbolgLethePower));

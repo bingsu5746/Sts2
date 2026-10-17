@@ -20,6 +20,7 @@ public sealed class KusanagiSusanoosStrike : KusanagiCard
 
     public KusanagiSusanoosStrike() : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.Purify);
         WithDamage(6);
         WithDamagePerLevel(1);
         WithVar("PerCard", PerExhausted);

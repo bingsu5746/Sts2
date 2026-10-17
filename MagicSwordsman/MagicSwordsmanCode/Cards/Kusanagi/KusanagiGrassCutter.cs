@@ -18,6 +18,7 @@ public sealed class KusanagiGrassCutter : KusanagiCard
 {
     public KusanagiGrassCutter() : base(1, CardType.Attack, CardRarity.Basic, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.Purify);
         WithDamage(7);
         WithDamagePerLevel(1);
     }

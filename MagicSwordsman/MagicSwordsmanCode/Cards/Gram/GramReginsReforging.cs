@@ -19,6 +19,7 @@ public sealed class GramReginsReforging : GramCard
 
     public GramReginsReforging() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self)
     {
+        WithTip(SwordMechTips.GramLevel);
         WithVar("Levels", LevelGain);
         WithKeywords(CardKeyword.Exhaust);
     }

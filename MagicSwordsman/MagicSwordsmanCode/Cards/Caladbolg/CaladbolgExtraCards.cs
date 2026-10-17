@@ -19,6 +19,7 @@ public sealed class CaladbolgOchainsCry : CaladbolgCard
 {
     public CaladbolgOchainsCry() : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.ThreeHills);
         WithDamage(5);
         WithDamagePerLevel(1);
         WithVar("BlockPerEnemy", 2);
@@ -70,6 +71,7 @@ public sealed class CaladbolgLoneHill : CaladbolgCard
 {
     public CaladbolgLoneHill() : base(2, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.ThreeHills);
         WithDamage(10);
         WithDamagePerLevel(2);
     }
@@ -91,6 +93,7 @@ public sealed class CaladbolgFergusWrath : CaladbolgCard
 {
     public CaladbolgFergusWrath() : base(1, CardType.Power, CardRarity.Rare, TargetType.Self)
     {
+        WithTip(SwordMechTips.ThreeHills);
         WithCalculatedVar("WrathDamage", 3, 1, static (card, _) => card is MagicSwordCard m ? m.SwordLevel / 2 : 0);
         WithTip(typeof(CaladbolgFergusWrathPower));
     }

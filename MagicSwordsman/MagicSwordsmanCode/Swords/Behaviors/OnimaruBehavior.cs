@@ -71,6 +71,8 @@ public static class OnimaruAttack
 {
     public const string KindKey = "kind";
     public const string IaiBonusKey = "iai_bonus";
+    public const string CommandTurnKey = "cmd_turn";
+    public const string CommandCountKey = "cmd_count";
     public const int RandomKindChancePercent = 25;
     public const int KindCount = 5;
 
@@ -82,6 +84,29 @@ public static class OnimaruAttack
     /// <summary>Accumulated 거합 bonus of this combat (거합 card: +2, +3 from level 3).</summary>
     public static int IaiBonus(Player player) => SwordCombat.Get(player)?.GetCounter(SwordId.Onimaru, IaiBonusKey) ?? 0;
 
+    /// <summary>【명령】 made so far in the player's current turn (잇따른 호령, mech2 2026-10-17).</summary>
+    public static int CommandsThisTurn(Player player)
+    {
+        var state = SwordCombat.Get(player);
+        var turn = player.PlayerCombatState?.TurnNumber ?? 0;
+        if (state == null || turn == 0 || state.GetCounter(SwordId.Onimaru, CommandTurnKey) != turn) return 0;
+        return state.GetCounter(SwordId.Onimaru, CommandCountKey);
+    }
+
+    /// <summary>Counts one 【명령】 for <see cref="CommandsThisTurn"/> (called by <see cref="Command"/>).</summary>
+    public static void CountCommand(Player player)
+    {
+        var state = SwordCombat.Get(player);
+        var turn = player.PlayerCombatState?.TurnNumber ?? 0;
+        if (state == null || turn == 0) return;
+        if (state.GetCounter(SwordId.Onimaru, CommandTurnKey) != turn)
+        {
+            state.SetCounter(SwordId.Onimaru, CommandTurnKey, turn);
+            state.SetCounter(SwordId.Onimaru, CommandCountKey, 0);
+        }
+        state.AddCounter(SwordId.Onimaru, CommandCountKey, 1);
+    }
+
     /// <summary>
     /// Sets the kind (last kind card wins, [확정]) and shows it as a kind power on the player. <paramref name="iaiAdd"/>
     /// adds to the combat-long 거합 bonus.
@@ -90,6 +115,7 @@ public static class OnimaruAttack
     {
         var state = SwordCombat.Get(player);
         if (state == null) return;
+        var oldKind = GetKind(player);
         state.SetCounter(SwordId.Onimaru, KindKey, (int)kind);
         if (iaiAdd > 0) state.AddCounter(SwordId.Onimaru, IaiBonusKey, iaiAdd);
         SwordVisuals.Sync(player); // presentation only: the katana takes the stance's pose
@@ -138,6 +164,10 @@ public static class OnimaruAttack
             current.RefreshIcon();
         }
         OnimaruKindPower.SyncVisibility(player);
+
+        // 바뀌는 자세 (mech2): Onimaru acts again whenever its stance changes to a different one
+        if (oldKind != kind && creature.GetPower<OnimaruShiftingStancePower>() is { } shifting)
+            await shifting.OnStanceChanged(player, kind, choiceContext);
     }
 
     // ------------------------------------------------------------------ numbers (pure: also used for previews)
@@ -211,7 +241,9 @@ public static class OnimaruAttack
         if (turnEnd && MasterlessBlade.IsInHand(player)) return;
 
         var kind = GetKind(player);
-        if (!IsEliteOrBoss(player))
+        // 녹을 닦다 (mech2): this turn's end-of-turn attack keeps the chosen stance and gets a bonus
+        var polished = turnEnd ? player.Creature.GetPower<OnimaruPolishedPower>() : null;
+        if (polished == null && !IsEliteOrBoss(player))
         {
             var rng = player.RunState.Rng.CombatTargets;
             if (rng.NextInt(100) < RandomKindChancePercent)
@@ -221,22 +253,31 @@ public static class OnimaruAttack
             }
         }
 
-        await Perform(player, kind, null, choiceContext, null, assumeCurrent: false);
+        await Perform(player, kind, null, choiceContext, null, assumeCurrent: false, extra: polished?.Amount ?? 0);
     }
 
     /// <summary>【명령】: one auto attack of the current kind right now (no 25% roll). Target used by 거합/퇴마.</summary>
-    public static Task Command(Player player, Creature? target, PlayerChoiceContext choiceContext, CardModel? source) =>
-        Perform(player, GetKind(player), target, choiceContext, source, assumeCurrent: false);
+    public static Task Command(Player player, Creature? target, PlayerChoiceContext choiceContext, CardModel? source,
+        int extra = 0)
+    {
+        CountCommand(player);
+        return Perform(player, GetKind(player), target, choiceContext, source, assumeCurrent: false, extra);
+    }
 
-    /// <summary>One attack of an explicit kind (kind cards strike once right after changing the kind).</summary>
+    /// <summary>
+    /// One attack of an explicit kind (kind cards strike once right after changing the kind). <paramref name="extra"/>
+    /// is added to the damage per hit (호위: to the Block), e.g. 녹을 닦다 / 잇따른 호령.
+    /// </summary>
     public static async Task Perform(Player player, OnimaruKind kind, Creature? target, PlayerChoiceContext choiceContext,
-        CardModel? source, bool assumeCurrent)
+        CardModel? source, bool assumeCurrent, int extra = 0)
     {
         var creature = player.Creature;
         if (!creature.IsAlive || creature.CombatState is not { } combatState) return;
         // Onimaru only acts while it is actually out (emerged / summoned, not returned to the vault).
         if (!SwordCombat.IsPresent(player, SwordId.Onimaru)) return;
         var n = Compute(player, kind, assumeCurrent);
+        if (extra != 0)
+            n = kind == OnimaruKind.Goei ? n with { Block = n.Block + extra } : n with { PerHit = n.PerHit + extra };
         n = n with { PerHit = WithEnchantment(n.PerHit, source) };
         var rng = player.RunState.Rng.CombatTargets;
 

@@ -14,6 +14,7 @@ public sealed class GramTwoShards : GramCard
 
     public GramTwoShards() : base(1, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
     {
+        WithTip(SwordMechTips.GramLevel);
         WithDamage(4);
         WithVar("Hits", Hits);
     }

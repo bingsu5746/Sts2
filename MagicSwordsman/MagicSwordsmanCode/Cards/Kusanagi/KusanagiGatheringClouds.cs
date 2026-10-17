@@ -16,6 +16,7 @@ public sealed class KusanagiGatheringClouds : KusanagiCard
 {
     public KusanagiGatheringClouds() : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self)
     {
+        WithTip(SwordMechTips.Purify);
         WithBlock(6);
         WithBlockPerLevel(1);
     }

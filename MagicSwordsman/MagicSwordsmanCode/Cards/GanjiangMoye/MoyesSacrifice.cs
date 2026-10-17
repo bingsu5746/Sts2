@@ -16,6 +16,7 @@ public sealed class MoyesSacrifice : GanjiangMoyeCard
 {
     public MoyesSacrifice() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self)
     {
+        WithTip(SwordMechTips.PairBlades);
         WithVar("HpLoss", 3);
         WithCalculatedVar("PairBlock", 3, 1, static (card, _) => card is MagicSwordCard m ? m.SwordLevel / 2 : 0);
         WithTip(typeof(MoyesSacrificePower));
