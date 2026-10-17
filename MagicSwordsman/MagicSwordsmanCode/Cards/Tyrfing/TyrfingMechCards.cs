@@ -25,7 +25,6 @@ public sealed class TyrfingShieldSplitter : TyrfingCard
     {
         WithDamage(10);
         WithDamagePerLevel(2);
-        WithTip(SwordMechanicTips.Effect(SwordId.Tyrfing));
         WithTip(MegaCrit.Sts2.Core.HoverTips.StaticHoverTip.Block);
     }
 
@@ -54,7 +53,6 @@ public sealed class TyrfingLifePrice : TyrfingCard
     {
         WithDamage(9);
         WithDamagePerLevel(1);
-        WithTip(SwordMechanicTips.Effect(SwordId.Tyrfing));
     }
 
     protected override async Task OnTyrfingPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)

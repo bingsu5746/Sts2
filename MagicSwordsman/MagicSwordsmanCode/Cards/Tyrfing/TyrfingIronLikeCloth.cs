@@ -26,7 +26,6 @@ public sealed class TyrfingIronLikeCloth : TyrfingCard
         WithDamage(7);
         WithDamagePerLevel(1);
         WithVar("Bonus", BlockedBonus);
-        WithTip(SwordMechanicTips.Effect(Swords.SwordId.Tyrfing));
     }
 
     protected override decimal BonusDamage(Creature? target) => target is { Block: > 0 } t ? Math.Min(t.Block, BlockedBonus) : 0m;

@@ -30,7 +30,6 @@ public sealed class DurandalHardEdge : DurandalCard
         WithBlockPerLevel(1);
         WithVar("Bonus", ReductionBonus);
         WithVar("MaxDraws", DurandalHardEdgePower.MaxDraws);
-        WithTip(SwordMechanicTips.Effect(SwordId.Durandal));
         WithTip(new TooltipSource(_ => HoverTipFactory.FromPower<DurandalHardEdgePower>()));
     }
 
@@ -54,7 +53,6 @@ public sealed class DurandalRolandsRiposte : DurandalCard
         WithDamage(5);
         WithDamagePerLevel(1);
         WithVar("PerHit", PerHit);
-        WithTip(SwordMechanicTips.Effect(SwordId.Durandal));
     }
 
     private int Hits => IsMutable && Owner != null && !LevelPreviewPatches.NeutralCombatInputs
@@ -81,7 +79,6 @@ public sealed class DurandalSpringingSteel : DurandalCard
 {
     public DurandalSpringingSteel() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self)
     {
-        WithTip(SwordMechanicTips.Effect(SwordId.Durandal));
         WithTip(new TooltipSource(_ => HoverTipFactory.FromPower<DurandalSpringingSteelPower>()));
     }
 
@@ -104,7 +101,6 @@ public sealed class DurandalRolandsEnd : DurandalCard
         WithBlock(6);
         WithBlockPerLevel(1);
         WithVar("Bonus", DurandalRolandsEndPower.LowHpBonus);
-        WithTip(SwordMechanicTips.Effect(SwordId.Durandal));
         WithTip(new TooltipSource(_ => HoverTipFactory.FromPower<DurandalRolandsEndPower>()));
     }
 

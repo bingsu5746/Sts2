@@ -45,7 +45,6 @@ public sealed class SolaisShadedLight : SolaisCard
     {
         WithCards(1);
         WithTip(typeof(SolaisLightPower));
-        WithTip(SwordMechanicTips.Effect(SwordId.ClaiomhSolais));
     }
 
     protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)

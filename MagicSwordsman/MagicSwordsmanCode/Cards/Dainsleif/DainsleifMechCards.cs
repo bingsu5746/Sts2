@@ -25,7 +25,6 @@ public sealed class DainsleifBladeReturns : DainsleifCard
     public DainsleifBladeReturns() : base(0, CardType.Skill, CardRarity.Common, TargetType.Self)
     {
         WithCalculatedVar("Look", 3, static (card, _) => card is MagicSwordCard { SwordLevel: >= 3 } ? 1 : 0);
-        WithTip(SwordMechanicTips.Effect(SwordId.Dainsleif));
     }
 
     private int Look => SwordLevel >= 3 ? 4 : 3;
@@ -54,7 +53,6 @@ public sealed class DainsleifRisenSlain : DainsleifCard
     {
         WithDamage(6);
         WithDamagePerLevel(1);
-        WithTip(SwordMechanicTips.Effect(SwordId.Dainsleif));
     }
 
     private CardModel? TopCard =>
@@ -83,7 +81,6 @@ public sealed class DainsleifShieldCastAside : DainsleifCard
     public DainsleifShieldCastAside() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self)
     {
         WithCalculatedVar("HitDamage", BaseDamage, static (card, _) => card is MagicSwordCard m ? m.SwordLevel / 2 : 0);
-        WithTip(SwordMechanicTips.Effect(SwordId.Dainsleif));
         WithTip(new TooltipSource(_ => HoverTipFactory.FromPower<DainsleifShieldCastAsidePower>()));
     }
 
