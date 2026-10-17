@@ -21,5 +21,19 @@
   "MAGICSWORDSMAN-UNION.popupPair": "{SwordA} + {SwordB}",
   "MAGICSWORDSMAN-UNION.popupBody": "두 검을 함께 가진 동안 이 [purple]조합[/purple] 카드가 카드 보상·상점에 나옵니다.\n쓰면 두 검이 함께 소환되어 같이 움직입니다.",
   "MAGICSWORDSMAN-UNION.popupContinue": "클릭하거나 아무 키나 눌러 계속",
-  "MAGICSWORDSMAN-MECH_SWORD_EFFECT.title": "{Sword} 효과"
+  "MAGICSWORDSMAN-MECH_SWORD_EFFECT.title": "{Sword} 효과",
+  "MAGICSWORDSMAN-MECH_GRAM_LEVEL.title": "그람의 효과",
+  "MAGICSWORDSMAN-MECH_GRAM_LEVEL.description": "[gold]그람[/gold]이 [gold]현재 검[/gold]이면 내 공격의 타격마다 피해가 그람 강화 단계만큼 늘어납니다(0단계 +0 ~ 5단계 +5). 그람이 런에서 처음 5단계에 닿으면 저주 [gold]니벨룽의 보물[/gold]을 얻습니다(덱에서 빠지지 않음).",
+  "MAGICSWORDSMAN-MECH_PAIR_BLADES.title": "간장과 막야",
+  "MAGICSWORDSMAN-MECH_PAIR_BLADES.description": "[gold]간장[/gold]이 [gold]현재 검[/gold]이면 공격 피해가, [gold]막야[/gold]가 현재 검이면 카드로 얻는 [gold]방어도[/gold]가 늘어납니다. 간장 카드와 막야 카드를 번갈아 쓰면 [gold]짝[/gold]이 발동합니다.",
+  "MAGICSWORDSMAN-MECH_INHERIT.title": "계승",
+  "MAGICSWORDSMAN-MECH_INHERIT.description": "[gold]쿠사나기[/gold]가 [gold]현재 검[/gold]이면, 쿠사나기로 바꾸기 바로 전에 들고 있던 검의 효과를 절반(버림, 최소 1)으로 이어받습니다. 그 검의 대가는 이어받지 않습니다.",
+  "MAGICSWORDSMAN-MECH_PURIFY.title": "정화",
+  "MAGICSWORDSMAN-MECH_PURIFY.description": "상태이상·저주 카드를 [gold]소멸[/gold]시키거나, 내 디버프의 수치를 줄이거나 없애는 효과입니다(수치가 가장 큰 디버프부터).",
+  "MAGICSWORDSMAN-MECH_KUSANAGI_LIMIT.title": "쿠사나기 바꿔 들기",
+  "MAGICSWORDSMAN-MECH_KUSANAGI_LIMIT.description": "다른 검에서 [gold]쿠사나기[/gold]로 바꿔 드는 것은 전투당 2번까지입니다. 다 쓴 뒤 쿠사나기가 현재 검에서 물러나면 그 전투 동안 만검총으로 돌아가고, 쿠사나기 카드는 쓸 수 없게 됩니다.",
+  "MAGICSWORDSMAN-MECH_AUTO_ATTACK.title": "오니마루의 자동 공격",
+  "MAGICSWORDSMAN-MECH_AUTO_ATTACK.description": "[gold]오니마루[/gold]는 전투 시작부터 나와 있고, 내 턴이 끝날 때마다 지금 자세로 1번 행동합니다: [gold]거합[/gold](적 1명) / [gold]난무[/gold](무작위 여러 번) / [gold]베기[/gold](모든 적) / [gold]퇴마[/gold](피해 + 약화) / [gold]호위[/gold](방어도). 자세는 마지막에 쓴 자세 카드를 따르고, 일반 전투에서는 25% 확률로 무작위 자세가 나옵니다.",
+  "MAGICSWORDSMAN-MECH_THREE_HILLS.title": "칼라드볼그의 효과",
+  "MAGICSWORDSMAN-MECH_THREE_HILLS.description": "[gold]칼라드볼그[/gold]가 [gold]현재 검[/gold]이면, 적 1명을 고르는 공격이 다른 무작위 적까지 최대 3명을 같은 피해로 맞힙니다. 대신 적이 1명뿐이면 공격 피해가 줄어듭니다(0단계 20% ~ 5단계 10%)."
 }

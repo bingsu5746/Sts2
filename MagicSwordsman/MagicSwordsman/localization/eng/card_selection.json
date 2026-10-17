@@ -13,5 +13,7 @@
   "MAGICSWORDSMAN-DECK_FILTER.UNION": "Combos",
   "MAGICSWORDSMAN-DECK_FILTER.CURSE": "Curses",
   "MAGICSWORDSMAN-DECK_FILTER.LABEL": "Sword: {Name}",
-  "MAGICSWORDSMAN-DECK_FILTER.LABEL_COUNT": "Sword: {Name} · {Count}"
+  "MAGICSWORDSMAN-DECK_FILTER.LABEL_COUNT": "Sword: {Name} · {Count}",
+  "MAGICSWORDSMAN-CHOOSE_LEAD_BLADE": "Choose the blade to lead (it becomes your current sword)",
+  "MAGICSWORDSMAN-CHOOSE_SWORD_TO_INHERIT": "Choose the sword Kusanagi inherits"
 }
