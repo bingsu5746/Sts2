@@ -48,7 +48,13 @@ public static class SwordRulesHint
             if (!ShownThisSession.Add(seed)) return;
 
             var cfg = new ConfigFile();
-            cfg.Load(CfgPath); // missing file = empty config
+            // Missing file = empty config. Any other load error: leave the file alone (saving would overwrite it).
+            var err = cfg.Load(CfgPath);
+            if (err != Error.Ok && err != Error.FileNotFound)
+            {
+                MainFile.Logger.Warn($"[SwordRulesHint] could not read {CfgPath}: {err}");
+                return;
+            }
             if ((bool)cfg.GetValue("hint", "never", false)) return;
             if (cfg.HasSectionKey("runs", seed)) return;
             cfg.SetValue("runs", seed, true);
@@ -69,7 +75,12 @@ public static class SwordRulesHint
         try
         {
             var cfg = new ConfigFile();
-            cfg.Load(CfgPath);
+            var err = cfg.Load(CfgPath);
+            if (err != Error.Ok && err != Error.FileNotFound)
+            {
+                MainFile.Logger.Warn($"[SwordRulesHint] could not read {CfgPath}: {err}");
+                return;
+            }
             cfg.SetValue("hint", "never", true);
             cfg.Save(CfgPath);
         }

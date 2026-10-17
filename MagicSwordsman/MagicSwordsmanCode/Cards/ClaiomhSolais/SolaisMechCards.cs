@@ -9,10 +9,10 @@ namespace MagicSwordsman.MagicSwordsmanCode.Cards.ClaiomhSolais;
 
 // 클라이브 솔라시 메커니즘 카드 2장 (2026-10-17). After the 2026-10-16 rework Light already had many gain/spend
 // patterns; two were still missing: MULTIPLYING the stack (광휘) and playing around the COST — Light fading when
-// Solais is not current at the end of the turn (빛 갈무리). Common 1 · Uncommon 1.
+// Solais is not current at the end of the turn (빛 갈무리). Common 1 · Rare 1.
 
 /// <summary>
-/// 광휘 (Uncommon skill, Exhaust; cost 0 from level 3): double your Light (with no Light, gain 1). Catalyst-style
+/// 광휘 (Rare skill, Exhaust; cost 0 from level 3): double your Light (with no Light, gain 1). Catalyst-style
 /// amplifier for 【발도】 / 빛의 검 / 왕위 복귀. Light has no cap (content doc §2.9).
 /// </summary>
 public sealed class SolaisRadiance : SolaisCard

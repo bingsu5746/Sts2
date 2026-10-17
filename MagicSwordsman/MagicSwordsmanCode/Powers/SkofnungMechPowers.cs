@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
@@ -14,7 +15,10 @@ namespace MagicSwordsman.MagicSwordsmanCode.Powers;
 ///    spreads at most once.
 ///  - whenever an enemy with Scars dies, its Scars move to a random other living enemy (BeforeDeath reads the amount
 ///    while the power is still there — GremlinHorn-style AfterDeath applies it). A creature that dies while its own
-///    Scars are bursting (12+) passes nothing on: the burst already "spent" them.
+///    Scars are bursting (<see cref="SkofnungWoundPower.IsBursting"/>; also an early burst such as 울부짖는 칼 at 7+)
+///    passes nothing on: the burst already "spent" them.
+///  - multiplayer: when several players own this power, only <see cref="HandlerIn"/> (the first player in
+///    combatState.Players who is alive and has it) spreads / relocates, so each burst or death is handled once.
 /// </summary>
 public sealed class SkofnungLingeringSoulsPower : MagicSwordsmanPower
 {
@@ -30,6 +34,22 @@ public sealed class SkofnungLingeringSoulsPower : MagicSwordsmanPower
     protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<SkofnungWoundPower>()];
 
     protected override object InitInternalData() => new Data();
+
+    /// <summary>
+    /// The one instance that handles bursts and deaths in this combat: the power of the first player in
+    /// <c>combatState.Players</c> (fixed order on every client) who is alive and has it; null if none.
+    /// </summary>
+    public static SkofnungLingeringSoulsPower? HandlerIn(ICombatState? combatState)
+    {
+        if (combatState == null) return null;
+        foreach (var player in combatState.Players)
+        {
+            if (!player.Creature.IsAlive) continue;
+            var souls = player.Creature.GetPower<SkofnungLingeringSoulsPower>();
+            if (souls != null) return souls;
+        }
+        return null;
+    }
 
     private List<Creature> OtherEnemies(Creature except) =>
         Owner.CombatState?.HittableEnemies.Where(e => e != except && e.IsAlive).ToList() ?? [];
@@ -54,9 +74,11 @@ public sealed class SkofnungLingeringSoulsPower : MagicSwordsmanPower
 
     public override Task BeforeDeath(Creature creature)
     {
-        if (creature.Side == Owner.Side) return Task.CompletedTask;
-        var scars = creature.GetPowerAmount<SkofnungWoundPower>();
-        if (scars > 0 && scars < SkofnungWoundPower.BurstThreshold) GetInternalData<Data>().Dying[creature] = scars;
+        if (creature.Side == Owner.Side || HandlerIn(Owner.CombatState) != this) return Task.CompletedTask;
+        var wound = creature.GetPower<SkofnungWoundPower>();
+        // Killed by its own burst (whatever the threshold was): those Scars are spent, nothing moves.
+        if (wound == null || wound.IsBursting || wound.Amount <= 0) return Task.CompletedTask;
+        GetInternalData<Data>().Dying[creature] = wound.Amount;
         return Task.CompletedTask;
     }
 

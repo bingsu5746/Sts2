@@ -21,6 +21,10 @@ public sealed class DainsleifHjadningavigPower : MagicSwordsmanPower
 
     private int _freeUsedTurn;
 
+    // Cost each own Dainsleif card had BEFORE this power's modifier (= after the hook listeners that ran earlier), as
+    // last computed. The energy actually paid is computed by CardModel.SpendResources right before BeforeCardPlayed.
+    private readonly Dictionary<CardModel, decimal> _costBeforeDiscount = new();
+
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Single;
 
@@ -32,7 +36,9 @@ public sealed class DainsleifHjadningavigPower : MagicSwordsmanPower
     public override bool TryModifyEnergyCostInCombat(CardModel card, decimal originalCost, out decimal modifiedCost)
     {
         modifiedCost = originalCost;
-        if (!IsOwnDainsleifCard(card) || _freeUsedTurn == TurnNumber || originalCost <= 0m) return false;
+        if (!IsOwnDainsleifCard(card)) return false;
+        _costBeforeDiscount[card] = originalCost;
+        if (_freeUsedTurn == TurnNumber || originalCost <= 0m) return false;
         modifiedCost = 0m;
         return true;
     }
@@ -40,8 +46,13 @@ public sealed class DainsleifHjadningavigPower : MagicSwordsmanPower
     // BeforeCardPlayed runs after the energy was paid (CardModel.OnPlayWrapper), so the played card was still free.
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
-        // A printed-0 Dainsleif card (선혈, 돌아온 칼) gained nothing from the discount, so it does not use it up.
-        if (IsOwnDainsleifCard(cardPlay.Card) && cardPlay.Card.EnergyCost.Canonical > 0) _freeUsedTurn = TurnNumber;
+        var card = cardPlay.Card;
+        if (!IsOwnDainsleifCard(card)) return Task.CompletedTask;
+        // Used up only when the discount really lowered the energy paid: not for a card that already cost 0 before
+        // this power (printed 0 like 선혈 / 돌아온 칼, or another discount) and not for an auto-play (pays nothing).
+        if (_costBeforeDiscount.Remove(card, out var before) && before > 0m && !cardPlay.IsAutoPlay &&
+            _freeUsedTurn != TurnNumber)
+            _freeUsedTurn = TurnNumber;
         return Task.CompletedTask;
     }
 }

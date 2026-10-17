@@ -47,6 +47,9 @@ public sealed class SkofnungWoundPower : MagicSwordsmanPower
 
     protected override object InitInternalData() => new Data();
 
+    /// <summary>True while <see cref="Burst"/> is running for this power (its HP loss may be what kills the owner).</summary>
+    public bool IsBursting => GetInternalData<Data>().Bursting;
+
     public static int BurstDamageFor(int skofnungLevel) => BurstBase + BurstPerLevel * Math.Max(0, skofnungLevel);
 
     /// <summary>Burst damage for wounds applied by <paramref name="applier"/> (its owner's Skofnung level).</summary>
@@ -99,10 +102,12 @@ public sealed class SkofnungWoundPower : MagicSwordsmanPower
             {
                 var finest = player.Creature.GetPower<SkofnungFinestInNorthPower>();
                 if (finest != null) await finest.OnWoundBurst(choiceContext);
-                // 떠나지 않는 혼 (2026-10-17): the burst spreads Scars to the other enemies.
-                var souls = player.Creature.GetPower<SkofnungLingeringSoulsPower>();
-                if (souls != null) await souls.OnWoundBurst(choiceContext, Owner);
             }
+
+            // 떠나지 않는 혼 (2026-10-17): the burst spreads Scars to the other enemies — once per burst even when
+            // several players own the power (one deterministic handler, see SkofnungLingeringSoulsPower.HandlerIn).
+            var souls = SkofnungLingeringSoulsPower.HandlerIn(combatState);
+            if (souls != null) await souls.OnWoundBurst(choiceContext, Owner);
         }
         finally
         {

@@ -54,6 +54,14 @@ public static class SwordEffectText
 
     private static int Scale(int full, bool inherited) => inherited ? Half(full) : full;
 
+    /// <summary>
+    /// Durandal's per-hit reduction as DurandalBehavior.ModifyDamageAdditive applies it: the level reduction (halved when
+    /// inherited) + DurandalBehavior.BonusReduction (단단한 날 / 롤랑의 최후, never halved) when a player is given.
+    /// </summary>
+    private static int DurandalReduction(Player? player, int level, bool inherited) =>
+        Scale(DurandalBehavior.ReductionFor(level), inherited) +
+        (player != null ? DurandalBehavior.BonusReduction(player.Creature) : 0);
+
     /// <summary>The level a text should use: the owner's level of the sword, 0 without a player.</summary>
     public static int LevelOf(Player? player, SwordId sword) => player != null ? SwordCombat.LevelOf(player, sword) : 0;
 
@@ -95,7 +103,7 @@ public static class SwordEffectText
             case SwordId.Dainsleif:
                 return Fmt("DAINSLEIF" + half);
             case SwordId.Durandal:
-                return Fmt("DURANDAL", ("Reduction", Scale(DurandalBehavior.ReductionFor(level), inherited)));
+                return Fmt("DURANDAL", ("Reduction", DurandalReduction(player, level, inherited)));
             case SwordId.Skofnung:
                 return Fmt("SKOFNUNG" + half) + "\n" + Fmt("SKOFNUNG_BURST",
                     ("Threshold", SkofnungWoundPower.BurstThreshold), ("Burst", SkofnungWoundPower.BurstDamageFor(level)));
@@ -185,7 +193,7 @@ public static class SwordEffectText
                 text = Fmt("SHORT_DAINSLEIF" + half);
                 break;
             case SwordId.Durandal:
-                text = Fmt("SHORT_DURANDAL", ("Reduction", Scale(DurandalBehavior.ReductionFor(level), inherited)));
+                text = Fmt("SHORT_DURANDAL", ("Reduction", DurandalReduction(player, level, inherited)));
                 break;
             case SwordId.Skofnung:
                 text = Fmt("SHORT_SKOFNUNG" + half);

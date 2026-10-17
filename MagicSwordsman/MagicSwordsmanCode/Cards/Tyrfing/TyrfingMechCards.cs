@@ -37,7 +37,9 @@ public sealed class TyrfingShieldSplitter : TyrfingCard
         if (cardPlay.Target is not { IsAlive: true } target || target.Block <= 0) return;
         var removed = target.Block;
         await CreatureCmd.LoseBlock(target, removed);
-        if (removed / 2 > 0) await CreatureCmd.GainBlock(Owner.Creature, removed / 2, ValueProp.Move, cardPlay);
+        // Fixed amount, not modified by Dexterity / Frail / Moye: Unpowered with no card play, as the game's
+        // Fortifier / CloakClasp grant unmodified Block.
+        if (removed / 2 > 0) await CreatureCmd.GainBlock(Owner.Creature, removed / 2, ValueProp.Unpowered, null);
     }
 }
 

@@ -89,7 +89,13 @@ public sealed class GramBrokenOnSpear : GramCard
         if (state == null) return;
         var before = SwordCombat.LevelOf(Owner, SwordId.Gram);
         if (before < 1) return;
-        state.AddCounter(SwordId.Gram, SwordCombat.CombatLevelBonusKey, -DynamicVars["LevelLoss"].IntValue);
+        // LevelOf clamps (base + counter + relic modifiers) to 0..MaxLevel, so a bonus above the cap (e.g. Regin's
+        // Reforging stacked with a level modifier) would swallow a plain -1. Lower the counter step by step until the
+        // EFFECTIVE level has really dropped by LevelLoss (bounded loop; LevelOf is monotonic in the counter).
+        var target = Math.Max(0, before - DynamicVars["LevelLoss"].IntValue);
+        for (var i = 0; i < SwordRegistry.MaxLevel * 4 && SwordCombat.LevelOf(Owner, SwordId.Gram) > target; i++)
+            state.AddCounter(SwordId.Gram, SwordCombat.CombatLevelBonusKey, -1);
+        if (SwordCombat.LevelOf(Owner, SwordId.Gram) >= before) return; // nothing was spent: no energy
         await SwordCombat.EnsureCurrentSwordPower(Owner, choiceContext); // refresh the "현재 검" number / text
         await PlayerCmd.GainEnergy(DynamicVars.Energy.IntValue, Owner);
         MainFile.Logger.Info($"[Gram] Broken on the spear: level {before} -> {SwordCombat.LevelOf(Owner, SwordId.Gram)} this combat");
