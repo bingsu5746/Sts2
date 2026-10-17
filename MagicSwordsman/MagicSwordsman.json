@@ -3,7 +3,7 @@
   "name": "엔시페르 (Ensifer)",
   "author": "bingsu5746",
   "description": "엔시페르 — 세계의 명검·마검 11자루를 깨워 주변에 띄우고, 바꿔 가며 싸우는 마검사 캐릭터 모드 (BaseLib 필요). / Ensifer: a sword-mage character who awakens legendary swords and fights by switching between them (requires BaseLib).",
-  "version": "v0.2.0",
+  "version": "v0.3.0",
   "min_game_version": "0.107.0",
   "has_pck": true,
   "has_dll": true,
