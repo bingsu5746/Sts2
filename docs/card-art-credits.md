@@ -432,3 +432,7 @@ Card art replaced because the old picture did not match the card name (72 cards)
 caladbolg_hard_cleft, durandal_st_deniss_hair, solais_from_findias, solais_light_flash, solais_lit_sheath, solais_measure_light, solais_srengs_blow, solais_victory_torch: AI Horde txt2img (AlbedoBase XL, 1024×768, seeds 11/29). Power icons solais_dawn/lit_sheath/sreng, union_dwarven_edge/sidhe_light: AI Horde badges in tools/power_art.
 
 Also replaced (seed 63, 2026-10-16): gram_anvil_splitter, gram_blade_between, gram_fleece_cutter, tyrfing_golden_hilt.
+
+## Mechanic cards art (2026-10-17)
+
+mech1 (15 cards: skofnung_howling_blade/wraith_shroud/lingering_souls, durandal_hard_edge/rolands_riposte/springing_steel/rolands_end, dainsleif_blade_returns/risen_slain/shield_cast_aside, tyrfing_shield_splitter/life_price/hervors_demand, solais_radiance/shaded_light): AI Horde txt2img (AlbedoBase XL, seeds 11/29).
