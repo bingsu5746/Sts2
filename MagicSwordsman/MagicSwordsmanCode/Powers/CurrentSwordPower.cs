@@ -56,6 +56,7 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         new DynamicVar("IaiBonus", 0m),
         new StringVar(TextVar, ""),
         new StringVar(WildVar, ""),
+        new StringVar(RoleVar, ""),
     ];
 
     /// <summary>
@@ -65,6 +66,12 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
     /// </summary>
     private const string TextVar = "Text";
     private const string WildVar = "Wild";
+
+    /// <summary>
+    /// {Role}: the sword's one-line role in [aqua] (Swords/SwordRole, user feedback 2026-10-17: the tooltip leads with what
+    /// the sword is for). {Text} already starts with it; the Onimaru stance texts use {Role} directly.
+    /// </summary>
+    private const string RoleVar = "Role";
 
     /// <summary>망령 상흔 tip while Skofnung's effect runs (current, or inherited by Kusanagi).</summary>
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
@@ -191,6 +198,7 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
             inh.StringValue = inherited != null ? SwordRegistry.DisplayName(inherited.Value) : "-";
         if (DynamicVars[TextVar] is StringVar text) text.StringValue = ComputedText(player, sword, level);
         if (DynamicVars[WildVar] is StringVar wild) wild.StringValue = SwordEffectText.OnimaruWildLine(player);
+        if (DynamicVars[RoleVar] is StringVar role) role.StringValue = sword is { } rs ? SwordRole.Rich(rs) : "";
         if (player != null && StanceKind() is { } kind)
         {
             var n = OnimaruAttack.Compute(player, kind);
@@ -202,8 +210,14 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         }
     }
 
-    private static string ComputedText(Player? player, SwordId? sword, int level) =>
-        sword is { } s ? SwordEffectText.Full(s, player, level) : "";
+    /// <summary>Role line, then effect + cost with live numbers.</summary>
+    private static string ComputedText(Player? player, SwordId? sword, int level)
+    {
+        if (sword is not { } s) return "";
+        var role = SwordRole.Rich(s);
+        var full = SwordEffectText.Full(s, player, level);
+        return role.Length == 0 ? full : role + "\n" + full;
+    }
 
     private string SwordKey(SwordId sword, string field) => $"{Id.Entry}.{sword.ToString().ToUpperInvariant()}.{field}";
 
@@ -227,6 +241,7 @@ public sealed class CurrentSwordPower : MagicSwordsmanPower
         loc.Add("IaiBonus", player != null ? OnimaruAttack.IaiBonus(player) : 0);
         loc.Add(TextVar, ComputedText(player, sword, level));
         loc.Add(WildVar, SwordEffectText.OnimaruWildLine(player));
+        loc.Add(RoleVar, sword is { } rs ? SwordRole.Rich(rs) : "");
     }
 
     /// <summary>Called after a switch so the icon number / tooltip update.</summary>

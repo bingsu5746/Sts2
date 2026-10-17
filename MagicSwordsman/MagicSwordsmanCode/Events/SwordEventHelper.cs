@@ -70,6 +70,18 @@ public static class SwordEventHelper
     /// act-3 page overflow; the full effect and cost stay in the button's token hover tip). Numbers of a new (level 0)
     /// sword. 간장·막야's first-time Max HP price keeps its lore line.
     /// </summary>
+    /// <summary>
+    /// Title of a sword button: "{Name} · {Role}" (user feedback 2026-10-17: the role must be visible while choosing; the
+    /// title row keeps the one-line-per-sword layout of 2026-10-15).
+    /// </summary>
+    public static LocString OptionTitle(SwordId sword)
+    {
+        var title = SwordLore.Generic("OPTION_TITLE");
+        title.Add("Name", SwordLore.Name(sword));
+        title.Add("Role", SwordRole.Loc(sword, pair: true));
+        return title;
+    }
+
     public static LocString OptionDescription(SwordId sword, Mangeomchong? tomb)
     {
         var desc = SwordLore.Generic("OPTION");
@@ -84,13 +96,18 @@ public static class SwordEventHelper
         return desc;
     }
 
-    /// <summary>Run-start pick: the sword's story page — origin, what it does as the current sword, and its cost.</summary>
+    /// <summary>
+    /// Run-start pick: the sword's story page — origin, its role, what it does as the current sword (level-0 numbers) and
+    /// its cost. (2026-10-17: the "현재 검일 때" line used to show the lore tagline instead of the effect.)
+    /// </summary>
     public static LocString StartAcquiredText(SwordId sword)
     {
         var text = SwordLore.Generic("ACQUIRED_START");
         text.Add("Sword", SwordLore.Name(sword));
         text.Add("Origin", SwordLore.Line(sword, "ORIGIN"));
         text.Add("Tagline", SwordLore.Line(sword, "TAGLINE"));
+        text.Add("Role", SwordRole.Loc(sword, pair: true));
+        text.Add("Effect", SwordEffectText.Effect(sword, null, 0, withPartner: true));
         text.Add("Cost", SwordLore.Line(sword, "COST"));
         return text;
     }
