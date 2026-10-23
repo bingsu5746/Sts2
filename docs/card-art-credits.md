@@ -441,3 +441,4 @@ mech2 (16 cards: gram_andvaris_curse/broken_on_spear/dragon_blood, ganjiang_thre
 ## Ensifer common cards (2026-10-23)
 
 21 common/basic cards redrawn with Ensifer himself (pale young man, messy black hair, violet tall-collared coat, violet chest gem): AI Horde txt2img (AlbedoBase XL, seeds 7/23). Previous versions in scratchpad only.
+Revised 2026-10-23: the same 21 cards redrawn with distinct compositions and empty hands (AI Horde txt2img, AlbedoBase XL), with the mod's own sword sprites composited as floating swords (scratchpad enscomp/comp.py, comp2.py).
