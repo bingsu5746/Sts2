@@ -29,6 +29,26 @@ internal static class SpriteBounds
     /// </summary>
     public static Rect2[] Bands(Texture2D tex) => Get(tex).Bands;
 
+    /// <summary>
+    /// The texture cropped to its opaque pixels (an AtlasTexture), so UI that centres a texture (TextureRect
+    /// KeepAspectCentered) centres the drawn sword, not its unevenly padded canvas. Falls back to the texture itself.
+    /// </summary>
+    public static Texture2D Trimmed(Texture2D tex)
+    {
+        try
+        {
+            var used = Used(tex);
+            var size = new Vector2(tex.GetWidth(), tex.GetHeight());
+            var region = new Rect2(used.Position + size / 2, used.Size).Intersection(new Rect2(Vector2.Zero, size));
+            if (region.Size.X < 4 || region.Size.Y < 4 || region.Size == size) return tex;
+            return new AtlasTexture { Atlas = tex, Region = region };
+        }
+        catch (Exception)
+        {
+            return tex;
+        }
+    }
+
     private static Info Get(Texture2D tex)
     {
         var key = string.IsNullOrEmpty(tex.ResourcePath) ? $"rid:{tex.GetRid().Id}" : tex.ResourcePath;

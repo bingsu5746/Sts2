@@ -262,7 +262,7 @@ public static class SwordViewer
             });
             frame.AddChild(new TextureRect
             {
-                Texture = GD.Load<Texture2D>(artPath), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                Texture = isSprite ? SpriteBounds.Trimmed(GD.Load<Texture2D>(artPath)) : GD.Load<Texture2D>(artPath), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
                 StretchMode = isSprite ? TextureRect.StretchModeEnum.KeepAspectCentered : TextureRect.StretchModeEnum.KeepAspectCovered,
                 CustomMinimumSize = isSprite ? new Vector2(300, 460) : new Vector2(420, 320),
                 MouseFilter = Control.MouseFilterEnum.Ignore,

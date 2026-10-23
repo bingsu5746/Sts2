@@ -107,6 +107,7 @@ public static class SwordRoulette
             {
                 var path = ArtPath(sword);
                 tex = path != null ? ResourceLoader.Load<Texture2D>(path) : null;
+                if (tex != null && path!.Contains("/images/swords/")) tex = SpriteBounds.Trimmed(tex); // centre the drawn sword
                 textures[sword] = tex;
             }
             art.Texture = tex;

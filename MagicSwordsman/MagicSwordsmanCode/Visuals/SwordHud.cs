@@ -93,10 +93,12 @@ public static class SwordHud
         var bar = display.GetNodeOrNull<Control>("%HealthBar");
         var powers = display.GetNodeOrNull<Control>("%PowerContainer");
         var barRect = bar?.GetGlobalRect() ?? display.GetGlobalRect();
-        var bottom = barRect.End.Y;
+        // the drawn bar, its block icon and the HP label are children that can reach below the bar control's own rect
+        // (seen in game 2026-10-23: the tag sat on top of the bar), so take the lowest visible descendant
+        var bottom = bar != null ? DeepBottom(bar, barRect.End.Y) : barRect.End.Y;
         if (powers != null && powers.IsVisibleInTree() && powers.GetChildren().OfType<CanvasItem>().Any(c => c.Visible))
             bottom = Math.Max(bottom, ChildrenBottom(powers));
-        stack.GlobalPosition = new Vector2(barRect.Position.X, bottom + 4f);
+        stack.GlobalPosition = new Vector2(barRect.Position.X, bottom + 8f);
         stack.Visible = true;
     }
 
@@ -244,6 +246,20 @@ public static class SwordHud
         var t = c.CreateTween();
         t.TweenProperty(c, "scale", new Vector2(1.12f, 1.12f), 0.08);
         t.TweenProperty(c, "scale", Vector2.One, 0.16);
+    }
+
+    /// <summary>Lowest edge of <paramref name="root"/> and all its visible Control descendants (our own stack excluded).</summary>
+    private static float DeepBottom(Control root, float start)
+    {
+        var bottom = start;
+        foreach (var child in root.GetChildren())
+        {
+            if (child is not Control { Visible: true } c || c.Name == NodeName) continue;
+            var r = c.GetGlobalRect();
+            if (r.Size.Y > 0 && r.Size.Y < 200) bottom = Math.Max(bottom, r.End.Y); // ignore huge full-size helpers
+            bottom = DeepBottom(c, bottom);
+        }
+        return bottom;
     }
 
     /// <summary>Lowest edge of the visible children (the container's own rect may not shrink to its icons).</summary>

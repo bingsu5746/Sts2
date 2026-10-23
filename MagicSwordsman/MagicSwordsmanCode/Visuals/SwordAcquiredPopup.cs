@@ -90,7 +90,7 @@ public static class SwordAcquiredPopup
 
             frame.AddChild(new TextureRect
             {
-                Texture = GD.Load<Texture2D>(artPath), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                Texture = isSprite ? SpriteBounds.Trimmed(GD.Load<Texture2D>(artPath)) : GD.Load<Texture2D>(artPath), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
                 StretchMode = isSprite
                     ? TextureRect.StretchModeEnum.KeepAspectCentered
                     : TextureRect.StretchModeEnum.KeepAspectCovered,
