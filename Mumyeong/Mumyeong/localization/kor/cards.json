@@ -1,0 +1,10 @@
+{
+  "MUMYEONG-SAMJAE_GEOMBEOP.title": "삼재검법",
+  "MUMYEONG-SAMJAE_GEOMBEOP.description": "피해를 {Damage:diff()} 줍니다.",
+  "MUMYEONG-CHEOLPOSAM.title": "철포삼",
+  "MUMYEONG-CHEOLPOSAM.description": "[gold]방어도[/gold]를 {Block:diff()} 얻습니다.",
+  "MUMYEONG-UNGI_JOSIK.title": "운기조식",
+  "MUMYEONG-UNGI_JOSIK.description": "[gold]내공[/gold]을 {Naegong:diff()} 회복합니다.",
+  "MUMYEONG-YUKHAP_GEOMBEOP.title": "육합검법",
+  "MUMYEONG-YUKHAP_GEOMBEOP.description": "모든 적에게 피해를 {Damage:diff()} 줍니다."
+}

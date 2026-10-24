@@ -1,0 +1,10 @@
+{
+  "MUMYEONG-SAMJAE_GEOMBEOP.title": "Three Powers Sword",
+  "MUMYEONG-SAMJAE_GEOMBEOP.description": "Deal {Damage:diff()} damage.",
+  "MUMYEONG-CHEOLPOSAM.title": "Iron Shirt",
+  "MUMYEONG-CHEOLPOSAM.description": "Gain {Block:diff()} [gold]Block[/gold].",
+  "MUMYEONG-UNGI_JOSIK.title": "Qi Circulation",
+  "MUMYEONG-UNGI_JOSIK.description": "Restore {Naegong:diff()} [gold]Internal Energy[/gold].",
+  "MUMYEONG-YUKHAP_GEOMBEOP.title": "Six Harmonies Sword",
+  "MUMYEONG-YUKHAP_GEOMBEOP.description": "Deal {Damage:diff()} damage to ALL enemies."
+}

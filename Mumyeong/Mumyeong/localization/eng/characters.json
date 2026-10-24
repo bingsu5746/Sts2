@@ -1,0 +1,16 @@
+{
+  "MUMYEONG-MUMYEONG_CHARACTER.title": "The Cheongun Disciple",
+  "MUMYEONG-MUMYEONG_CHARACTER.titleObject": "The Cheongun Disciple",
+  "MUMYEONG-MUMYEONG_CHARACTER.description": "A disciple of the Blue Cloud Sect.\nGrows stronger by mastering the arts of many sects.",
+  "MUMYEONG-MUMYEONG_CHARACTER.aromaPrinciple": "[sine]The higher the cloud climbs, the bluer it becomes...[/sine]",
+  "MUMYEONG-MUMYEONG_CHARACTER.banter.alive.endTurnPing": "[sine]Steady the breath.[/sine]",
+  "MUMYEONG-MUMYEONG_CHARACTER.banter.dead.endTurnPing": "...",
+  "MUMYEONG-MUMYEONG_CHARACTER.cardsModifierTitle": "Cheongun Cards",
+  "MUMYEONG-MUMYEONG_CHARACTER.cardsModifierDescription": "Cheongun cards will now appear in rewards and shops.",
+  "MUMYEONG-MUMYEONG_CHARACTER.eventDeathPrevention": "I cannot fall yet.",
+  "MUMYEONG-MUMYEONG_CHARACTER.goldMonologue": "[sine]Enough for a manual or two.[/sine]",
+  "MUMYEONG-MUMYEONG_CHARACTER.possessiveAdjective": "their",
+  "MUMYEONG-MUMYEONG_CHARACTER.pronounObject": "them",
+  "MUMYEONG-MUMYEONG_CHARACTER.pronounPossessive": "theirs",
+  "MUMYEONG-MUMYEONG_CHARACTER.pronounSubject": "they"
+}
