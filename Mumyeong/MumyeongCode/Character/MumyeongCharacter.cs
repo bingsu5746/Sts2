@@ -3,6 +3,7 @@ using BaseLib.Utils.NodeFactories;
 using Mumyeong.MumyeongCode.Cards.Shared;
 using Mumyeong.MumyeongCode.Extensions;
 using Mumyeong.MumyeongCode.Relics;
+using Mumyeong.MumyeongCode.Visuals;
 using Godot;
 using MegaCrit.Sts2.Core.Entities.Characters;
 using MegaCrit.Sts2.Core.Models;
@@ -53,6 +54,17 @@ public class MumyeongCharacter : PlaceholderCharacterModel
             return icon;
         }
     }
+    // Body scenes: the reaper in a black coat and fedora, face hidden in smoke, with the contracted figure's spirit
+    // behind him (SpiritVisuals). Built in code (RuntimeScenes: the .pck tool cannot pack .tscn files); BaseLib converts
+    // them and plays their AnimationPlayer clips by name (idle / Attack / Cast / Hit / Dead). Art missing -> placeholder.
+    public override string CustomVisualPath => RuntimeScenes.PathOr(RuntimeScenes.Combat, base.CustomVisualPath)!;
+    public override string CustomRestSiteAnimPath =>
+        RuntimeScenes.PathOr(RuntimeScenes.RestSite, base.CustomRestSiteAnimPath)!;
+    public override string CustomMerchantAnimPath =>
+        RuntimeScenes.PathOr(RuntimeScenes.Merchant, base.CustomMerchantAnimPath)!;
+    public override string CustomCharacterSelectBg =>
+        RuntimeScenes.PathOr(RuntimeScenes.CharSelect, base.CustomCharacterSelectBg)!;
+
     public override string CustomIconTexturePath => "character_icon_char_name.png".CharacterUiPath();
     public override string CustomCharacterSelectIconPath => "char_select_char_name.png".CharacterUiPath();
     public override string CustomCharacterSelectLockedIconPath => "char_select_char_name_locked.png".CharacterUiPath();

@@ -11,6 +11,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from loc_cards import CARDS  # noqa: E402
 from loc_scenes import FIGS, SCENES  # noqa: E402
+from loc_talk import TALK  # noqa: E402
 
 P = "MUMYEONG-"
 ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Mumyeong", "localization")
@@ -377,6 +378,12 @@ def build(lang):
         events[f"{P}THEATER_EVENT.{part}"] = pair[i]
     for part, pair in STAGE_EVENT.items():
         events[f"{P}STAGE_UP_EVENT.{part}"] = pair[i]
+    for fig, sits in TALK.items():
+        for sit, lines in sits.items():
+            for n, (sk, rk, se, re_) in enumerate(lines):
+                events[f"{P}SPIRIT_TALK.{fig}.{sit}.{n}.S"] = sk if k else se
+                if rk:
+                    events[f"{P}SPIRIT_TALK.{fig}.{sit}.{n}.R"] = rk if k else re_
     out["events"] = events
 
     out["characters"] = {f"{P}MUMYEONG_CHARACTER.{part}": pair[i] for part, pair in CHARACTER.items()}

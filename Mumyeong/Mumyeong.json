@@ -3,7 +3,7 @@
   "name": "무명 (Mumyeong)",
   "author": "bingsu5746",
   "description": "무명 — 한 번 죽고 저승의 영사실에서 위인 한 명의 코어를 받아, 그 영혼과 함께 빙의·동기화·집중·강림으로 깊어지는 캐릭터 모드 (베타, BaseLib 필요). / Mumyeong: a once-dead wanderer who receives the soul core of one great figure and grows with them (beta, requires BaseLib).",
-  "version": "v0.1.0-beta",
+  "version": "v0.2.0-beta",
   "min_game_version": "0.107.0",
   "has_pck": true,
   "has_dll": true,

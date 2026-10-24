@@ -1,8 +1,10 @@
 using System.Runtime.CompilerServices;
 using Mumyeong.MumyeongCode.Cards;
+using Mumyeong.MumyeongCode.Dialogue;
 using Mumyeong.MumyeongCode.Figures;
 using Mumyeong.MumyeongCode.Powers;
 using Mumyeong.MumyeongCode.Stages;
+using Mumyeong.MumyeongCode.Visuals;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -119,9 +121,14 @@ public sealed class SoulCore : MumyeongRelic
         Contract = (int)contract;
         Resonance = resonance;
         Stage = (int)SoulStage.Possession;
+        if (Owner != null) SpiritVisuals.RefreshSoon(Owner);
     }
 
-    public void SetStage(SoulStage stage) => Stage = (int)stage;
+    public void SetStage(SoulStage stage)
+    {
+        Stage = (int)stage;
+        if (Owner != null) SpiritVisuals.RefreshSoon(Owner); // the spirit grows clearer with each stage
+    }
 
     /// <summary>MumyeongCard.OnPlay: a card of the contracted figure was played.</summary>
     public void OnFigureCardPlayed(FigureId figure)
@@ -129,6 +136,7 @@ public sealed class SoulCore : MumyeongRelic
         if (Figure != figure) return;
         Mastery = _mastery + 1;
         InvokeDisplayAmountChanged();
+        if (Owner != null) SpiritVisuals.Pulse(Owner);
     }
 
     /// <summary>Per-run integer counter (saved). Key must not contain ';' or '='.</summary>
@@ -188,6 +196,7 @@ public sealed class SoulCore : MumyeongRelic
     {
         await base.AfterRoomEntered(room);
         UpdateStatus(); // the act index in the status line changes with the map
+        SpiritTalk.OnRoomEntered(Owner, room); // shows the spirit (rest site / shop) and maybe a line by the fire
     }
 
     // =====================================================================================
@@ -273,6 +282,7 @@ public sealed class SoulCore : MumyeongRelic
     public override async Task BeforeHandDraw(Player player, PlayerChoiceContext choiceContext, ICombatState combatState)
     {
         if (player != Owner || Owner.PlayerCombatState is not { TurnNumber: 1 }) return;
+        SpiritTalk.OnCombatStart(Owner); // the spirit appears behind him, maybe an opening exchange
         if (ContractKind != ContractType.Grudge || Figure == null) return;
         Flash();
         await PowerCmd.Apply<StrengthPower>(choiceContext, Owner.Creature, GrudgeStrength, Owner.Creature, null);
@@ -317,6 +327,7 @@ public sealed class SoulCore : MumyeongRelic
     public override Task AfterDamageReceived(PlayerChoiceContext choiceContext, Creature target, DamageResult result,
         ValueProp props, Creature? dealer, CardModel? cardSource)
     {
+        if (target == Owner.Creature && result.UnblockedDamage > 0) SpiritTalk.OnOwnerDamaged(Owner);
         if (Figure == FigureId.Leonidas && target == Owner.Creature && result.BlockedDamage > 0)
         {
             _combatBlocked += result.BlockedDamage;
@@ -346,6 +357,7 @@ public sealed class SoulCore : MumyeongRelic
 
     public override Task AfterCombatVictory(CombatRoom room)
     {
+        SpiritTalk.OnVictory(Owner, room);
         if (Figure == FigureId.YiSunsin && (room.RoomType == RoomType.Elite || room.RoomType == RoomType.Boss) &&
             Owner.Creature.IsAlive && Owner.Creature.CurrentHp * 2 <= Owner.Creature.MaxHp)
             CompleteDescentTask();
