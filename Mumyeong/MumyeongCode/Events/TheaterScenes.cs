@@ -18,6 +18,8 @@ public static class TheaterScenes
     [
         "BRIDGE", "SIEGE", "STORM", "TEMPLE", "SCAFFOLD", "SNOWMARCH",
         "FLOOD", "WELL", "MINE", "PLAGUE", "BORDER", "CORONATION",
+        "ARENA", "AMBUSH", "MUTINY", "FAMINE", "DUEL", "EXILE",
+        "FALSE_ORDER", "RIVER", "TRIBUNAL", "HOSTAGE", "LAST_CAMP", "TOWER",
     ];
 
     public static readonly IReadOnlyList<string> Cuts = ["GAZE", "ACTION", "WORDS"];
