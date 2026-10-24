@@ -10,21 +10,30 @@ public static class StringExtensions
         return Path.Join(MainFile.ResPath, "images", path);
     }
 
-    public static string CardImagePath(this string path)
+    /// <summary>The card's own portrait, else <paramref name="fallback"/> (the figure's emblem), else card.png.</summary>
+    public static string CardImagePath(this string path, string? fallback = null)
     {
         path = Path.Join(MainFile.ResPath, "images", "card_portraits", path);
         if (ResourceLoader.Exists(path)) return path;
-        
-        MainFile.Logger.Info("Could not find card image path: " + path);
+        if (fallback != null)
+        {
+            var alt = Path.Join(MainFile.ResPath, "images", "card_portraits", fallback);
+            if (ResourceLoader.Exists(alt)) return alt;
+        }
+
         return Path.Join(MainFile.ResPath, "images", "card_portraits", "card.png");
     }
 
-    public static string BigCardImagePath(this string path)
+    public static string BigCardImagePath(this string path, string? fallback = null)
     {
         path = Path.Join(MainFile.ResPath, "images", "card_portraits", "big", path);
         if (ResourceLoader.Exists(path)) return path;
-        
-        MainFile.Logger.Info("Could not find big card image path: " + path);
+        if (fallback != null)
+        {
+            var alt = Path.Join(MainFile.ResPath, "images", "card_portraits", "big", fallback);
+            if (ResourceLoader.Exists(alt)) return alt;
+        }
+
         return Path.Join(MainFile.ResPath, "images", "card_portraits", "big", "card.png");
     }
 

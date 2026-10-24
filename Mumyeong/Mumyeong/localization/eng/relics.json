@@ -1,5 +1,23 @@
 {
-  "MUMYEONG-DANJEON.title": "Dantian",
-  "MUMYEONG-DANJEON.description": "At the start of each combat, fill your [gold]Internal Energy[/gold] to its maximum. The counter shows the maximum.",
-  "MUMYEONG-DANJEON.flavor": "The vessel where internal energy gathers."
+  "MUMYEONG-SOUL_CORE.title": "Soul Core",
+  "MUMYEONG-SOUL_CORE.description": "The soul of a great figure, received in the underworld's projection room. Playing that figure's cards raises Mastery by 1; Mastery and the acts deepen your bond. Card rewards and shops only offer shared cards and your figure's cards.{Status}",
+  "MUMYEONG-SOUL_CORE.flavor": "It beats where a stopped heart used to.",
+  "MUMYEONG-GUANYU_GREEN_DRAGON_RELIC.title": "Green Dragon Crescent Blade",
+  "MUMYEONG-GUANYU_GREEN_DRAGON_RELIC.description": "At the start of each combat, gain 8 [gold]Vigor[/gold].",
+  "MUMYEONG-GUANYU_GREEN_DRAGON_RELIC.flavor": "A crescent blade carved with a green dragon. Heavy.",
+  "MUMYEONG-JOAN_BANNER_RELIC.title": "Banner of Orléans",
+  "MUMYEONG-JOAN_BANNER_RELIC.description": "At the start of your turn, gain 2 [gold]Faith[/gold].",
+  "MUMYEONG-JOAN_BANNER_RELIC.flavor": "It was not lowered, even in the fire.",
+  "MUMYEONG-LEONIDAS_SHIELD_RELIC.title": "Spartan Shield",
+  "MUMYEONG-LEONIDAS_SHIELD_RELIC.description": "At the start of each combat, gain [gold]Phalanx[/gold] and 3 [gold]Counter[/gold].",
+  "MUMYEONG-LEONIDAS_SHIELD_RELIC.flavor": "Come back with it, or on it.",
+  "MUMYEONG-GENGHIS_SEAL_RELIC.title": "Seal of the Great Khan",
+  "MUMYEONG-GENGHIS_SEAL_RELIC.description": "Whenever an enemy dies, gain 1 energy and draw 1 card.",
+  "MUMYEONG-GENGHIS_SEAL_RELIC.flavor": "A seal honoured from one end of the steppe to the other.",
+  "MUMYEONG-YI_TURTLE_SHIP_RELIC.title": "Turtle Ship",
+  "MUMYEONG-YI_TURTLE_SHIP_RELIC.description": "At the end of your turn, deal 5 damage to ALL enemies and gain 5 [gold]Block[/gold].",
+  "MUMYEONG-YI_TURTLE_SHIP_RELIC.flavor": "The spikes on its back guard the sea.",
+  "MUMYEONG-NAPOLEON_CROWN_RELIC.title": "Emperor's Crown",
+  "MUMYEONG-NAPOLEON_CROWN_RELIC.description": "Gain 1 max energy.",
+  "MUMYEONG-NAPOLEON_CROWN_RELIC.flavor": "A crown placed by one's own hands."
 }

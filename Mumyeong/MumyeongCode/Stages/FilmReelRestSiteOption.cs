@@ -1,4 +1,5 @@
 using BaseLib.Abstracts;
+using Mumyeong.MumyeongCode.Extensions;
 using Mumyeong.MumyeongCode.Relics;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -16,6 +17,8 @@ public sealed class FilmReelRestSiteOption(Player owner) : CustomRestSiteOption(
     public const string Id = "MUMYEONG_FILM_REEL";
 
     public override string OptionId => Id;
+
+    public override string? CustomIconPath => "ui/rest_option_film_reel.png".ImagePath();
 
     public override bool IsEnabled => Owner.GetRelic<SoulCore>() is { } core && StageRules.NextReadyStage(core) != null;
 

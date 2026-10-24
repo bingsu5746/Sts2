@@ -28,9 +28,12 @@ public abstract class MumyeongCard(int cost, CardType type, CardRarity rarity, T
     ConstructedCardModel(cost, type, rarity, target)
 {
     // Image size: normal art 1000x760 (500x380 ok), full art 606x852; small variants 250x190 / 250x350.
-    public override string CustomPortraitPath => $"{Id.Entry.RemovePrefix().ToLowerInvariant()}.png".BigCardImagePath();
-    public override string PortraitPath => $"{Id.Entry.RemovePrefix().ToLowerInvariant()}.png".CardImagePath();
-    public override string BetaPortraitPath => $"beta/{Id.Entry.RemovePrefix().ToLowerInvariant()}.png".CardImagePath();
+    // Beta: cards without their own painting show their figure's emblem (images/card_portraits/figure_<key>.png).
+    private string PortraitFile => $"{Id.Entry.RemovePrefix().ToLowerInvariant()}.png";
+    private string EmblemFile => $"figure_{(Figure is { } f ? FigureRegistry.Key(f).ToLowerInvariant() : "shared")}.png";
+    public override string CustomPortraitPath => PortraitFile.BigCardImagePath(EmblemFile);
+    public override string PortraitPath => PortraitFile.CardImagePath(EmblemFile);
+    public override string BetaPortraitPath => $"beta/{PortraitFile}".CardImagePath(EmblemFile);
 
     public virtual FigureId? Figure => null;
 

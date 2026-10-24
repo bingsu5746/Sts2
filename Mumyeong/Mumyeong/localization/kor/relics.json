@@ -1,5 +1,23 @@
 {
-  "MUMYEONG-DANJEON.title": "단전",
-  "MUMYEONG-DANJEON.description": "매 전투 시작 시, [gold]내공[/gold]을 최대치까지 채웁니다. 숫자는 내공 최대치입니다.",
-  "MUMYEONG-DANJEON.flavor": "내공이 쌓이는 그릇."
+  "MUMYEONG-SOUL_CORE.title": "코어",
+  "MUMYEONG-SOUL_CORE.description": "저승의 영사실에서 받은 위인의 영혼. 그 위인의 카드를 쓸 때마다 숙련이 1 오르고, 숙련과 막 진행으로 영혼과의 단계가 깊어집니다. 카드 보상과 상점에는 공용 카드와 계약한 위인의 카드만 나옵니다.{Status}",
+  "MUMYEONG-SOUL_CORE.flavor": "한 번 멈춘 심장 대신 뛰는 것.",
+  "MUMYEONG-GUANYU_GREEN_DRAGON_RELIC.title": "청룡언월도",
+  "MUMYEONG-GUANYU_GREEN_DRAGON_RELIC.description": "전투를 시작할 때 [gold]활력[/gold]을 8 얻습니다.",
+  "MUMYEONG-GUANYU_GREEN_DRAGON_RELIC.flavor": "푸른 용이 새겨진 언월도. 무겁다.",
+  "MUMYEONG-JOAN_BANNER_RELIC.title": "오를레앙의 깃발",
+  "MUMYEONG-JOAN_BANNER_RELIC.description": "내 턴이 시작될 때마다 [gold]신념[/gold]을 2 얻습니다.",
+  "MUMYEONG-JOAN_BANNER_RELIC.flavor": "불길 속에서도 내려지지 않았다.",
+  "MUMYEONG-LEONIDAS_SHIELD_RELIC.title": "스파르타의 방패",
+  "MUMYEONG-LEONIDAS_SHIELD_RELIC.description": "전투를 시작할 때 [gold]방진[/gold]과 [gold]반격[/gold] 3을 얻습니다.",
+  "MUMYEONG-LEONIDAS_SHIELD_RELIC.flavor": "방패를 들고 오라. 아니면 그 위에 실려 오라.",
+  "MUMYEONG-GENGHIS_SEAL_RELIC.title": "대칸의 인장",
+  "MUMYEONG-GENGHIS_SEAL_RELIC.description": "적이 쓰러질 때마다 에너지를 1 얻고 카드를 1장 뽑습니다.",
+  "MUMYEONG-GENGHIS_SEAL_RELIC.flavor": "초원 끝에서 끝까지 통하는 인장.",
+  "MUMYEONG-YI_TURTLE_SHIP_RELIC.title": "거북선",
+  "MUMYEONG-YI_TURTLE_SHIP_RELIC.description": "내 턴이 끝날 때마다 모든 적에게 피해를 5 주고 [gold]방어도[/gold]를 5 얻습니다.",
+  "MUMYEONG-YI_TURTLE_SHIP_RELIC.flavor": "등에 돋은 철침이 바다를 지킨다.",
+  "MUMYEONG-NAPOLEON_CROWN_RELIC.title": "황제의 관",
+  "MUMYEONG-NAPOLEON_CROWN_RELIC.description": "최대 에너지가 1 늘어납니다.",
+  "MUMYEONG-NAPOLEON_CROWN_RELIC.flavor": "스스로 머리에 얹은 관."
 }
