@@ -1,6 +1,6 @@
 using BaseLib.Abstracts;
 using BaseLib.Utils.NodeFactories;
-using Mumyeong.MumyeongCode.Cards.Basic;
+using Mumyeong.MumyeongCode.Cards.Shared;
 using Mumyeong.MumyeongCode.Extensions;
 using Mumyeong.MumyeongCode.Relics;
 using Godot;
@@ -9,32 +9,35 @@ using MegaCrit.Sts2.Core.Models;
 
 namespace Mumyeong.MumyeongCode.Character;
 
+/// <summary>
+/// 무명 (spec docs/mumyeong-spec.md §1). HP 70; gold 99 / energy 3 are the character base defaults.
+/// Starting deck: Strike x4, Defend x4. The 황천 영사실 adds the contracted figure's 2 starter cards (10 cards).
+/// Starting relic: 코어 (SoulCore).
+/// </summary>
 public class MumyeongCharacter : PlaceholderCharacterModel
 {
     public const string CharacterId = "Mumyeong";
 
-    public static readonly Color Color = new("4f86b8");
+    public static readonly Color Color = new("8fa3b8");
 
     public override Color NameColor => Color;
     public override CharacterGender Gender => CharacterGender.Neutral;
     public override int StartingHp => 70;
 
     public override IEnumerable<CardModel> StartingDeck => [
-        ModelDb.Card<SamjaeGeombeop>(),
-        ModelDb.Card<SamjaeGeombeop>(),
-        ModelDb.Card<SamjaeGeombeop>(),
-        ModelDb.Card<SamjaeGeombeop>(),
-        ModelDb.Card<Cheolposam>(),
-        ModelDb.Card<Cheolposam>(),
-        ModelDb.Card<Cheolposam>(),
-        ModelDb.Card<Cheolposam>(),
-        ModelDb.Card<UngiJosik>(),
-        ModelDb.Card<YukhapGeombeop>()
+        ModelDb.Card<MumyeongStrike>(),
+        ModelDb.Card<MumyeongStrike>(),
+        ModelDb.Card<MumyeongStrike>(),
+        ModelDb.Card<MumyeongStrike>(),
+        ModelDb.Card<MumyeongDefend>(),
+        ModelDb.Card<MumyeongDefend>(),
+        ModelDb.Card<MumyeongDefend>(),
+        ModelDb.Card<MumyeongDefend>()
     ];
 
     public override IReadOnlyList<RelicModel> StartingRelics =>
     [
-        ModelDb.Relic<Danjeon>()
+        ModelDb.Relic<SoulCore>()
     ];
 
     public override CardPoolModel CardPool => ModelDb.CardPool<MumyeongCardPool>();

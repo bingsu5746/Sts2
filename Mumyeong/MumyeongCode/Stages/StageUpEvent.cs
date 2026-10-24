@@ -1,16 +1,10 @@
 using BaseLib.Abstracts;
-using Mumyeong.MumyeongCode.Events;
 using Mumyeong.MumyeongCode.Figures;
 using Mumyeong.MumyeongCode.Relics;
-using MegaCrit.Sts2.Core.CardSelection;
-using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Localization;
-using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Runs;
 
 namespace Mumyeong.MumyeongCode.Stages;
@@ -23,8 +17,6 @@ namespace Mumyeong.MumyeongCode.Stages;
 /// </summary>
 public sealed class StageUpEvent : CustomEventModel
 {
-    public const int UpgradeCount = 2;
-
     private SoulStage? _stage;
 
     public StageUpEvent() : base(autoAdd: false)
@@ -85,40 +77,19 @@ public sealed class StageUpEvent : CustomEventModel
         return Task.CompletedTask;
     }
 
-    private async Task Synchronize()
-    {
-        if (Core is not { Figure: { } figure } core) { await Leave(); return; }
-        core.SetStage(SoulStage.Synchronization);
-        await FigureCardPick.Offer(Owner!, figure, new BlockingPlayerChoiceContext());
-        Finish(SoulStage.Synchronization);
-    }
+    private async Task Synchronize() => await Reward(SoulStage.Synchronization, false);
 
-    private async Task FocusRemove()
-    {
-        if (Core is not { } core) { await Leave(); return; }
-        core.SetStage(SoulStage.Focus);
-        var cards = (await CardSelectCmd.FromDeckForRemoval(Owner!,
-            new CardSelectorPrefs(CardSelectorPrefs.RemoveSelectionPrompt, 1), _ => true)).ToList();
-        if (cards.Count > 0) await CardPileCmd.RemoveFromDeck(cards);
-        Finish(SoulStage.Focus);
-    }
+    private async Task FocusRemove() => await Reward(SoulStage.Focus, false);
 
-    private async Task FocusUpgrade()
-    {
-        if (Core is not { } core) { await Leave(); return; }
-        core.SetStage(SoulStage.Focus);
-        var prompt = new LocString("card_selection", "MUMYEONG-UPGRADE_PROMPT");
-        var cards = (await CardSelectCmd.FromDeckForUpgrade(Owner!, new CardSelectorPrefs(prompt, 0, UpgradeCount))).ToList();
-        if (cards.Count > 0) CardCmd.Upgrade(cards, CardPreviewStyle.EventLayout);
-        Finish(SoulStage.Focus);
-    }
+    private async Task FocusUpgrade() => await Reward(SoulStage.Focus, true);
 
-    private async Task Descend()
+    private async Task Descend() => await Reward(SoulStage.Descent, false);
+
+    private async Task Reward(SoulStage stage, bool upgrade)
     {
-        if (Core is not { Figure: { } figure } core) { await Leave(); return; }
-        core.SetStage(SoulStage.Descent);
-        await RelicCmd.Obtain(FigureRegistry.DescentRelic(figure).ToMutable(), Owner!);
-        Finish(SoulStage.Descent);
+        if (Core is not { Figure: not null } core) { await Leave(); return; }
+        await StageRewards.Apply(Owner!, core, stage, upgrade, new BlockingPlayerChoiceContext());
+        Finish(stage);
     }
 
     private void Finish(SoulStage stage)

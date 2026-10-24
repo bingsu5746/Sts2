@@ -5,9 +5,13 @@ using Mumyeong.MumyeongCode.Character;
 using Mumyeong.MumyeongCode.Extensions;
 using Mumyeong.MumyeongCode.Figures;
 using Mumyeong.MumyeongCode.Relics;
+using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Commands.Builders;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace Mumyeong.MumyeongCode.Cards;
 
@@ -48,6 +52,57 @@ public abstract class MumyeongCard(int cost, CardType type, CardRarity rarity, T
     }
 
     protected abstract Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay);
+
+    // ------------------------------------------------------------------ helpers (BaseLib CommonActions + game commands)
+
+    public const string Slash = "vfx/vfx_attack_slash";
+
+    /// <summary>Attack with this card's Damage / CalculatedDamage var (single target or all enemies per TargetType).</summary>
+    protected Task<AttackCommand> Hit(PlayerChoiceContext ctx, CardPlay cardPlay, int hits = 1) =>
+        CommonActions.CardAttack(this, cardPlay, hits).WithHitFx(Slash).Execute(ctx);
+
+    protected Task<decimal> GainBlock(CardPlay cardPlay) => CommonActions.CardBlock(this, cardPlay);
+
+    protected Task<IEnumerable<CardModel>> DrawCards(PlayerChoiceContext ctx) => CommonActions.Draw(this, ctx);
+
+    protected Task GainEnergy() => PlayerCmd.GainEnergy(DynamicVars.Energy.BaseValue, Owner);
+
+    protected decimal PowerAmount<T>() where T : PowerModel => DynamicVars[typeof(T).Name].BaseValue;
+
+    /// <summary>Applies T to the owner with this card's var for T.</summary>
+    protected Task Self<T>(PlayerChoiceContext ctx) where T : PowerModel =>
+        PowerCmd.Apply<T>(ctx, Owner.Creature, PowerAmount<T>(), Owner.Creature, this);
+
+    protected Task Self<T>(PlayerChoiceContext ctx, decimal amount) where T : PowerModel =>
+        PowerCmd.Apply<T>(ctx, Owner.Creature, amount, Owner.Creature, this);
+
+    /// <summary>Applies T to the card's target with this card's var for T.</summary>
+    protected async Task OnTarget<T>(PlayerChoiceContext ctx, CardPlay cardPlay) where T : PowerModel
+    {
+        if (cardPlay.Target is { IsAlive: true } target)
+            await PowerCmd.Apply<T>(ctx, target, PowerAmount<T>(), Owner.Creature, this);
+    }
+
+    /// <summary>Applies T to every hittable enemy with this card's var for T.</summary>
+    protected async Task OnAllEnemies<T>(PlayerChoiceContext ctx) where T : PowerModel
+    {
+        var enemies = Enemies(this);
+        if (enemies.Count > 0) await PowerCmd.Apply<T>(ctx, enemies, PowerAmount<T>(), Owner.Creature, this);
+    }
+
+    protected Task LoseHp(PlayerChoiceContext ctx, decimal amount) =>
+        CreatureCmd.Damage(ctx, Owner.Creature, amount, DamageProps.cardHpLoss, this);
+
+    public static List<Creature> Enemies(CardModel card) =>
+        card.Owner?.Creature.CombatState?.HittableEnemies.ToList() ?? [];
+
+    /// <summary>For calculated vars: 0 outside combat.</summary>
+    public static decimal EnemyCount(CardModel card) => Enemies(card).Count;
+
+    public static decimal OwnerBlock(CardModel card) => card.Owner?.Creature.Block ?? 0;
+
+    public static decimal OwnerPower<T>(CardModel card) where T : PowerModel =>
+        card.Owner?.Creature.GetPowerAmount<T>() ?? 0;
 }
 
 /// <summary>Shorthand base for a figure's card: <c>public sealed class X() : FigureCard(FigureId.Joan, 1, ...)</c>.</summary>
