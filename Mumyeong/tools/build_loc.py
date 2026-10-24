@@ -286,6 +286,41 @@ ANCIENTS = {
     "NEOW.talk.{C}.2-2.ancient": ("...그렇다면, 또 일어나렴.", "...Then rise again."),
 }
 
+
+# THE_ARCHITECT dialogue: same key structure as 엔시페르 (the localization analyzer expects it for a character).
+ARCHITECT_LINES = [
+    ("0-0r.char", "이 탑 꼭대기에도 객석이 있나?", "Are there seats at the top of this spire too?"),
+    ("0-1r.ancient", "이름 없는 자여. 탑은 관객을 두지 않는다. 오르는 자만 있을 뿐.", "Nameless one. My spire keeps no audience. Only climbers."),
+    ("1-0.char", "다시 올라왔어. 이번엔 다른 영혼과 함께야.", "I climbed again. With a different soul this time."),
+    ("1-1.ancient", "영혼을 갈아입으며 오르는 자라. 기묘하군.", "One who climbs while changing souls. Strange."),
+    ("1-2.char", "갈아입는 게 아니야. 함께 걷는 거지.", "Not changing. Walking together."),
+    ("2-0.ancient", "네 심장 소리가 둘로 들린다.", "I hear your heart beating twice."),
+    ("2-1.char", "맞아. 하나는 내 것이 아니야.", "Yes. One of them is not mine."),
+    ("3-0.char", "이번 필름은 끝까지 돌릴 거야.", "This time I'll run the reel to the end."),
+    ("3-1.ancient", "끝을 본 필름은 다시 돌지 않는다.", "A reel that reaches its end does not turn again."),
+    ("3-2.char", "그래서 끝까지 가는 거야.", "That's why I'm going to the end."),
+    ("4-0.ancient", "죽었다 돌아온 자. 이 탑 위에서 또 죽을 셈이냐.", "One who died and returned. Do you mean to die again atop my spire?"),
+    ("4-1.char", "한 번이면 충분했어.", "Once was enough."),
+    ("4-2.ancient", "...그렇다면 버텨 보아라.", "...Then endure."),
+    ("5-0.char", "꼭대기에 오니까 내 안의 영혼이 조용해졌어.", "At the summit, the soul inside me went quiet."),
+    ("5-1.ancient", "두려워서겠지.", "Out of fear, no doubt."),
+    ("5-2.char", "아니. 자기 마지막 싸움이 생각나서야.", "No. It remembers its own last battle."),
+    ("6-0r.ancient", "다시 왔군. 이번엔 누구의 영혼이냐.", "Back again. Whose soul is it this time?"),
+    ("6-1r.char", "누구든, 마지막 1초는 같이 넘을 거야.", "Whoever it is, we'll cross the last second together."),
+    ("6-2r.ancient", "그렇다면 증명해 보아라.", "Then prove it."),
+    ("7-0r.char", "이 탑에도 필름 한 롤쯤 남겨 두고 갈까?", "Should I leave a reel of film in this spire?"),
+    ("7-1r.ancient", "내 탑은 영사실이 아니다.", "My spire is no projection room."),
+    ("7-2r.char", "저승도 그렇게 말했어.", "The underworld said the same."),
+    ("8-0r.ancient", "아무리 많은 영혼을 빌려도, 탑의 끝은 하나다.", "Borrow as many souls as you like; the spire still has one summit."),
+    ("8-1r.char", "그럼 그 끝까지 둘이서 갈게.", "Then the two of us will go to that summit."),
+    ("8-2r.ancient", "...오너라.", "...Come."),
+]
+ARCHITECT_EXTRA = {
+    "0-0r.next": None, "1-0.next": None, "1-1.next": None, "2-0.next": None, "3-0.next": None, "3-1.next": None,
+    "4-0.next": None, "4-1.next": None, "5-0.next": None, "5-1.next": None, "6-0r.next": None, "6-1r.next": None,
+    "7-0r.next": None, "7-1r.next": None, "8-0r.next": None, "8-1r.next": None,
+}
+
 CARD_SELECTION = {
     P + "UPGRADE_PROMPT": ("강화할 카드를 최대 2장 고르세요", "Choose up to 2 cards to upgrade"),
 }
@@ -345,7 +380,17 @@ def build(lang):
     out["events"] = events
 
     out["characters"] = {f"{P}MUMYEONG_CHARACTER.{part}": pair[i] for part, pair in CHARACTER.items()}
-    out["ancients"] = {key.replace("{C}", f"{P}MUMYEONG_CHARACTER"): pair[i] for key, pair in ANCIENTS.items()}
+    anc = {key.replace("{C}", f"{P}MUMYEONG_CHARACTER"): pair[i] for key, pair in ANCIENTS.items()}
+    arch = f"THE_ARCHITECT.talk.{P}MUMYEONG_CHARACTER."
+    for key, kt, et in ARCHITECT_LINES:
+        anc[arch + key] = kt if k else et
+    for key in ARCHITECT_EXTRA:
+        anc[arch + key] = "계속" if k else "Continue"
+    for n in range(9):
+        anc[arch + f"{n}-attack"] = "Both"
+    for n in (6, 7, 8):
+        anc[arch + f"{n}-visit"] = "6"
+    out["ancients"] = anc
     out["card_selection"] = {key: pair[i] for key, pair in CARD_SELECTION.items()}
     out["rest_site_ui"] = {key: pair[i] for key, pair in REST_SITE.items()}
     out["card_keywords"] = {}
