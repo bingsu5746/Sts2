@@ -1,4 +1,5 @@
 using BaseLib.Abstracts;
+using Mumyeong.MumyeongCode.Events;
 using Mumyeong.MumyeongCode.Figures;
 using Mumyeong.MumyeongCode.Relics;
 using MegaCrit.Sts2.Core.Events;
@@ -25,8 +26,18 @@ public sealed class StageUpEvent : CustomEventModel
 
     public override bool IsAllowed(IRunState runState) => false;
 
-    // TODO(art): own film-reel portrait. Placeholder: the game's "Grave of the Forgotten" event art.
-    public override string? CustomInitialPortraitPath => ImageHelper.GetImagePath("events/grave_of_the_forgotten.png");
+    // The contracted figure's background (EventArt), the spirit rising in it once the page is up.
+    public override string? CustomInitialPortraitPath =>
+        Owner?.GetRelic<SoulCore>()?.Figure is { } f ? EventArt.Resolve(EventArt.Figure(f)) : EventArt.Resolve(EventArt.Hall);
+
+    public override async Task AfterEventStarted()
+    {
+        await base.AfterEventStarted();
+        if (Core?.Figure is not { } figure || _stage == null || Owner == null) return;
+        var owner = Owner;
+        if (Godot.Engine.GetMainLoop() is Godot.SceneTree tree)
+            tree.CreateTimer(0.4).Timeout += () => EventArt.PlayRise(owner, figure);
+    }
 
     private string PageKey(string page) => $"{Id.Entry}.pages.{page}";
 

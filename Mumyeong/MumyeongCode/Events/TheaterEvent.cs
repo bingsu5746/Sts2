@@ -18,13 +18,16 @@ namespace Mumyeong.MumyeongCode.Events;
 /// 황천 영사실 — the run-start event (spec §4). Started by <see cref="EventTriggers"/> when the starting Ancient
 /// (Neow) PROCEED would open the map, and only while the 코어 has no figure yet.
 ///
-/// Pages: START (blackout + the three shadows) -> CUT 0..2 (one option per shadow, the line of that figure for this
-/// scene and cut) -> DESCENT (the figure with the most resonance steps into the screen) -> REVEAL (my three cuts vs
-/// the figure's real last moment) -> contract: 코어 data, 2 starter cards, 1-of-3 figure card pick.
+/// Pages (2026-10-24: little text per page, a background per page, a cinematic for the contract):
+///   INITIAL (hall) -> SHADOWS (hall: the three epithets) -> SCENE (scene background) -> CUT 0..2 (one option per
+///   shadow) -> DESCENT (figure background, the shadow rises into the screen and becomes the spirit) -> WHO (who they
+///   were) -> DEED (their real last moment) -> CONTRACT (resonance, contract type) -> the spirit rushes into you ->
+///   TEACH (figure background) -> 1-of-3 figure card pick -> CONTRACTED.
+/// Winner: the most resonance; a 1:1:1 tie goes to the figure of the last cut (유언), which the WORDS prompt says.
 ///
 /// The three figures and the scene come from the event Rng (run seed + event id, mixed with a fixed key), so the same
 /// seed shows the same theater. Not shared in multiplayer: every player gets their own copy (like 엔시페르's
-/// TombResonanceEvent). Per-instance state: a save/reload while the event is open restarts it from START.
+/// TombResonanceEvent). Per-instance state: a save/reload while the event is open restarts it from INITIAL.
 /// </summary>
 public sealed class TheaterEvent : CustomEventModel
 {
@@ -41,15 +44,11 @@ public sealed class TheaterEvent : CustomEventModel
 
     public override bool IsAllowed(IRunState runState) => false;
 
-    // TODO(art): own theater portrait. Placeholder: the game's "Grave of the Forgotten" event art.
-    public override string? CustomInitialPortraitPath => ImageHelper.GetImagePath("events/grave_of_the_forgotten.png");
+    public override string? CustomInitialPortraitPath => EventArt.Resolve(EventArt.Hall);
 
     private string PageKey(string page) => $"{Id.Entry}.pages.{page}";
 
     private SoulCore? Core => Owner?.GetRelic<SoulCore>();
-
-    public override LocString InitialDescription =>
-        IsMutable && Owner != null ? StartDescription() : base.InitialDescription;
 
     protected override Task BeforeEventStarted(bool isPreFinished)
     {
@@ -67,19 +66,29 @@ public sealed class TheaterEvent : CustomEventModel
         return Task.CompletedTask;
     }
 
-    // ------------------------------------------------------------------ START
+    private EventOption Next(string page, string option, Action show) =>
+        new(this, () => { show(); return Task.CompletedTask; }, $"{PageKey(page)}.options.{option}");
 
-    private LocString StartDescription()
-    {
-        var desc = L10NLookup($"{PageKey("INITIAL")}.description");
-        desc.Add("Shadows", string.Join("\n", _figures.Select(f => $"— 「{FigureRegistry.Shadow(f)}」")));
-        return desc;
-    }
+    // ------------------------------------------------------------------ INITIAL / SHADOWS / SCENE
 
     protected override IReadOnlyList<EventOption> GenerateInitialOptions() =>
-    [
-        new EventOption(this, () => { ShowCut(0); return Task.CompletedTask; }, $"{PageKey("INITIAL")}.options.ROLL"),
-    ];
+        [Next("INITIAL", "ROLL", ShowShadows)];
+
+    private void ShowShadows()
+    {
+        EventArt.Show(Owner, EventArt.Hall);
+        var desc = L10NLookup($"{PageKey("SHADOWS")}.description");
+        desc.Add("Shadows", string.Join("\n", _figures.Select(f => $"[gold]「{FigureRegistry.Shadow(f)}」[/gold]")));
+        SetEventState(desc, [Next("SHADOWS", "START", ShowScene)]);
+    }
+
+    private void ShowScene()
+    {
+        EventArt.Show(Owner, EventArt.Scene(_scene));
+        var desc = L10NLookup($"{PageKey("SCENE")}.description");
+        desc.Add("Scene", TheaterScenes.Description(_scene).GetFormattedText());
+        SetEventState(desc, [Next("SCENE", "FREEZE", () => ShowCut(0))]);
+    }
 
     // ------------------------------------------------------------------ CUTS
 
@@ -87,7 +96,6 @@ public sealed class TheaterEvent : CustomEventModel
     {
         var desc = L10NLookup($"{PageKey("CUT")}.description");
         desc.Add("Reaction", _picks.Count == 0 ? "" : Reaction(_picks[^1]));
-        desc.Add("Scene", cut == 0 ? TheaterScenes.Description(_scene).GetFormattedText() + "\n\n" : "");
         desc.Add("Prompt", TheaterScenes.Generic($"PROMPT.{TheaterScenes.Cuts[cut]}").GetFormattedText());
 
         var options = new List<EventOption>();
@@ -118,7 +126,7 @@ public sealed class TheaterEvent : CustomEventModel
         return Task.CompletedTask;
     }
 
-    // ------------------------------------------------------------------ DESCENT / REVEAL
+    // ------------------------------------------------------------------ DESCENT / WHO / DEED / CONTRACT
 
     /// <summary>Most resonance wins; a 1:1:1 tie goes to the figure of the last cut (spec §4.1).</summary>
     private FigureId Winner()
@@ -131,33 +139,42 @@ public sealed class TheaterEvent : CustomEventModel
     private void ShowDescent()
     {
         var winner = Winner();
+        EventArt.Show(Owner, EventArt.Figure(winner));
+        EventArt.PlayRise(Owner, winner);
         var desc = L10NLookup($"{PageKey("DESCENT")}.description");
-        desc.Add("Reaction", Reaction(_picks[^1]));
         desc.Add("Shadow", FigureRegistry.Shadow(winner));
         desc.Add("Figure", FigureRegistry.Name(winner));
-        SetEventState(desc,
-        [
-            new EventOption(this, () => { ShowReveal(winner); return Task.CompletedTask; },
-                $"{PageKey("DESCENT")}.options.WATCH"),
-        ]);
+        SetEventState(desc, [Next("DESCENT", "WHO", () => ShowWho(winner))]);
     }
 
-    private void ShowReveal(FigureId winner)
+    private void ShowWho(FigureId winner)
+    {
+        var desc = L10NLookup($"{PageKey("WHO")}.description");
+        desc.Add("Figure", FigureRegistry.Name(winner));
+        desc.Add("Intro", FigureRegistry.Text(winner, "INTRO").GetFormattedText());
+        SetEventState(desc, [Next("WHO", "DEED", () => ShowDeed(winner))]);
+    }
+
+    private void ShowDeed(FigureId winner)
+    {
+        var desc = L10NLookup($"{PageKey("DEED")}.description");
+        desc.Add("Figure", FigureRegistry.Name(winner));
+        desc.Add("Deed", FigureRegistry.Text(winner, "LAST_DEED").GetFormattedText());
+        SetEventState(desc, [Next("DEED", "TERMS", () => ShowContract(winner))]);
+    }
+
+    private void ShowContract(FigureId winner)
     {
         var resonance = _picks.Count(p => p == winner);
         var contract = resonance >= TheaterScenes.Cuts.Count ? ContractType.Resonance : ContractType.Grudge;
 
-        var desc = L10NLookup($"{PageKey("REVEAL")}.description");
-        desc.Add("Figure", FigureRegistry.Name(winner));
-        desc.Add("Mine", string.Join("\n", _picks.Select((p, i) =>
-            $"{i + 1}. {TheaterScenes.Line(_scene, i, p).GetFormattedText()}")));
-        desc.Add("Deed", FigureRegistry.Text(winner, "LAST_DEED").GetFormattedText());
+        var desc = L10NLookup($"{PageKey("CONTRACT")}.description");
         desc.Add("Resonance", resonance);
         desc.Add("Contract", Stages.StageRules.ContractName(contract));
         desc.Add("ContractText", FigureRegistry.Generic($"CONTRACT_TEXT.{contract.ToString().ToUpperInvariant()}").GetFormattedText());
 
         var tips = FigureRegistry.StarterCards(winner).Select(c => HoverTipFactory.FromCard(c)).ToList();
-        var key = $"{PageKey("REVEAL")}.options.CONTRACT";
+        var key = $"{PageKey("CONTRACT")}.options.TAKE";
         SetEventState(desc,
         [
             new EventOption(this, () => MakeContract(winner, contract, resonance),
@@ -178,6 +195,7 @@ public sealed class TheaterEvent : CustomEventModel
 
         if (core.Figure == null)
         {
+            await EventArt.PlayMerge(Owner, figure);
             core.MakeContract(figure, contract, resonance);
             var results = new List<CardPileAddResult>();
             foreach (var canonical in FigureRegistry.StarterCards(figure))
@@ -186,13 +204,22 @@ public sealed class TheaterEvent : CustomEventModel
                 results.Add(await CardPileCmd.Add(card, PileType.Deck));
             }
             if (results.Count > 0) CardCmd.PreviewCardPileAdd(results);
-            await FigureCardPick.Offer(Owner, figure, new BlockingPlayerChoiceContext());
         }
 
         core.SetRunCounter(DoneKey, 1);
+        EventArt.Show(Owner, EventArt.Figure(figure));
+        var desc = L10NLookup($"{PageKey("TEACH")}.description");
+        desc.Add("Figure", FigureRegistry.Name(figure));
+        var key = $"{PageKey("TEACH")}.options.LEARN";
+        SetEventState(desc, [new EventOption(this, () => Learn(figure), key)]);
+    }
+
+    private async Task Learn(FigureId figure)
+    {
+        if (Owner != null) await FigureCardPick.Offer(Owner, figure, new BlockingPlayerChoiceContext());
         var end = L10NLookup($"{PageKey("CONTRACTED")}.description");
         end.Add("Figure", FigureRegistry.Name(figure));
-        end.Add("Contract", Stages.StageRules.ContractName(core.ContractKind));
+        end.Add("Contract", Stages.StageRules.ContractName(Core?.ContractKind ?? ContractType.None));
         SetEventFinished(end);
     }
 }
