@@ -7,7 +7,18 @@
 - 설계 기준 문서: 저장소의 `docs/mumyeong-spec.md` (결정 기록: `docs/soul-character-design.md`)
 - 구조는 같은 저장소의 엔시페르(`MagicSwordsman/`)와 같다(Alchyr ModTemplate-StS2 + BaseLib).
 
-## 설치 (PC에서 빌드)
+## 설치 A — 바로 설치 (빌드 없이)
+
+1. 저장소의 `releases/Mumyeong-v0.1.0-beta.zip`을 받는다.
+2. 압축을 풀면 나오는 `Mumyeong` 폴더(`Mumyeong.dll`, `Mumyeong.pck`, `Mumyeong.json`)를 게임 폴더의 `mods/` 안에 넣는다.
+   예: `Steam/steamapps/common/Slay the Spire 2/mods/Mumyeong/`
+3. BaseLib 3.4.7 이상이 설치되어 있어야 한다(창작마당 구독 등).
+4. 게임을 "Play with Mods"로 실행하고 캐릭터 선택에서 **무명**을 고른다.
+
+`.pck`는 Godot 에디터 대신 `BSchneppe.StS2.PckPacker`(템플릿 csproj에 주석으로 들어 있던 도구)로 만들었다.
+글자가 안 보이거나 그림이 깨지면 아래 B 방법(MegaDot으로 `dotnet publish`)으로 다시 만들면 된다.
+
+## 설치 B — PC에서 빌드
 
 이 저장소에는 빌드된 `.dll`·`.pck`가 들어 있지 않다. 게임 파일(`sts2.dll`)이 있는 PC에서 한 번 빌드하면 게임
 `mods` 폴더에 설치된다. 엔시페르와 같은 방법이다.
@@ -72,9 +83,9 @@
 | 나폴레옹 | 에너지·카드 운용, 포병 | 포병대 | 황제의 관 |
 
 ## 검증 상태 (중요)
-- 이 베타는 **게임 파일 없이** 작성되었다. 엔시페르에서 실제로 빌드·동작하는 엔진 API 패턴만 따랐고,
-  C# 문법 검사(Roslyn)와 텍스트 키 대조(클래스 ↔ 현지화)는 통과했다.
-- **컴파일과 게임 실행은 아직 확인하지 못했다.** 첫 `dotnet publish`에서 오류가 나면 메시지를 그대로 알려 주세요.
+- 게임 v0.107 계열의 실제 `sts2.dll` / `0Harmony.dll` / `GodotSharp.dll`과 BaseLib 3.4.7로 **컴파일 성공**(오류 0, 경고 0),
+  현지화 분석기 통과, 텍스트 키 대조(클래스 ↔ 현지화) 통과.
+- **게임 안에서 실행해 보지는 못했다.** 실행 중 문제가 생기면 게임 로그(`godot.log`)의 `[Mumyeong]` 줄을 알려 주세요.
 - 게임에서 확인해야 할 것:
   - 영사실·단계 이벤트가 강제로 열리는 타이밍(멀티플레이 포함), 이벤트 도중 저장 후 불러오기
   - 휴식처 「필름을 돌린다」와 카드 고르기 화면

@@ -39,9 +39,9 @@ public sealed class StageUpEvent : CustomEventModel
     }
 
     public override LocString InitialDescription =>
-        IsMutable && Owner != null ? Description() : base.InitialDescription;
+        IsMutable && Owner != null ? PageDescription() : base.InitialDescription;
 
-    private LocString Description()
+    private LocString PageDescription()
     {
         if (Core is not { Figure: { } figure } || _stage is not { } stage)
             return L10NLookup($"{PageKey("NOTHING")}.description");

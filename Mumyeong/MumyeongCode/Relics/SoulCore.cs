@@ -301,7 +301,7 @@ public sealed class SoulCore : MumyeongRelic
             {
                 Flash();
                 await PowerCmd.Remove(grudge);
-                await CreatureCmd.Damage(choiceContext, Owner.Creature, GrudgeHpLoss, DamageProps.cardHpLoss, (CardModel?)null);
+                await CreatureCmd.Damage(choiceContext, Owner.Creature, GrudgeHpLoss, DamageProps.cardHpLoss, (CardModel)null!);
             }
         }
     }
