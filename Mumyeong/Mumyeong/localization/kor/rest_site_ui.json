@@ -1,4 +1,7 @@
 {
   "OPTION_MUMYEONG_FILM_REEL.name": "필름을 돌린다",
-  "OPTION_MUMYEONG_FILM_REEL.description": "영혼과의 다음 단계로 들어갑니다(동기화: 카드 고르기 · 집중: 카드 2장 강화 · 강림: 위인의 유물)."
+  "OPTION_MUMYEONG_FILM_REEL.description": "영혼과의 다음 단계로 들어갑니다.",
+  "OPTION_MUMYEONG_FILM_REEL.SYNCHRONIZATION": "[gold]동기화[/gold]: 위인의 카드 3장 중 1장을 고릅니다.",
+  "OPTION_MUMYEONG_FILM_REEL.FOCUS": "[gold]집중[/gold]: 카드를 최대 2장 강화합니다.",
+  "OPTION_MUMYEONG_FILM_REEL.DESCENT": "[gold]강림[/gold]: 위인의 유물을 얻습니다."
 }

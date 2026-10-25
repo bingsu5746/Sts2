@@ -1,4 +1,5 @@
 using Godot;
+using Mumyeong.MumyeongCode.Figures;
 using MegaCrit.Sts2.Core.Assets;
 
 namespace Mumyeong.MumyeongCode.Visuals;
@@ -25,7 +26,7 @@ public static class RuntimeScenes
 
     private const string Img = $"{MainFile.ResPath}/images/character";
 
-    private static readonly string[] Figures = ["guanyu", "joan", "leonidas", "genghis", "yisunsin", "napoleon"];
+    private static readonly string[] Figures = FigureRegistry.All.Select(SpiritVisuals.FileKey).ToArray();
 
     // layout (scene units); reaper.png 560x860 at 0.5 with the feet at y ~ 0
     private const float BodyScale = 0.5f;
@@ -39,15 +40,22 @@ public static class RuntimeScenes
     private const float RestSpiritScale = 0.42f;
 
     private static readonly Dictionary<string, PackedScene> Built = new();
+    private static readonly HashSet<string> Failed = new();
 
     /// <summary>
-    /// The scene's path once it was built and registered, else the fallback (placeholder visuals). A failed build is
-    /// retried on the next call (the art may not be loadable yet).
+    /// The scene's path once it was built and registered, else the fallback (placeholder visuals). The first call
+    /// decides for the whole session: BaseLib registers the scene conversion of CustomVisualPath & co. once, at
+    /// PostModInit, so a path that only started working later would reach the game unconverted.
     /// </summary>
     public static string? PathOr(string path, string? fallback)
     {
         if (Built.ContainsKey(path)) return path;
-        if (TryBuild(path) is not { } scene) return fallback;
+        if (Failed.Contains(path)) return fallback;
+        if (TryBuild(path) is not { } scene)
+        {
+            Failed.Add(path);
+            return fallback;
+        }
         Built[path] = scene;
         return path;
     }

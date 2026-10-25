@@ -24,7 +24,8 @@ def energy(k=True):
     return "{Energy:energyIcons()}를 얻습니다." if k else "Gain {Energy:energyIcons()}."
 
 def power(name_k, name_e, var, k=True):
-    return f"[gold]{name_k}[/gold]을(를) {{{var}:diff()}} 얻습니다." if k else f"Gain {{{var}:diff()}} [gold]{name_e}[/gold]."
+    # every name passed here (활력, 신념, 반격, 포격, 힘) ends in a final consonant, so the particle is always 을
+    return f"[gold]{name_k}[/gold]을 {{{var}:diff()}} 얻습니다." if k else f"Gain {{{var}:diff()}} [gold]{name_e}[/gold]."
 
 def vigor(k=True): return power("활력", "Vigor", "VigorPower", k)
 def faith(k=True): return power("신념", "Faith", "JoanFaithPower", k)
@@ -84,7 +85,9 @@ CARDS = [
                                                       "If you had [gold]Vigor[/gold], draw {Cards:diff()} card(s).")]),
     card("GuanyuSweep", "청룡 휘두르기", "Dragon Sweep", [dmg_all]),
     card("GuanyuPresence", "위세", "Presence", [vigor]),
-    card("GuanyuLoyalty", "의리", "Loyalty", [block]),
+    card("GuanyuLoyalty", "의리", "Loyalty",
+         [T("[gold]방어도[/gold]를 {CalculatedBlock:diff()} 얻습니다.\n([gold]활력[/gold]이 있으면 {CalculationExtra:diff()} 더)",
+            "Gain {CalculatedBlock:diff()} [gold]Block[/gold].\n({CalculationExtra:diff()} more if you have [gold]Vigor[/gold])")]),
     card("GuanyuFivePasses", "오관돌파", "Through Five Passes", [dmg_hits]),
     card("GuanyuFlood", "수엄칠군", "Flooding the Seven Armies", [dmg_all, weak_all]),
     card("GuanyuBoneScrape", "괄골요독", "Scraping the Bone", [strength, block]),
@@ -132,13 +135,13 @@ CARDS = [
     card("JoanJudgment", "심판", "Judgment",
          [T("내 턴이 끝날 때 [gold]신념[/gold]만큼 모든 적에게 피해를 줍니다.",
             "At the end of your turn, deal damage equal to your [gold]Faith[/gold] to ALL enemies.")]),
-    card("JoanTearTheAbjuration", "철회서를 찢다", "Tear the Abjuration",
+    card("JoanTearTheAbjuration", "철회를 거두다", "Take It Back",
          [T("피해를 {CalculatedDamage:diff()} 줍니다.\n(기본 {CalculationBase:diff()}, [gold]신념[/gold] 1당 {ExtraDamage:diff()} 더)",
             "Deal {CalculatedDamage:diff()} damage.\n({CalculationBase:diff()}, plus {ExtraDamage:diff()} per [gold]Faith[/gold])")]),
     card("JoanSainthood", "성인", "Sainthood", [T("[gold]신념[/gold]을 2배로 늘립니다.", "Double your [gold]Faith[/gold].")]),
 
     # ------------------------------------------------------------------ 레오니다스
-    card("LeonidasShieldWall", "방패벽", "Shield Wall", [block]),
+    card("LeonidasShieldWall", "방패벽", "Shield Wall", [block, counter]),
     card("LeonidasSpearThrust", "창 찌르기", "Spear Thrust", [dmg]),
     card("LeonidasHoplite", "호플리테스", "Hoplite", [block, counter]),
     card("LeonidasShieldBash", "방패 밀치기", "Shield Bash",
@@ -151,7 +154,7 @@ CARDS = [
     card("LeonidasPhalanx", "팔랑크스", "Phalanx",
          [T("[gold]방진[/gold]: [gold]방어도[/gold]가 내 턴이 시작될 때 사라지지 않습니다.",
             "[gold]Phalanx[/gold]: your [gold]Block[/gold] is not removed at the start of your turn.")]),
-    card("LeonidasBronzeSpikes", "청동 가시", "Bronze Spikes", [counter]),
+    card("LeonidasBronzeSpikes", "청동 창끝", "Bronze Spearpoint", [counter]),
     card("LeonidasCounterattack", "역습", "Counterattack",
          [dmg, T("[gold]방어도[/gold]가 {BlockNeeded} 이상이면 2번 줍니다.",
                  "If you have {BlockNeeded} or more [gold]Block[/gold], hit twice.")]),
@@ -176,9 +179,9 @@ CARDS = [
             "Whenever you play a Skill, deal {LeonidasThermopylaePower:diff()} damage to a random enemy.")]),
 
     # ------------------------------------------------------------------ 칭기즈 칸
-    card("GenghisMountedArcher", "기사", "Mounted Archer", [dmg_hits]),
+    card("GenghisMountedArcher", "말 위의 활", "Mounted Archer", [dmg_hits]),
     card("GenghisCavalryCharge", "기마 돌격", "Cavalry Charge", [dmg_all]),
-    card("GenghisVolley", "일제 사격", "Volley", [dmg_all_hits]),
+    card("GenghisVolley", "연사", "Rapid Shots", [dmg_all_hits]),
     card("GenghisSteppeWind", "초원의 바람", "Steppe Wind", [draw, block]),
     card("GenghisFeignedRetreat", "거짓 퇴각", "Feigned Retreat", [block, vuln_t]),
     card("GenghisLancer", "창기병", "Lancer", [dmg]),
@@ -201,7 +204,8 @@ CARDS = [
          [T("공격 카드를 쓸 때마다 모든 적에게 피해를 {GenghisEmpirePower:diff()} 줍니다.",
             "Whenever you play an Attack, deal {GenghisEmpirePower:diff()} damage to ALL enemies.")]),
     card("GenghisGreatKhan", "대칸", "The Great Khan", [dmg_all_hits]),
-    card("GenghisKurultai", "쿠릴타이", "Kurultai", [energy, draw]),
+    card("GenghisKurultai", "쿠릴타이", "Kurultai",
+         [energy, draw, lambda k: power("기마 군단", "Horde", "GenghisHordePower", k)]),
     card("GenghisEndlessCampaign", "끝없는 원정", "Endless Campaign",
          [T("[gold]기마 군단[/gold]을 {GenghisHordePower:diff()} 얻습니다.", "Gain {GenghisHordePower:diff()} [gold]Horde[/gold].")]),
 
@@ -229,7 +233,8 @@ CARDS = [
     card("YiHansando", "한산도", "Hansando", [cannon, block]),
     card("YiServeAsCommoner", "백의종군", "Serving as a Common Soldier", [block]),
     card("YiIronChain", "쇠사슬", "Iron Chain", [weak_all, cannon]),
-    card("YiResolveToDie", "필사즉생", "Resolve to Die", [strength]),
+    card("YiResolveToDie", "필사즉생", "Resolve to Die",
+         [strength, T("체력이 절반 이하이면 {Bonus} 더 얻습니다.", "If your HP is at half or less, gain {Bonus} more.")]),
     card("YiNoryang", "노량", "Noryang", [dmg_all, cannon]),
     card("YiTwelveShips", "열두 척", "Twelve Ships",
          [T("[gold]방어도[/gold]를 {CalculatedBlock:diff()} 얻습니다.\n(적 1명당 {CalculationExtra:diff()})",
@@ -247,17 +252,17 @@ CARDS = [
     card("NapoleonBayonet", "총검", "Bayonet", [dmg]),
     card("NapoleonGrapeshot", "산탄", "Grapeshot", [dmg_all]),
     card("NapoleonForcedMarch", "강행군", "Forced March", [draw]),
-    card("NapoleonInfantrySquare", "방진", "Infantry Square", [block]),
+    card("NapoleonInfantrySquare", "보병 방진", "Infantry Square", [block]),
     card("NapoleonCivilCode", "법전", "Civil Code", [block, draw]),
     card("NapoleonCuirassiers", "흉갑 기병", "Cuirassiers", [dmg_hits]),
     card("NapoleonArtillery", "포병대", "Artillery Corps",
          [T("내 턴이 시작될 때마다 무작위 적에게 피해를 {NapoleonArtilleryPower:diff()} 줍니다.",
             "At the start of your turn, deal {NapoleonArtilleryPower:diff()} damage to a random enemy.")]),
-    card("NapoleonBlitz", "전격전", "Lightning Campaign",
+    card("NapoleonBlitz", "속전속결", "Lightning Campaign",
          [T("한 턴에 카드를 4장 쓸 때마다 에너지를 {NapoleonBlitzPower:diff()} 얻습니다.",
             "Every 4th card you play in a turn gives {NapoleonBlitzPower:diff()} energy.")]),
     card("NapoleonAusterlitz", "아우스터리츠", "Austerlitz", [dmg, weak_t]),
-    card("NapoleonGrandBattery", "대포대", "Grand Battery", [dmg_all]),
+    card("NapoleonGrandBattery", "그랑 바테리", "Grande Batterie", [dmg_all]),
     card("NapoleonManeuver", "기동", "Maneuver", [block, draw]),
     card("NapoleonImperialGuard", "근위대", "Imperial Guard", [block]),
     card("NapoleonAmbition", "야망", "Ambition", [energy]),

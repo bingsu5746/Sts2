@@ -1,5 +1,6 @@
 using BaseLib.Abstracts;
 using Mumyeong.MumyeongCode.Events;
+using Mumyeong.MumyeongCode.Extensions;
 using Mumyeong.MumyeongCode.Figures;
 using Mumyeong.MumyeongCode.Relics;
 using MegaCrit.Sts2.Core.Events;
@@ -61,7 +62,20 @@ public sealed class StageUpEvent : CustomEventModel
         desc.Add("Figure", FigureRegistry.Name(figure));
         desc.Add("Stage", StageRules.StageName(stage));
         desc.Add("Memory", FigureRegistry.Text(figure, $"MEMORY_{(int)stage}").GetFormattedText());
+        desc.Add("Words", stage == SoulStage.Descent ? YourWords(Core) : "");
         return desc;
+    }
+
+    /// <summary>강림 (spec §4.1 run arc): the last words you chose in the theater, next to the figure's own.</summary>
+    private string YourWords(SoulCore core)
+    {
+        var scene = core.GetRunCounter(TheaterEvent.SceneKey);
+        var words = core.GetRunCounter(TheaterEvent.WordsKey) - 1;
+        if (words < 0 || !FigureRegistry.IsValid(words) || scene < 0 || scene >= TheaterScenes.All.Count) return "";
+        var line = L10NLookup($"{PageKey("INITIAL")}.words");
+        line.Add("Words", TheaterScenes.Line(TheaterScenes.All[scene], TheaterScenes.Cuts.Count - 1, (FigureId)words)
+            .GetFormattedText());
+        return "\n\n" + line.GetFormattedText();
     }
 
     protected override IReadOnlyList<EventOption> GenerateInitialOptions()
@@ -107,7 +121,9 @@ public sealed class StageUpEvent : CustomEventModel
     {
         var end = L10NLookup($"{PageKey("DONE")}.description");
         end.Add("Stage", StageRules.StageName(stage));
-        end.Add("Figure", Core?.Figure is { } f ? FigureRegistry.Name(f) : "");
+        var name = Core?.Figure is { } f ? FigureRegistry.Name(f) : "";
+        end.Add("Figure", name);
+        end.Add("Wa", Korean.Wa(name));
         SetEventFinished(end);
     }
 }

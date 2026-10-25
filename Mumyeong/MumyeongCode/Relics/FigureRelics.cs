@@ -13,15 +13,15 @@ namespace Mumyeong.MumyeongCode.Relics;
 // The figures' own relics, given at 강림 (spec §5.2). Event rarity: never offered by the game's random relic pulls.
 // Numbers are written in the relic text (localization), so they are constants here.
 
-/// <summary>청룡언월도 (관우): at the start of each combat, gain 8 Vigor.</summary>
+/// <summary>청룡언월도 (관우): at the start of your turn, gain 3 Vigor (was 8 once per combat: one hit only).</summary>
 public sealed class GuanyuGreenDragonRelic : MumyeongRelic
 {
-    public const int Vigor = 8;
+    public const int Vigor = 3;
     public override RelicRarity Rarity => RelicRarity.Event;
 
-    public override async Task BeforeHandDraw(Player player, PlayerChoiceContext choiceContext, ICombatState combatState)
+    public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {
-        if (player != Owner || Owner.PlayerCombatState is not { TurnNumber: 1 }) return;
+        if (player != Owner || !Owner.Creature.IsAlive) return;
         Flash();
         await PowerCmd.Apply<VigorPower>(choiceContext, Owner.Creature, Vigor, Owner.Creature, null);
     }
@@ -66,7 +66,7 @@ public sealed class GenghisSealRelic : MumyeongRelic
     {
         if (wasRemovalPrevented || !creature.IsEnemy || !Owner.Creature.IsAlive || Owner.PlayerCombatState == null) return;
         Flash();
-        await PlayerCmd.GainEnergy(1m, Owner);
+        await PowerHelpers.GainEnergyNowOrNextTurn(choiceContext, Owner.Creature, 1m);
         await CardPileCmd.Draw(choiceContext, 1m, Owner);
     }
 }

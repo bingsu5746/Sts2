@@ -41,7 +41,7 @@ TALK = {
             ("문을 지키던 자가 쓰러졌다. 다음 문으로 가자.", "앞장서.", "The gatekeeper has fallen. On to the next gate.", "Lead the way."),
         ],
         "REST": [
-            ("불가에 앉으니 형님, 익덕과 한 방에서 지새우던 밤이 떠오르는구나.", "난 그런 사람이 없었어.", "A fire like this... I remember nights in one room with my elder brother and Yide.", "I never had anyone like that."),
+            ("불가에 앉으니 형님, 익덕과 한 침상에서 자던 밤이 떠오르는구나.", "난 그런 사람이 없었어.", "A fire like this... I remember sharing one bed with my elder brother and Yide.", "I never had anyone like that."),
             ("이 불이 꺼지기 전에 칼날을 살펴 두거라.", "벌써 했어.", "Check your blade before the fire dies.", "Already did."),
             ("떠나는 길이 멀어도, 돌아갈 곳이 있으면 견딜 만하다.", "돌아갈 곳… 기억이 안 나.", "A long road is bearable if there is somewhere to return to.", "Somewhere to return to... I can't remember."),
         ],
@@ -81,7 +81,7 @@ TALK = {
         "REST": [
             ("불 냄새는 좋아하지 않아. 그래도 따뜻하긴 하네.", "…미안. 다른 데로 갈까.", "I don't like the smell of fire. It is warm, though.", "...Sorry. Should we move?"),
             ("고향 마을엔 이맘때 종이 울렸어.", "종소리는 기억나.", "Back home the bells would ring about now.", "I remember bells."),
-            ("나는 칼보다 깃발이 좋아. 칼은 아무도 지키지 못하거든.", "깃발도 못 지키잖아.", "I like the banner more than the sword. A sword protects no one.", "Neither does a banner."),
+            ("나는 칼보다 깃발이 좋아. 깃발을 들면 아무도 죽이지 않아도 되거든.", "…그래서 깃발이었구나.", "I like the banner more than the sword. With the banner, I never had to kill anyone.", "...So that's why the banner."),
         ],
         "CHAT": [
             ("불렀어? 나 여기 있어.", "알아. 확인만.", "You called? I'm here.", "I know. Just checking."),
@@ -118,7 +118,7 @@ TALK = {
         ],
         "REST": [
             ("싸우기 전에 머리를 빗는 건 스파르타의 예법이다. 너는… 모자를 벗지 않는군.", "벗으면 큰일 나.", "Combing one's hair before battle is the Spartan way. You... never take off that hat.", "Bad things happen if I do."),
-            ("나와 함께 남은 삼백이 있었다.", "다들 어떻게 됐어?", "There were three hundred who stayed with me.", "What happened to them?"),
+            ("나와 함께 남은 이들이 있었다.", "다들 어떻게 됐어?", "There were those who stayed with me.", "What happened to them?"),
             ("잘 자라. 내일은 짧게 끝내자.", "", "Sleep. Let's make tomorrow short.", ""),
         ],
         "CHAT": [
@@ -169,7 +169,7 @@ TALK = {
     "YISUNSIN": {
         "COMBAT_START": [
             ("서두르지 마라. 적이 들어올 자리를 먼저 정하라.", "어디가 좋을까.", "Do not hurry. First decide where the enemy will come in.", "Where would be good?"),
-            ("포를 준비하라. 가까이 올수록 우리에게 유리하다.", "", "Ready the cannon. The closer they come, the better for us.", ""),
+            ("포를 준비하라. 서두르지 말고, 사거리에 들어올 때를 기다려라.", "", "Ready the cannon. Do not rush; wait until they are in range.", ""),
             ("오늘 일도 일기에 적어 두겠다.", "좋게 써 줘.", "I will write today down in my diary as well.", "Write it kindly."),
         ],
         "ELITE": [
@@ -193,7 +193,7 @@ TALK = {
             ("큰 적을 물리쳤다. 그러나 바다는 아직 넓다.", "그럼 계속 가.", "A great enemy is beaten. But the sea is still wide.", "Then we keep going."),
         ],
         "REST": [
-            ("밤마다 등불 아래서 그날을 적었다. 너도 적어 보아라.", "쓸 이름이 없어.", "Every night I wrote the day down by lamplight. You should too.", "I've no name to sign it with."),
+            ("싸우는 동안 일기를 적었다. 너도 적어 보아라.", "쓸 이름이 없어.", "Through the war I kept a diary. You should too.", "I've no name to sign it with."),
             ("어머니 소식을 기다리던 밤이 있었다.", "…기다리는 사람이 있었구나.", "There were nights I waited for word of my mother.", "...You had someone to wait for."),
             ("배를 고치는 날이 싸우는 날보다 많았다.", "", "There were more days mending ships than days fighting.", ""),
         ],

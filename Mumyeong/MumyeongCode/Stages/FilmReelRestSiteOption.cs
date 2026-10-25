@@ -3,6 +3,7 @@ using Mumyeong.MumyeongCode.Extensions;
 using Mumyeong.MumyeongCode.Relics;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization;
 
 namespace Mumyeong.MumyeongCode.Stages;
 
@@ -10,7 +11,7 @@ namespace Mumyeong.MumyeongCode.Stages;
 /// Rest-site option "필름을 돌린다", added by the 코어 only while a stage-up is ready (spec §5). It uses the rest
 /// action and gives the stage reward right at the rest site with the game's own card screens (pattern: 엔시페르's
 /// forge option): 동기화 = 1-of-3 figure card, 집중 = upgrade 2 cards, 강림 = the figure's relic.
-/// Localization: rest_site_ui.json OPTION_MUMYEONG_FILM_REEL.name / .description
+/// Localization: rest_site_ui.json OPTION_MUMYEONG_FILM_REEL.name / .description / .&lt;STAGE&gt;
 /// </summary>
 public sealed class FilmReelRestSiteOption(Player owner) : CustomRestSiteOption(owner)
 {
@@ -19,6 +20,12 @@ public sealed class FilmReelRestSiteOption(Player owner) : CustomRestSiteOption(
     public override string OptionId => Id;
 
     public override string? CustomIconPath => "ui/rest_option_film_reel.png".ImagePath();
+
+    /// <summary>Only the stage that opens now (OPTION_MUMYEONG_FILM_REEL.&lt;STAGE&gt;), not all three.</summary>
+    public override LocString Description =>
+        Owner.GetRelic<SoulCore>() is { } core && StageRules.NextReadyStage(core) is { } stage
+            ? new LocString("rest_site_ui", $"OPTION_{Id}.{stage.ToString().ToUpperInvariant()}")
+            : base.Description;
 
     public override bool IsEnabled => Owner.GetRelic<SoulCore>() is { } core && StageRules.NextReadyStage(core) != null;
 

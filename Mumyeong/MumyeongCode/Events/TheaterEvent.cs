@@ -1,6 +1,8 @@
 using BaseLib.Abstracts;
+using Mumyeong.MumyeongCode.Extensions;
 using Mumyeong.MumyeongCode.Figures;
 using Mumyeong.MumyeongCode.Relics;
+using Mumyeong.MumyeongCode.Stages;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Events;
@@ -27,12 +29,21 @@ namespace Mumyeong.MumyeongCode.Events;
 ///
 /// The three figures and the scene come from the event Rng (run seed + event id, mixed with a fixed key), so the same
 /// seed shows the same theater. Not shared in multiplayer: every player gets their own copy (like 엔시페르's
-/// TombResonanceEvent). Per-instance state: a save/reload while the event is open restarts it from INITIAL.
+/// TombResonanceEvent); a player who has no 코어 or already has a figure only sees LEAVE (the trigger opens the room
+/// for everyone while any player still needs it).
+/// Save/reload: nothing here saves the run. The last save is the one the game made when Neow finished (its room is
+/// saved as pre-finished), so a reload puts the player back in Neow's finished room with the contract undone, and its
+/// PROCEED opens the theater again from INITIAL (verified in the decompiled EventRoom / RunManager; untested in game).
+/// The scene and the figure picked in the last cut are kept on the 코어 (run counters) for the 강림 page.
 /// </summary>
 public sealed class TheaterEvent : CustomEventModel
 {
     public const int ShadowCount = 3;
     public const string DoneKey = "event.theater";
+
+    /// <summary>Run counters: index of the scene in <see cref="TheaterScenes.All"/>, and (int)figure + 1 of the last cut.</summary>
+    public const string SceneKey = "theater.scene";
+    public const string WordsKey = "theater.words";
 
     private List<FigureId> _figures = new();
     private string _scene = TheaterScenes.All[0];
@@ -49,6 +60,12 @@ public sealed class TheaterEvent : CustomEventModel
     private string PageKey(string page) => $"{Id.Entry}.pages.{page}";
 
     private SoulCore? Core => Owner?.GetRelic<SoulCore>();
+
+    /// <summary>False for a player without a 코어 or with a contract already (multiplayer: the room opens for everyone).</summary>
+    private bool NeedsContract => Core is { Figure: null } core && core.GetRunCounter(DoneKey) == 0;
+
+    public override LocString InitialDescription =>
+        IsMutable && Owner != null && !NeedsContract ? L10NLookup($"{PageKey("NO_CORE")}.description") : base.InitialDescription;
 
     protected override Task BeforeEventStarted(bool isPreFinished)
     {
@@ -72,7 +89,15 @@ public sealed class TheaterEvent : CustomEventModel
     // ------------------------------------------------------------------ INITIAL / SHADOWS / SCENE
 
     protected override IReadOnlyList<EventOption> GenerateInitialOptions() =>
-        [Next("INITIAL", "ROLL", ShowShadows)];
+        NeedsContract
+            ? [Next("INITIAL", "ROLL", ShowShadows)]
+            : [new EventOption(this, Leave, $"{PageKey("NO_CORE")}.options.LEAVE")];
+
+    private Task Leave()
+    {
+        SetEventFinished(L10NLookup($"{PageKey("NO_CORE")}.description"));
+        return Task.CompletedTask;
+    }
 
     private void ShowShadows()
     {
@@ -103,7 +128,7 @@ public sealed class TheaterEvent : CustomEventModel
         {
             var f = figure;
             var body = TheaterScenes.Generic("REACTS");
-            body.Add("Shadow", FigureRegistry.Shadow(f));
+            AddShadow(body, f);
             options.Add(new EventOption(this, () => Pick(cut, f), TheaterScenes.Line(_scene, cut, f), body,
                 $"{PageKey("CUT")}.options.LINE", []));
         }
@@ -114,8 +139,16 @@ public sealed class TheaterEvent : CustomEventModel
     private static string Reaction(FigureId figure)
     {
         var line = TheaterScenes.Generic("REACTION");
-        line.Add("Shadow", FigureRegistry.Shadow(figure));
+        AddShadow(line, figure);
         return line.GetFormattedText() + "\n\n";
+    }
+
+    /// <summary>{Shadow} and its Korean subject particle {Ga}.</summary>
+    private static void AddShadow(LocString text, FigureId figure)
+    {
+        var shadow = FigureRegistry.Shadow(figure);
+        text.Add("Shadow", shadow);
+        text.Add("Ga", Korean.Ga(shadow));
     }
 
     private Task Pick(int cut, FigureId figure)
@@ -142,7 +175,7 @@ public sealed class TheaterEvent : CustomEventModel
         EventArt.Show(Owner, EventArt.Figure(winner));
         EventArt.PlayRise(Owner, winner);
         var desc = L10NLookup($"{PageKey("DESCENT")}.description");
-        desc.Add("Shadow", FigureRegistry.Shadow(winner));
+        AddShadow(desc, winner);
         desc.Add("Figure", FigureRegistry.Name(winner));
         SetEventState(desc, [Next("DESCENT", "WHO", () => ShowWho(winner))]);
     }
@@ -155,11 +188,13 @@ public sealed class TheaterEvent : CustomEventModel
         SetEventState(desc, [Next("WHO", "DEED", () => ShowDeed(winner))]);
     }
 
+    /// <summary>Their real last moment next to the last words you chose (spec §4.1-5).</summary>
     private void ShowDeed(FigureId winner)
     {
         var desc = L10NLookup($"{PageKey("DEED")}.description");
         desc.Add("Figure", FigureRegistry.Name(winner));
         desc.Add("Deed", FigureRegistry.Text(winner, "LAST_DEED").GetFormattedText());
+        desc.Add("Words", TheaterScenes.Line(_scene, TheaterScenes.Cuts.Count - 1, _picks[^1]).GetFormattedText());
         SetEventState(desc, [Next("DEED", "TERMS", () => ShowContract(winner))]);
     }
 
@@ -170,8 +205,8 @@ public sealed class TheaterEvent : CustomEventModel
 
         var desc = L10NLookup($"{PageKey("CONTRACT")}.description");
         desc.Add("Resonance", resonance);
-        desc.Add("Contract", Stages.StageRules.ContractName(contract));
-        desc.Add("ContractText", FigureRegistry.Generic($"CONTRACT_TEXT.{contract.ToString().ToUpperInvariant()}").GetFormattedText());
+        desc.Add("Contract", StageRules.ContractName(contract));
+        desc.Add("ContractText", ContractText(contract));
 
         var tips = FigureRegistry.StarterCards(winner).Select(c => HoverTipFactory.FromCard(c)).ToList();
         var key = $"{PageKey("CONTRACT")}.options.TAKE";
@@ -180,6 +215,20 @@ public sealed class TheaterEvent : CustomEventModel
             new EventOption(this, () => MakeContract(winner, contract, resonance),
                 L10NLookup($"{key}.title"), L10NLookup($"{key}.description"), key, tips),
         ]);
+    }
+
+    /// <summary>What the contract does, with the numbers from the code (spec §4.2 / §4.3).</summary>
+    private static string ContractText(ContractType contract)
+    {
+        var text = FigureRegistry.Generic($"CONTRACT_TEXT.{contract.ToString().ToUpperInvariant()}");
+        text.Add("Sync", StageRules.SyncMastery);
+        text.Add("SyncResonance", StageRules.SyncMasteryResonance);
+        text.Add("Focus", StageRules.FocusMastery);
+        text.Add("FocusResonance", StageRules.FocusMasteryResonance);
+        text.Add("Strength", SoulCore.GrudgeStrength);
+        text.Add("Limit", SoulCore.GrudgeLimit);
+        text.Add("HpLoss", SoulCore.GrudgeHpLoss);
+        return text.GetFormattedText();
     }
 
     // ------------------------------------------------------------------ CONTRACT
@@ -193,23 +242,32 @@ public sealed class TheaterEvent : CustomEventModel
             return;
         }
 
-        if (core.Figure == null)
+        // Already contracted (a second copy of the room in multiplayer): no second card pick.
+        if (core.Figure != null || core.GetRunCounter(DoneKey) > 0)
         {
-            await EventArt.PlayMerge(Owner, figure);
-            core.MakeContract(figure, contract, resonance);
-            var results = new List<CardPileAddResult>();
-            foreach (var canonical in FigureRegistry.StarterCards(figure))
-            {
-                var card = Owner.RunState.CreateCard(canonical, Owner);
-                results.Add(await CardPileCmd.Add(card, PileType.Deck));
-            }
-            if (results.Count > 0) CardCmd.PreviewCardPileAdd(results);
+            await Leave();
+            return;
         }
 
+        // Game state first, then the (local, skippable) cinematic: nothing below depends on the animation's nodes.
+        core.MakeContract(figure, contract, resonance);
         core.SetRunCounter(DoneKey, 1);
+        core.SetRunCounter(SceneKey, Math.Max(0, TheaterScenes.All.ToList().IndexOf(_scene)));
+        core.SetRunCounter(WordsKey, (int)_picks[^1] + 1);
+        var results = new List<CardPileAddResult>();
+        foreach (var canonical in FigureRegistry.StarterCards(figure))
+        {
+            var card = Owner.RunState.CreateCard(canonical, Owner);
+            results.Add(await CardPileCmd.Add(card, PileType.Deck));
+        }
+        await EventArt.PlayMerge(Owner, figure);
+        if (results.Count > 0) CardCmd.PreviewCardPileAdd(results);
+
         EventArt.Show(Owner, EventArt.Figure(figure));
         var desc = L10NLookup($"{PageKey("TEACH")}.description");
-        desc.Add("Figure", FigureRegistry.Name(figure));
+        var name = FigureRegistry.Name(figure);
+        desc.Add("Figure", name);
+        desc.Add("Ga", Korean.Ga(name));
         var key = $"{PageKey("TEACH")}.options.LEARN";
         SetEventState(desc, [new EventOption(this, () => Learn(figure), key)]);
     }
@@ -219,7 +277,7 @@ public sealed class TheaterEvent : CustomEventModel
         if (Owner != null) await FigureCardPick.Offer(Owner, figure, new BlockingPlayerChoiceContext());
         var end = L10NLookup($"{PageKey("CONTRACTED")}.description");
         end.Add("Figure", FigureRegistry.Name(figure));
-        end.Add("Contract", Stages.StageRules.ContractName(Core?.ContractKind ?? ContractType.None));
+        end.Add("Contract", StageRules.ContractName(Core?.ContractKind ?? ContractType.None));
         SetEventFinished(end);
     }
 }

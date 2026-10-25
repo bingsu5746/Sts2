@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
+using MegaCrit.Sts2.Core.Runs;
 
 namespace Mumyeong.MumyeongCode.Stages;
 
@@ -27,7 +28,8 @@ public static class StageRewards
         switch (stage)
         {
             case SoulStage.Synchronization:
-                await FigureCardPick.Offer(player, figure, choiceContext);
+                // A stage-up is a big moment: elite-fight rarity odds (more uncommon / rare than the theater's pick).
+                await FigureCardPick.Offer(player, figure, choiceContext, CardRarityOddsType.EliteEncounter);
                 break;
             case SoulStage.Focus:
                 if (upgradeInsteadOfRemove) await UpgradeCards(player);

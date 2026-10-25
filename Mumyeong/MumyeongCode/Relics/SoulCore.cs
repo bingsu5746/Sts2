@@ -130,7 +130,11 @@ public sealed class SoulCore : MumyeongRelic
         if (Owner != null) SpiritVisuals.RefreshSoon(Owner); // the spirit grows clearer with each stage
     }
 
-    /// <summary>MumyeongCard.OnPlay: a card of the contracted figure was played.</summary>
+    /// <summary>
+    /// MumyeongCard.OnPlay: a card of the contracted figure was played. Called for the first play only, so a replay
+    /// (불가능은 없다 = DuplicationPower) does not count again (spec §1: no effect raises mastery). OnPlay rather than
+    /// AfterCardPlayed because the game skips AfterCardPlayed once the combat is over (the killing card would be lost).
+    /// </summary>
     public void OnFigureCardPlayed(FigureId figure)
     {
         if (Figure != figure) return;
@@ -262,18 +266,22 @@ public sealed class SoulCore : MumyeongRelic
     // =====================================================================================
 
     public const int GrudgeLimit = 5;
-    public const int GrudgeHpLoss = 4;
-    public const int GrudgeStrength = 1;
+    public const int GrudgeHpLoss = 3;
+    public const int GrudgeStrength = 2;
 
-    private int _turnCardCount;
-    private int _turnNumberSeen;
+    // Descent tasks (spec §5.1); the numbers are also written in the TASK texts (tools/build_loc.py).
+    public const int GuanyuTaskHit = 30;
+    public const int JoanTaskFaith = 10;
+    public const int LeonidasTaskBlocked = 100;
+    public const int GenghisTaskKills = 2;
+    public const int YiTaskCannon = 15;
+    public const int NapoleonTaskCards = 8;
+
     private int _combatBlocked;
     private int _combatKills;
 
     public override Task BeforeCombatStart()
     {
-        _turnCardCount = 0;
-        _turnNumberSeen = 0;
         _combatBlocked = 0;
         _combatKills = 0;
         return Task.CompletedTask;
@@ -290,17 +298,14 @@ public sealed class SoulCore : MumyeongRelic
 
     public override async Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (cardPlay.Card.Owner != Owner) return;
+        // A card played twice (DuplicationPower etc.) runs this once per play; only the first play counts.
+        if (cardPlay.Card.Owner != Owner || !cardPlay.IsFirstInSeries) return;
 
-        // Napoleon task: cards played this turn
-        var turn = Owner.PlayerCombatState?.TurnNumber ?? 0;
-        if (turn != _turnNumberSeen)
-        {
-            _turnNumberSeen = turn;
-            _turnCardCount = 0;
-        }
-        _turnCardCount++;
-        if (Figure == FigureId.Napoleon && _turnCardCount >= 8) CompleteDescentTask();
+        // Napoleon task: cards played this turn (game EchoFormPower pattern; this card is already in the history).
+        if (Figure == FigureId.Napoleon && Owner.Creature.CombatState is { } combat &&
+            CombatManager.Instance.History.CardPlaysFinished.Count(e =>
+                e.HappenedThisTurn(combat) && e.CardPlay.IsFirstInSeries && e.CardPlay.Card.Owner == Owner) >= NapoleonTaskCards)
+            CompleteDescentTask();
 
         // 한 계약: a non-figure card feeds the grudge; at GrudgeLimit the soul lashes out (HP loss) and it resets.
         if (ContractKind == ContractType.Grudge && Figure is { } figure && !FigureRegistry.IsCardOf(cardPlay.Card, figure) &&
@@ -311,7 +316,9 @@ public sealed class SoulCore : MumyeongRelic
             {
                 Flash();
                 await PowerCmd.Remove(grudge);
-                await CreatureCmd.Damage(choiceContext, Owner.Creature, GrudgeHpLoss, DamageProps.cardHpLoss, (CardModel)null!);
+                // HP loss with no card source (game DamageProps.nonCardHpLoss, the poison-like loss).
+                await CreatureCmd.Damage(choiceContext, Owner.Creature, GrudgeHpLoss, DamageProps.nonCardHpLoss,
+                    (Creature?)null, (CardModel?)null);
             }
         }
     }
@@ -319,7 +326,10 @@ public sealed class SoulCore : MumyeongRelic
     public override Task AfterDamageGiven(PlayerChoiceContext choiceContext, Creature? dealer, DamageResult result,
         ValueProp props, Creature target, CardModel? cardSource)
     {
-        if (Figure == FigureId.Guanyu && dealer == Owner.Creature && target.IsEnemy && result.TotalDamage >= 30)
+        // Guan Yu task: one hit of an Attack card, overkill included (UnblockedDamage stops at the target's HP).
+        if (Figure == FigureId.Guanyu && dealer == Owner.Creature && target.IsEnemy &&
+            cardSource is { Type: CardType.Attack } &&
+            result.TotalDamage + result.OverkillDamage >= GuanyuTaskHit)
             CompleteDescentTask();
         return Task.CompletedTask;
     }
@@ -331,7 +341,7 @@ public sealed class SoulCore : MumyeongRelic
         if (Figure == FigureId.Leonidas && target == Owner.Creature && result.BlockedDamage > 0)
         {
             _combatBlocked += result.BlockedDamage;
-            if (_combatBlocked >= 50) CompleteDescentTask();
+            if (_combatBlocked >= LeonidasTaskBlocked) CompleteDescentTask();
         }
         return Task.CompletedTask;
     }
@@ -342,15 +352,17 @@ public sealed class SoulCore : MumyeongRelic
         if (Figure == FigureId.Genghis && creature.IsEnemy && !wasRemovalPrevented)
         {
             _combatKills++;
-            if (_combatKills >= 3) CompleteDescentTask();
+            if (_combatKills >= GenghisTaskKills) CompleteDescentTask();
         }
         return Task.CompletedTask;
     }
 
     public override Task BeforeSideTurnEnd(PlayerChoiceContext choiceContext, CombatSide side, IEnumerable<Creature> participants)
     {
-        if (side == CombatSide.Player && participants.Contains(Owner.Creature) && Figure == FigureId.Joan &&
-            Owner.Creature.GetPowerAmount<JoanFaithPower>() >= 10)
+        if (side != CombatSide.Player || !participants.Contains(Owner.Creature)) return Task.CompletedTask;
+        if (Figure == FigureId.Joan && Owner.Creature.GetPowerAmount<JoanFaithPower>() >= JoanTaskFaith)
+            CompleteDescentTask();
+        if (Figure == FigureId.YiSunsin && Owner.Creature.GetPowerAmount<YiCannonPower>() >= YiTaskCannon)
             CompleteDescentTask();
         return Task.CompletedTask;
     }
@@ -358,9 +370,6 @@ public sealed class SoulCore : MumyeongRelic
     public override Task AfterCombatVictory(CombatRoom room)
     {
         SpiritTalk.OnVictory(Owner, room);
-        if (Figure == FigureId.YiSunsin && (room.RoomType == RoomType.Elite || room.RoomType == RoomType.Boss) &&
-            Owner.Creature.IsAlive && Owner.Creature.CurrentHp * 2 <= Owner.Creature.MaxHp)
-            CompleteDescentTask();
         return Task.CompletedTask;
     }
 

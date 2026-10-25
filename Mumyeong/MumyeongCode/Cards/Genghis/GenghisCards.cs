@@ -12,7 +12,7 @@ namespace Mumyeong.MumyeongCode.Cards.Genghis;
 public abstract class GenghisCard(int cost, CardType type, CardRarity rarity, TargetType target)
     : FigureCard(FigureId.Genghis, cost, type, rarity, target);
 
-/// <summary>기사 — Basic attack, 1: 4 (5) x2.</summary>
+/// <summary>말 위의 활 — Basic attack, 1: 4 (5) x2.</summary>
 public sealed class GenghisMountedArcher : GenghisCard
 {
     public const int Hits = 2;
@@ -33,7 +33,7 @@ public sealed class GenghisCavalryCharge : GenghisCard
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Hit(ctx, cp);
 }
 
-/// <summary>일제 사격 — Common attack, 1: 3 (4) x2 to ALL enemies.</summary>
+/// <summary>연사 — Common attack, 1: 3 (4) x2 to ALL enemies.</summary>
 public sealed class GenghisVolley : GenghisCard
 {
     public const int Hits = 2;
@@ -114,10 +114,10 @@ public sealed class GenghisScout : GenghisCard
     }
 }
 
-/// <summary>기마 군단 — Uncommon power, 2: start of turn, 2 (3) damage to ALL enemies, +1 every turn.</summary>
+/// <summary>기마 군단 — Uncommon power, 1: start of turn, 2 (3) damage to ALL enemies, +1 every turn.</summary>
 public sealed class GenghisHorde : GenghisCard
 {
-    public GenghisHorde() : base(2, CardType.Power, CardRarity.Uncommon, TargetType.Self) { WithPower<GenghisHordePower>(2, 1); }
+    public GenghisHorde() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self) { WithPower<GenghisHordePower>(2, 1); }
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Self<GenghisHordePower>(ctx);
 }
 
@@ -246,13 +246,14 @@ public sealed class GenghisGreatKhan : GenghisCard
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Hit(ctx, cp, Hits);
 }
 
-/// <summary>쿠릴타이 — Rare skill, 1: gain 3 energy, draw 3 (4). Exhaust.</summary>
+/// <summary>쿠릴타이 — Rare skill, 1: gain 2 energy, draw 2 (3), 2 기마 군단. Exhaust.</summary>
 public sealed class GenghisKurultai : GenghisCard
 {
     public GenghisKurultai() : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self)
     {
-        WithEnergy(3);
-        WithCards(3, 1);
+        WithEnergy(2);
+        WithCards(2, 1);
+        WithPower<GenghisHordePower>(2);
         WithKeywords(CardKeyword.Exhaust);
     }
 
@@ -260,6 +261,7 @@ public sealed class GenghisKurultai : GenghisCard
     {
         await GainEnergy();
         await DrawCards(ctx);
+        await Self<GenghisHordePower>(ctx);
     }
 }
 

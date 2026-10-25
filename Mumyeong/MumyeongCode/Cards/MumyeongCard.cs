@@ -20,8 +20,8 @@ namespace Mumyeong.MumyeongCode.Cards;
 /// - <see cref="Figure"/> null = shared card (공용), otherwise the card belongs to that figure: it is only offered in
 ///   rewards/shops while that figure is the contracted one (<see cref="SoulCore.IsCardAllowed"/>).
 /// - Implement <see cref="OnCardPlay"/>, never OnPlay (sealed): playing a card of the contracted figure first counts one
-///   mastery point on the 코어 (spec §2, §5), then runs the card's effect.
-/// - Figure cards get the figure's colour on the card frame; shared cards use the colourless frame.
+///   mastery point on the 코어 (spec §2, §5; the first play only), then runs the card's effect.
+/// - Figure cards get the figure's colour on the card frame; shared cards get 무명's colour.
 /// </summary>
 [Pool(typeof(MumyeongCardPool))]
 public abstract class MumyeongCard(int cost, CardType type, CardRarity rarity, TargetType target) :
@@ -41,16 +41,17 @@ public abstract class MumyeongCard(int cost, CardType type, CardRarity rarity, T
     {
         get
         {
-            if (Figure is not { } figure)
-                return ModelDb.CardPool<MegaCrit.Sts2.Core.Models.CardPools.ColorlessCardPool>().FrameMaterial;
-            var c = FigureRegistry.ColorOf(figure);
+            // Shared cards: 무명's own grey-blue, so Strike/Defend read as 무명 cards in the deck view.
+            var c = Figure is { } figure ? FigureRegistry.ColorOf(figure) : MumyeongCharacter.Color;
             return ShaderUtils.GenerateHsv(c.H <= 0.001f ? 1f : c.H, Math.Max(c.S, 0.15f) / 0.75f, Math.Max(c.V, 0.4f));
         }
     }
 
     protected sealed override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (Figure is { } figure && Owner?.GetRelic<SoulCore>() is { } core) core.OnFigureCardPlayed(figure);
+        // Mastery counts the card once: a replay (DuplicationPower) has PlayIndex > 0.
+        if (cardPlay.IsFirstInSeries && Figure is { } figure && Owner?.GetRelic<SoulCore>() is { } core)
+            core.OnFigureCardPlayed(figure);
         await OnCardPlay(choiceContext, cardPlay);
     }
 

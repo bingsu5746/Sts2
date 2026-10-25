@@ -259,7 +259,7 @@ public sealed class JoanJudgment : JoanCard
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Self<JoanJudgmentPower>(ctx);
 }
 
-/// <summary>철회서를 찢다 — Rare attack, 2: 10 + 3 per Faith (14 + 3 per Faith).</summary>
+/// <summary>철회를 거두다 — Rare attack, 2: 10 + 3 per Faith (14 + 3 per Faith).</summary>
 public sealed class JoanTearTheAbjuration : JoanCard
 {
     public JoanTearTheAbjuration() : base(2, CardType.Attack, CardRarity.Rare, TargetType.AnyEnemy)

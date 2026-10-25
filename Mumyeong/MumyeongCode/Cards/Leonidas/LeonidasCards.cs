@@ -14,11 +14,20 @@ namespace Mumyeong.MumyeongCode.Cards.Leonidas;
 public abstract class LeonidasCard(int cost, CardType type, CardRarity rarity, TargetType target)
     : FigureCard(FigureId.Leonidas, cost, type, rarity, target);
 
-/// <summary>방패벽 — Basic skill, 1: 8 (11) Block.</summary>
+/// <summary>방패벽 — Basic skill, 1: 7 (10) Block, 1 반격.</summary>
 public sealed class LeonidasShieldWall : LeonidasCard
 {
-    public LeonidasShieldWall() : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self) { WithBlock(8, 3); }
-    protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => GainBlock(cp);
+    public LeonidasShieldWall() : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self)
+    {
+        WithBlock(7, 3);
+        WithPower<LeonidasCounterPower>(1);
+    }
+
+    protected override async Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp)
+    {
+        await GainBlock(cp);
+        await Self<LeonidasCounterPower>(ctx);
+    }
 }
 
 /// <summary>창 찌르기 — Basic attack, 1: 7 (10).</summary>
@@ -101,10 +110,10 @@ public sealed class LeonidasBrace : LeonidasCard
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => GainBlock(cp);
 }
 
-/// <summary>팔랑크스 — Uncommon power, 2 (1): 방진 — Block is not removed at the start of your turn.</summary>
+/// <summary>팔랑크스 — Uncommon power, 3 (2): 방진 — Block is not removed at the start of your turn.</summary>
 public sealed class LeonidasPhalanx : LeonidasCard
 {
-    public LeonidasPhalanx() : base(2, CardType.Power, CardRarity.Uncommon, TargetType.Self)
+    public LeonidasPhalanx() : base(3, CardType.Power, CardRarity.Uncommon, TargetType.Self)
     {
         WithCostUpgradeBy(-1);
         WithTip(StaticHoverTip.Block);
@@ -113,7 +122,7 @@ public sealed class LeonidasPhalanx : LeonidasCard
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Self<LeonidasPhalanxPower>(ctx, 1m);
 }
 
-/// <summary>청동 가시 — Uncommon power, 1: 3 (4) 반격.</summary>
+/// <summary>청동 창끝 — Uncommon power, 1: 3 (4) 반격.</summary>
 public sealed class LeonidasBronzeSpikes : LeonidasCard
 {
     public LeonidasBronzeSpikes() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self) { WithPower<LeonidasCounterPower>(3, 1); }

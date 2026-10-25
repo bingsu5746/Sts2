@@ -18,10 +18,10 @@ public sealed class NapoleonCannon : NapoleonCard
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Hit(ctx, cp);
 }
 
-/// <summary>명령 — Basic skill, 1: draw 1 (2), 1 energy next turn.</summary>
+/// <summary>명령 — Basic skill, 0: draw 1 (2), 1 energy next turn.</summary>
 public sealed class NapoleonOrders : NapoleonCard
 {
-    public NapoleonOrders() : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self)
+    public NapoleonOrders() : base(0, CardType.Skill, CardRarity.Basic, TargetType.Self)
     {
         WithCards(1, 1);
         WithPower<EnergyNextTurnPower>(1);
@@ -55,7 +55,7 @@ public sealed class NapoleonForcedMarch : NapoleonCard
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => DrawCards(ctx);
 }
 
-/// <summary>방진 — Common skill, 1: 8 (11) Block.</summary>
+/// <summary>보병 방진 — Common skill, 1: 8 (11) Block.</summary>
 public sealed class NapoleonInfantrySquare : NapoleonCard
 {
     public NapoleonInfantrySquare() : base(1, CardType.Skill, CardRarity.Common, TargetType.Self) { WithBlock(8, 3); }
@@ -99,7 +99,7 @@ public sealed class NapoleonArtillery : NapoleonCard
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Self<NapoleonArtilleryPower>(ctx);
 }
 
-/// <summary>전격전 — Uncommon power, 1 (0): every 4th card you play in a turn gives 1 energy.</summary>
+/// <summary>속전속결 — Uncommon power, 1 (0): every 4th card you play in a turn gives 1 energy.</summary>
 public sealed class NapoleonBlitz : NapoleonCard
 {
     public NapoleonBlitz() : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self)
@@ -127,7 +127,7 @@ public sealed class NapoleonAusterlitz : NapoleonCard
     }
 }
 
-/// <summary>대포대 — Uncommon attack, 3: 15 (20) to ALL enemies.</summary>
+/// <summary>그랑 바테리 — Uncommon attack, 3: 15 (20) to ALL enemies.</summary>
 public sealed class NapoleonGrandBattery : NapoleonCard
 {
     public NapoleonGrandBattery() : base(3, CardType.Attack, CardRarity.Uncommon, TargetType.AllEnemies) { WithDamage(15, 5); }
@@ -197,13 +197,13 @@ public sealed class NapoleonCoronation : NapoleonCard
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Self<NapoleonCoronationPower>(ctx);
 }
 
-/// <summary>백일천하 — Rare skill, 0: gain 3 energy, draw 3 (4). Exhaust.</summary>
+/// <summary>백일천하 — Rare skill, 1: gain 3 energy, draw 2 (3). Exhaust.</summary>
 public sealed class NapoleonHundredDays : NapoleonCard
 {
-    public NapoleonHundredDays() : base(0, CardType.Skill, CardRarity.Rare, TargetType.Self)
+    public NapoleonHundredDays() : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self)
     {
         WithEnergy(3);
-        WithCards(3, 1);
+        WithCards(2, 1);
         WithKeywords(CardKeyword.Exhaust);
     }
 

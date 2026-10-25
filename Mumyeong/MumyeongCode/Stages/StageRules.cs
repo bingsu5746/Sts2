@@ -10,10 +10,12 @@ namespace Mumyeong.MumyeongCode.Stages;
 /// </summary>
 public static class StageRules
 {
-    public const int SyncMastery = 25;
-    public const int SyncMasteryResonance = 15;
-    public const int FocusMastery = 70;
-    public const int FocusMasteryResonance = 55;
+    // 2026-10-24 (critique D-01): raised from 25/15 and 70/55. With the old numbers mastery was full before the act
+    // gate opened, so the 공명 계약 bonus changed nothing; now the gap is meant to show (estimate, needs play-testing).
+    public const int SyncMastery = 35;
+    public const int SyncMasteryResonance = 20;
+    public const int FocusMastery = 90;
+    public const int FocusMasteryResonance = 60;
 
     /// <summary>Act index (0 = act 1) from which the stage can be entered.</summary>
     public const int SyncActIndex = 1;

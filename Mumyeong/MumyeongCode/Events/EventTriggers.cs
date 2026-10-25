@@ -17,8 +17,14 @@ namespace Mumyeong.MumyeongCode.Events;
 ///  2. Stage-ups: when a stage-up is ready (<see cref="StageRules.NextReadyStage"/>), <see cref="StageUpEvent"/> opens
 ///     right after a new act is entered and, as a safety net, at the PROCEED of any event (? rooms, the act's Ancient).
 /// The event room is pushed on top with RunManager.EnterRoomWithoutExitingCurrentRoom; its own PROCEED opens the map.
-/// UNTESTED IN GAME: transition timing and multiplayer. A save/reload while the event is open drops it; the next
-/// event PROCEED or act change offers it again because the 코어 data has not changed.
+///
+/// Save/reload (from the decompiled game, untested in game): pushing an event room does not save. With Neow, the last
+/// save is the one made when Neow finished (EventRoom saves itself as pre-finished), so a reload during the theater
+/// lands in Neow's finished room and its PROCEED (patch 1) opens the theater again. Without Neow there is no map point
+/// yet and the load (RunManager.LoadIntoLatestMapCoord) only opens the map, so <see cref="LoadPatch"/> reopens it.
+/// A stage-up event lost to a reload is offered again by the next ? event, rest site or act change (the 코어 data
+/// still says it is ready).
+/// UNTESTED IN GAME: transition timing and multiplayer.
 /// </summary>
 internal static class EventTriggers
 {
@@ -78,6 +84,34 @@ internal static class EventTriggers
         catch (Exception e)
         {
             MainFile.Logger.Error($"[Mumyeong] act event failed: {e}");
+        }
+    }
+
+    /// <summary>Reload of a run that has no map point yet (no Neow) while the theater was still owed.</summary>
+    [HarmonyPatch(typeof(RunManager), nameof(RunManager.LoadIntoLatestMapCoord))]
+    internal static class LoadPatch
+    {
+        [HarmonyPostfix]
+        private static void Chain(ref Task __result)
+        {
+            __result = AfterLoad(__result);
+        }
+    }
+
+    private static async Task AfterLoad(Task original)
+    {
+        await original;
+        try
+        {
+            var runState = CurrentRunState();
+            if (runState is not RunState { CurrentActIndex: 0, VisitedMapCoords.Count: 0 } || !NeedsTheater(runState)) return;
+            MainFile.Logger.Info("[Mumyeong] reload before the first map point: opening the theater");
+            await RunManager.Instance.EnterRoomWithoutExitingCurrentRoom(
+                new EventRoom(ModelDb.Event<TheaterEvent>()), fadeToBlack: true);
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Error($"[Mumyeong] load event failed: {e}");
         }
     }
 

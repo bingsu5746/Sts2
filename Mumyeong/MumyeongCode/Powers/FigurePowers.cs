@@ -32,6 +32,19 @@ internal static class PowerHelpers
         await CreatureCmd.Damage(choiceContext, enemies, amount, ValueProp.Unpowered, owner, null);
     }
 
+    /// <summary>
+    /// Energy on your turn; on the enemies' turn (an enemy killed by Counter, Thorns...) it would be reset before you
+    /// could spend it, so it comes as EnergyNextTurnPower instead.
+    /// </summary>
+    public static async Task GainEnergyNowOrNextTurn(PlayerChoiceContext choiceContext, Creature owner, decimal amount)
+    {
+        if (owner.Player is not { } player || amount <= 0) return;
+        if (owner.CombatState is { CurrentSide: not CombatSide.Player })
+            await PowerCmd.Apply<EnergyNextTurnPower>(choiceContext, owner, amount, owner, null);
+        else
+            await PlayerCmd.GainEnergy(amount, player);
+    }
+
     public static async Task DamageRandomEnemy(PlayerChoiceContext choiceContext, Creature owner, decimal amount)
     {
         if (amount <= 0 || owner.CombatState is not { } combat || owner.Player is not { } player) return;
@@ -60,10 +73,14 @@ public sealed class ApplausePower : MumyeongPower
     }
 }
 
-/// <summary>한 (한 계약, spec §4.3): grows when you play a card that is not your figure's. Display only; the 코어 acts.</summary>
+/// <summary>
+/// 한 (한 계약, spec §4.3): grows when you play a card that is not your figure's. Display only; the 코어 acts.
+/// Buff on purpose: the game's Artifact cancels any visible Debuff applied to its owner (and spends a charge), which
+/// would switch the contract's risk off and eat the player's Artifact.
+/// </summary>
 public sealed class GrudgePower : MumyeongPower
 {
-    public override PowerType Type => PowerType.Debuff;
+    public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
@@ -268,7 +285,7 @@ public sealed class GenghisConquestPower : MumyeongPower
     {
         if (wasRemovalPrevented || !creature.IsEnemy || !Owner.IsAlive || Owner.Player is not { } player) return;
         Flash();
-        await PlayerCmd.GainEnergy(Amount, player);
+        await PowerHelpers.GainEnergyNowOrNextTurn(choiceContext, Owner, Amount);
         await CardPileCmd.Draw(choiceContext, Amount, player);
     }
 }
@@ -368,34 +385,24 @@ public sealed class NapoleonArtilleryPower : MumyeongPower
     }
 }
 
-/// <summary>전격전: every 4th card you play in a turn gives Amount energy (per-turn counter: game OutbreakPower pattern).</summary>
+/// <summary>
+/// 속전속결: every 4th card you play in a turn gives Amount energy. Counts this turn's plays from the combat history
+/// (game EchoFormPower pattern), so cards played before the power came in count too, and a replay counts once.
+/// </summary>
 public sealed class NapoleonBlitzPower : MumyeongPower
 {
     public const int CardsPerTrigger = 4;
 
-    private sealed class Data
-    {
-        public int Turn;
-        public int Cards;
-    }
-
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    protected override object InitInternalData() => new Data();
-
     public override async Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (!PowerHelpers.IsMine(this, cardPlay) || Owner.Player is not { } player) return;
-        var data = GetInternalData<Data>();
-        var turn = player.PlayerCombatState?.TurnNumber ?? 0;
-        if (data.Turn != turn)
-        {
-            data.Turn = turn;
-            data.Cards = 0;
-        }
-        data.Cards++;
-        if (data.Cards % CardsPerTrigger != 0) return;
+        if (!PowerHelpers.IsMine(this, cardPlay) || !cardPlay.IsFirstInSeries || Owner.Player is not { } player ||
+            Owner.CombatState is not { } combat) return;
+        var cards = CombatManager.Instance.History.CardPlaysFinished.Count(e =>
+            e.HappenedThisTurn(combat) && e.CardPlay.IsFirstInSeries && e.CardPlay.Card.Owner == player);
+        if (cards == 0 || cards % CardsPerTrigger != 0) return;
         Flash();
         await PlayerCmd.GainEnergy(Amount, player);
     }

@@ -26,10 +26,10 @@ public sealed class GuanyuLoneRider : GuanyuCard
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Self<VigorPower>(ctx);
 }
 
-/// <summary>일도양단 — Common attack, 2: 13 (17).</summary>
+/// <summary>일도양단 — Common attack, 2: 16 (21).</summary>
 public sealed class GuanyuCleave : GuanyuCard
 {
-    public GuanyuCleave() : base(2, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy) { WithDamage(13, 4); }
+    public GuanyuCleave() : base(2, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy) { WithDamage(16, 5); }
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Hit(ctx, cp);
 }
 
@@ -82,10 +82,16 @@ public sealed class GuanyuPresence : GuanyuCard
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Self<VigorPower>(ctx);
 }
 
-/// <summary>의리 — Common skill, 1: 8 (11) Block.</summary>
+/// <summary>의리 — Common skill, 1: 7 (10) Block, 3 more if you have Vigor.</summary>
 public sealed class GuanyuLoyalty : GuanyuCard
 {
-    public GuanyuLoyalty() : base(1, CardType.Skill, CardRarity.Common, TargetType.Self) { WithBlock(8, 3); }
+    public GuanyuLoyalty() : base(1, CardType.Skill, CardRarity.Common, TargetType.Self)
+    {
+        WithCalculatedBlock(7, 3, static (card, _) => OwnerPower<VigorPower>(card) > 0 ? 1 : 0, upgrade: 3);
+    }
+
+    protected override bool ShouldGlowGoldInternal => OwnerPower<VigorPower>(this) > 0;
+
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => GainBlock(cp);
 }
 

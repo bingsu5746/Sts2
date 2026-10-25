@@ -17,8 +17,9 @@ namespace Mumyeong.MumyeongCode.Events;
 ///   images/events/scenes/&lt;scene&gt;.png         one per theater scene (lower-case key, e.g. bridge.png)
 ///   images/events/figures/&lt;figure&gt;.png       one per figure (descent, contract, card pick, stage-ups)
 /// A missing file falls back to the hall, then to the game's own event art.
-/// The portrait is swapped with NEventLayout.SetPortrait; the cinematics are nodes anchored to the portrait
-/// (NEventLayout.AddVfxAnchoredToPortrait), so they scale with it. Presentation only, local player only.
+/// The portrait is swapped with NEventLayout.SetPortrait; the cinematics are added with
+/// NEventLayout.AddVfxAnchoredToPortrait, so they scale with it. Their size and clean-up still read the layout's
+/// "%Portrait" node (the field behind that method is private). Presentation only, local player only.
 /// </summary>
 public static class EventArt
 {
@@ -60,6 +61,9 @@ public static class EventArt
         }
     }
 
+    /// <summary>The game's own call for event vfx (NEventLayout.AddVfxAnchoredToPortrait = portrait.AddChildSafely).</summary>
+    private static void AddToPortrait(Node node) => NEventRoom.Instance?.Layout?.AddVfxAnchoredToPortrait(node);
+
     private static void ClearVfx(TextureRect portrait)
     {
         foreach (var child in portrait.GetChildren())
@@ -82,7 +86,7 @@ public static class EventArt
             ClearVfx(portrait);
             var size = portrait.Size;
             var root = new Node2D { Name = $"{VfxPrefix}_Rise", Position = new Vector2(size.X / 2, size.Y * 0.55f) };
-            portrait.AddChildSafely(root);
+            AddToPortrait(root);
 
             var glow = new Sprite2D
             {
@@ -143,7 +147,7 @@ public static class EventArt
                 Name = $"{VfxPrefix}_Flash", Color = new Color(1, 1, 1, 0), Size = portrait.Size,
                 MouseFilter = Control.MouseFilterEnum.Ignore,
             };
-            portrait.AddChildSafely(flash);
+            AddToPortrait(flash);
 
             if (root.GetNodeOrNull<Sprite2D>("Spirit") is { } spirit)
             {

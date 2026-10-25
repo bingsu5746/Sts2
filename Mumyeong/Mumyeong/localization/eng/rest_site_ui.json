@@ -1,4 +1,7 @@
 {
   "OPTION_MUMYEONG_FILM_REEL.name": "Roll the Reel",
-  "OPTION_MUMYEONG_FILM_REEL.description": "Enter the next stage with the soul (Synchronization: pick a card · Focus: upgrade 2 cards · Descent: their relic)."
+  "OPTION_MUMYEONG_FILM_REEL.description": "Enter the next stage with the soul.",
+  "OPTION_MUMYEONG_FILM_REEL.SYNCHRONIZATION": "[gold]Synchronization[/gold]: choose 1 of 3 of their cards.",
+  "OPTION_MUMYEONG_FILM_REEL.FOCUS": "[gold]Focus[/gold]: upgrade up to 2 cards.",
+  "OPTION_MUMYEONG_FILM_REEL.DESCENT": "[gold]Descent[/gold]: obtain their relic."
 }

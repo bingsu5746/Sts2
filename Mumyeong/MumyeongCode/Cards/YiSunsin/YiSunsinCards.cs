@@ -87,10 +87,10 @@ public sealed class YiPrepareToSail : YiCard
     }
 }
 
-/// <summary>장전 — Common skill, 0: 2 (3) 포격.</summary>
+/// <summary>장전 — Common skill, 0: 1 (2) 포격.</summary>
 public sealed class YiReload : YiCard
 {
-    public YiReload() : base(0, CardType.Skill, CardRarity.Common, TargetType.Self) { WithPower<YiCannonPower>(2, 1); }
+    public YiReload() : base(0, CardType.Skill, CardRarity.Common, TargetType.Self) { WithPower<YiCannonPower>(1, 1); }
     protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Self<YiCannonPower>(ctx);
 }
 
@@ -179,16 +179,24 @@ public sealed class YiIronChain : YiCard
     }
 }
 
-/// <summary>필사즉생 — Uncommon skill, 1: 2 (3) Strength. Exhaust.</summary>
+/// <summary>필사즉생 — Uncommon skill, 1: 1 (2) Strength, 2 more at half HP or less. Exhaust.</summary>
 public sealed class YiResolveToDie : YiCard
 {
+    public const int Bonus = 2;
+
     public YiResolveToDie() : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self)
     {
-        WithPower<StrengthPower>(2, 1);
+        WithPower<StrengthPower>(1, 1);
+        WithVar("Bonus", Bonus);
         WithKeywords(CardKeyword.Exhaust);
     }
 
-    protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) => Self<StrengthPower>(ctx);
+    private bool AtHalfHp => Owner?.Creature is { } c && c.CurrentHp * 2 <= c.MaxHp;
+
+    protected override bool ShouldGlowGoldInternal => AtHalfHp;
+
+    protected override Task OnCardPlay(PlayerChoiceContext ctx, CardPlay cp) =>
+        Self<StrengthPower>(ctx, PowerAmount<StrengthPower>() + (AtHalfHp ? Bonus : 0));
 }
 
 /// <summary>노량 — Rare attack, 3: 16 (22) to ALL enemies, 3 포격.</summary>
