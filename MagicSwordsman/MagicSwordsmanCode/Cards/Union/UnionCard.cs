@@ -88,9 +88,9 @@ public abstract class UnionCard : MagicSwordCard
     protected int UnionValue(int baseValue, int divisor) => baseValue + UnionLevel / divisor;
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
-        var bonus = base.ModifyDamageAdditive(target, amount, props, dealer, cardSource);
+        var bonus = base.ModifyDamageAdditive(target, amount, props, dealer, cardSource, cardPlay);
         if (!ReferenceEquals(cardSource, this) || !props.IsPoweredAttack()) return bonus;
         if (UnionDamageDivisor > 0) bonus += UnionLevel / UnionDamageDivisor;
         return bonus + BonusDamage(target);
@@ -110,7 +110,16 @@ public abstract class UnionCard : MagicSwordCard
     /// Same rule as DainsleifCard: the game picks the result pile BEFORE OnPlay, so a card that is about to switch to
     /// Dainsleif applies Dainsleif's return rule to itself (when Dainsleif is already current the behavior does it).
     /// </summary>
-    public override (PileType, CardPilePosition) ModifyCardPlayResultPileTypeAndPosition(CardModel card,
+    // Game v0.111 replaced ModifyCardPlayResultPileTypeAndPosition with ModifyCardPlayResultLocation (a CardLocation
+    // record); the original pile/position logic is kept below and adapted here.
+    public override CardLocation ModifyCardPlayResultLocation(CardModel card, bool isAutoPlay, ResourceInfo resources,
+        CardLocation cardLocation)
+    {
+        var (pile, pos) = ResultPileAndPosition(card, isAutoPlay, resources, cardLocation.pileType, cardLocation.position);
+        return cardLocation with { pileType = pile, position = pos };
+    }
+
+    private (PileType, CardPilePosition) ResultPileAndPosition(CardModel card,
         bool isAutoPlay, ResourceInfo resources, PileType pileType, CardPilePosition position)
     {
         if (Primary != SwordId.Dainsleif || !ReferenceEquals(card, this) || Owner == null)

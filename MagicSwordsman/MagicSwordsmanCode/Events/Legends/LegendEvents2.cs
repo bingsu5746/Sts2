@@ -102,8 +102,8 @@ public sealed class MoyesHairEvent : SwordLegendEvent
 
     private async Task Hair()
     {
-        await CreatureCmd.LoseMaxHp(new ThrowingPlayerChoiceContext(), Owner!.Creature,
-            DynamicVars["HairMaxHpLoss"].BaseValue, isFromCard: false);
+        await GameCompat.LoseMaxHpNotFromCard(new ThrowingPlayerChoiceContext(), Owner!.Creature,
+            DynamicVars["HairMaxHpLoss"].BaseValue);
         if (Owner.Creature.IsDead) return;
         await ChangeSwordLevel(+1);
         Finish("HAIR", AddSwordVars);
@@ -172,8 +172,8 @@ public sealed class SilverArmEvent : SwordLegendEvent
 
     private async Task Throne()
     {
-        await CreatureCmd.LoseMaxHp(new ThrowingPlayerChoiceContext(), Owner!.Creature,
-            DynamicVars["ThroneMaxHpLoss"].BaseValue, isFromCard: false);
+        await GameCompat.LoseMaxHpNotFromCard(new ThrowingPlayerChoiceContext(), Owner!.Creature,
+            DynamicVars["ThroneMaxHpLoss"].BaseValue);
         if (Owner.Creature.IsDead) return;
         await RemoveCards(1);
         Finish("THRONE");

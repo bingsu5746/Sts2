@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 using MegaCrit.Sts2.Core.Combat;
@@ -23,7 +24,7 @@ public sealed class UnionRelicGracePower : MagicSwordsmanPower
     public override PowerStackType StackType => PowerStackType.Counter;
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (!DurandalBehavior.IsEnemyAttackOn(Owner, target, props, dealer)) return 0m;
         if (Owner.Player is not { } player) return 0m;

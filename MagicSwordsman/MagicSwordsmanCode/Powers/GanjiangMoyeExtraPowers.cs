@@ -23,6 +23,6 @@ public sealed class TwinDragonsPower : MagicSwordsmanPower
         var target = Owner.Player.RunState.Rng.CombatTargets.NextItem(enemies);
         if (target == null) return;
         Flash();
-        await CreatureCmd.Damage(new ThrowingPlayerChoiceContext(), target, Amount, ValueProp.Unpowered, Owner, null);
+        await CreatureCmd.Damage(new ThrowingPlayerChoiceContext(), target, Amount, ValueProp.Unpowered, Owner, null, null);
     }
 }

@@ -116,7 +116,8 @@ public sealed class TombResonanceEvent : CustomEventModel
         if (Owner != null && SwordEventHelper.Tomb(Owner) is { } tomb)
         {
             // The event Rng is seeded only by run seed + event id, so mix in the act: act 1 and act 2 roll differently.
-            var rng = new Rng(Rng.Seed, $"tomb_resonance_act{ActIndex}");
+            // game v0.111: Rng no longer exposes its seed, so seed from the owner's player seed (deterministic on every client).
+            var rng = new Rng(Owner.PlayerRng.Seed, $"tomb_resonance_act{ActIndex}");
             _candidates = SwordEventHelper.Roll(tomb, CandidateCount, rng);
         }
         _firstSwordRevealed = false;
@@ -338,7 +339,7 @@ public sealed class TombResonanceEvent : CustomEventModel
     {
         // User report #42 (25 gold was too weak): a random relic instead, rarity rolled by the game like the
         // relic events (RoundTeaParty / UnrestSite: RelicFactory.PullNextRelicFromFront + RelicCmd.Obtain).
-        await RelicCmd.Obtain(RelicFactory.PullNextRelicFromFront(Owner!).ToMutable(), Owner!);
+        await RelicCmd.Obtain(GameCompat.PullNextRewardRelic(Owner!).ToMutable(), Owner!);
         if (SwordEventHelper.Tomb(Owner!) is { } tomb)
             await OfferPendingFirstSwordPick(tomb, new BlockingPlayerChoiceContext());
         MarkDone();

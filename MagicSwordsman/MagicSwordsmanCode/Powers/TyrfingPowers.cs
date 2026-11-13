@@ -33,7 +33,7 @@ public sealed class TyrfingVictoryPower : MagicSwordsmanPower
     public override PowerStackType StackType => PowerStackType.Counter;
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource) =>
+        CardModel? cardSource, CardPlay? cardPlay) =>
         TyrfingPowerUtil.IsTyrfingAttack(Owner, dealer, props, cardSource) ? Amount : 0m;
 }
 
@@ -44,7 +44,7 @@ public sealed class TyrfingRansomPower : MagicSwordsmanPower
     public override PowerStackType StackType => PowerStackType.Counter;
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource) =>
+        CardModel? cardSource, CardPlay? cardPlay) =>
         TyrfingPowerUtil.IsTyrfingAttack(Owner, dealer, props, cardSource) ? Amount : 0m;
 
     public override async Task AfterAttack(PlayerChoiceContext choiceContext, AttackCommand command)

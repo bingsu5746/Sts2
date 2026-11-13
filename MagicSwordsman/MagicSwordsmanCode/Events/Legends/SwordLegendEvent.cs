@@ -95,7 +95,7 @@ public abstract class SwordLegendEvent : CustomEventModel
     protected async Task<bool> LoseHp(decimal amount)
     {
         await CreatureCmd.Damage(new ThrowingPlayerChoiceContext(), Owner!.Creature, amount,
-            ValueProp.Unblockable | ValueProp.Unpowered, (Creature?)null, (CardModel?)null);
+            ValueProp.Unblockable | ValueProp.Unpowered, (Creature?)null, (CardModel?)null, null);
         return !Owner.Creature.IsDead;
     }
 

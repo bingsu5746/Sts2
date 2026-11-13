@@ -156,8 +156,8 @@ public sealed class HognisAnswerEvent : SwordLegendEvent
     private async Task Hild()
     {
         var creature = Owner!.Creature;
-        await CreatureCmd.LoseMaxHp(new ThrowingPlayerChoiceContext(), creature,
-            DynamicVars["HildMaxHpLoss"].BaseValue, isFromCard: false);
+        await GameCompat.LoseMaxHpNotFromCard(new ThrowingPlayerChoiceContext(), creature,
+            DynamicVars["HildMaxHpLoss"].BaseValue);
         if (creature.IsDead) return;
         await CreatureCmd.Heal(creature, creature.MaxHp - creature.CurrentHp);
         Finish("HILD");

@@ -76,6 +76,6 @@ public sealed class DainsleifNeverMissesPower : MagicSwordsmanPower
         var target = player.RunState.Rng.CombatTargets.NextItem(enemies);
         if (target == null) return;
         Flash();
-        await CreatureCmd.Damage(choiceContext, target, Amount, ValueProp.Unpowered, Owner, null);
+        await CreatureCmd.Damage(choiceContext, target, Amount, ValueProp.Unpowered, Owner, null, null);
     }
 }

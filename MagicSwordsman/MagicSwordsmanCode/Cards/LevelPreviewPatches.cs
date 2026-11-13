@@ -153,7 +153,7 @@ internal static class LevelPreviewPatches
         var owner = card.Owner;
         var me = owner.Creature;
         decimal sum = 0m;
-        try { sum += card.ModifyDamageAdditive(null, amount, props, me, card); }
+        try { sum += card.ModifyDamageAdditive(null, amount, props, me, card, null); }
         catch (Exception e) { Warn(card, "card damage", e); }
 
         try

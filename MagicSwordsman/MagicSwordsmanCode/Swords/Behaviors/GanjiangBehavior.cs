@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Cards.GanjiangMoye;
 using MagicSwordsman.MagicSwordsmanCode.Curses;
 using MegaCrit.Sts2.Core.Commands;
@@ -48,7 +49,7 @@ public sealed class GanjiangBehavior : SwordBehavior
     {
         if (!firstTime) return;
         // Out-of-combat Max HP loss: same call as the game's relics/events (LeafyPoultice, UnrestSite).
-        await CreatureCmd.LoseMaxHp(new ThrowingPlayerChoiceContext(), player.Creature, MaxHpCost, isFromCard: false);
+        await GameCompat.LoseMaxHpNotFromCard(new ThrowingPlayerChoiceContext(), player.Creature, MaxHpCost);
         MainFile.Logger.Info($"[Ganjiang] first acquisition: lost {MaxHpCost} Max HP");
     }
 }

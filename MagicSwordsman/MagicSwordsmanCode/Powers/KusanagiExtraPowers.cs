@@ -73,7 +73,7 @@ public sealed class KusanagiChippedTotsukaPower : MagicSwordsmanPower
     }
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         decimal sum = 0m;
         foreach (var (b, half, full) in Inherited(cardSource))

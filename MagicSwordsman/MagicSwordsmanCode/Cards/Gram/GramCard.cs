@@ -46,9 +46,9 @@ public abstract class GramCard(int cost, CardType type, CardRarity rarity, Targe
     protected int HalfLevelVar(string name) => DynamicVars[name + "Base"].IntValue + SwordLevel / 2;
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
-        var bonus = base.ModifyDamageAdditive(target, amount, props, dealer, cardSource);
+        var bonus = base.ModifyDamageAdditive(target, amount, props, dealer, cardSource, cardPlay);
         if (!ReferenceEquals(cardSource, this) || !props.IsPoweredAttack()) return bonus;
         return bonus + LevelDamageBonus(SwordLevel) + TargetDamageBonus(target);
     }

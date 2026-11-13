@@ -39,7 +39,7 @@ public sealed class TyrfingOneLifePerDraw : TyrfingCard
         }
         else
         {
-            await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this);
+            await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this, null);
         }
     }
 }

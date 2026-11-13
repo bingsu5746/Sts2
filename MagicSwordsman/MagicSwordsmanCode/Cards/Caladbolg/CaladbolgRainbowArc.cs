@@ -44,9 +44,9 @@ public sealed class CaladbolgRainbowArc : CaladbolgCard
     }
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
-        var bonus = base.ModifyDamageAdditive(target, amount, props, dealer, cardSource);
+        var bonus = base.ModifyDamageAdditive(target, amount, props, dealer, cardSource, cardPlay);
         if (ReferenceEquals(cardSource, this) && props.IsPoweredAttack()) bonus += EarlierAttacks() * PerAttack;
         return bonus;
     }

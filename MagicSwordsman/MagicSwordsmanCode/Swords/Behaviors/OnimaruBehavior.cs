@@ -299,7 +299,7 @@ public static class OnimaruAttack
                 if (t == null) return;
                 Present(player, kind, [t]);
                 VfxCmd.PlayOnCreature(t, "vfx/vfx_attack_slash");
-                await CreatureCmd.Damage(choiceContext, t, n.PerHit, ValueProp.Unpowered, creature, source);
+                await CreatureCmd.Damage(choiceContext, t, n.PerHit, ValueProp.Unpowered, creature, source, null);
                 if (n.Weak > 0 && t.IsAlive)
                     await PowerCmd.Apply<WeakPower>(choiceContext, t, n.Weak, creature, source);
                 break;
@@ -312,13 +312,13 @@ public static class OnimaruAttack
                     if (t == null) break;
                     Present(player, kind, [t]);
                     VfxCmd.PlayOnCreature(t, "vfx/vfx_attack_slash");
-                    await CreatureCmd.Damage(choiceContext, t, n.PerHit, ValueProp.Unpowered, creature, source);
+                    await CreatureCmd.Damage(choiceContext, t, n.PerHit, ValueProp.Unpowered, creature, source, null);
                 }
                 break;
             case OnimaruKind.Giri:
                 Present(player, kind, enemies);
                 VfxCmd.PlayOnCreatures(enemies, "vfx/vfx_attack_slash");
-                await CreatureCmd.Damage(choiceContext, enemies, n.PerHit, ValueProp.Unpowered, creature, source);
+                await CreatureCmd.Damage(choiceContext, enemies, n.PerHit, ValueProp.Unpowered, creature, source, null);
                 break;
         }
     }

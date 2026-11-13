@@ -26,9 +26,9 @@ public abstract class DainsleifCard(int cost, CardType type, CardRarity rarity, 
     protected virtual int? CostAtLevel(int level) => null;
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
-        var bonus = base.ModifyDamageAdditive(target, amount, props, dealer, cardSource);
+        var bonus = base.ModifyDamageAdditive(target, amount, props, dealer, cardSource, cardPlay);
         if (ReferenceEquals(cardSource, this) && props.IsPoweredAttack()) bonus += BonusDamage(target);
         return bonus;
     }
@@ -41,7 +41,16 @@ public abstract class DainsleifCard(int cost, CardType type, CardRarity rarity, 
         return true;
     }
 
-    public override (PileType, CardPilePosition) ModifyCardPlayResultPileTypeAndPosition(CardModel card,
+    // Game v0.111 replaced ModifyCardPlayResultPileTypeAndPosition with ModifyCardPlayResultLocation (a CardLocation
+    // record); the original pile/position logic is kept below and adapted here.
+    public override CardLocation ModifyCardPlayResultLocation(CardModel card, bool isAutoPlay, ResourceInfo resources,
+        CardLocation cardLocation)
+    {
+        var (pile, pos) = ResultPileAndPosition(card, isAutoPlay, resources, cardLocation.pileType, cardLocation.position);
+        return cardLocation with { pileType = pile, position = pos };
+    }
+
+    private (PileType, CardPilePosition) ResultPileAndPosition(CardModel card,
         bool isAutoPlay, ResourceInfo resources, PileType pileType, CardPilePosition position)
     {
         if (!ReferenceEquals(card, this) || Owner == null) return (pileType, position);

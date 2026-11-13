@@ -25,6 +25,6 @@ public sealed class FurnaceOffering : SwordCurseCard
     protected override async Task OnTurnEndInHand(PlayerChoiceContext choiceContext)
     {
         await CreatureCmd.Damage(choiceContext, Owner.Creature, DynamicVars["HpLoss"].IntValue,
-            ValueProp.Unblockable | ValueProp.Unpowered | ValueProp.Move, this);
+            ValueProp.Unblockable | ValueProp.Unpowered | ValueProp.Move, this, null);
     }
 }

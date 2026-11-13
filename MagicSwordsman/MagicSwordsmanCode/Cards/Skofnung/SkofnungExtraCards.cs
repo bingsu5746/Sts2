@@ -51,7 +51,7 @@ public sealed class SkofnungHiltSerpent : SkofnungCard
         {
             VfxCmd.PlayOnCreature(target, "vfx/vfx_attack_slash");
             await CreatureCmd.Damage(choiceContext, target, wounds, ValueProp.Unblockable | ValueProp.Unpowered,
-                Owner.Creature, this);
+                Owner.Creature, this, null);
         }
 
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.IntValue + (SwordLevel >= 3 ? 1 : 0), Owner);

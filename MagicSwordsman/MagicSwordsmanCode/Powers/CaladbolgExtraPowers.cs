@@ -24,6 +24,6 @@ public sealed class CaladbolgFergusWrathPower : MagicSwordsmanPower
         if (enemies == null || enemies.Count == 0) return;
         Flash();
         VfxCmd.PlayOnCreatures(enemies, "vfx/vfx_attack_slash");
-        await CreatureCmd.Damage(choiceContext, enemies, Amount, ValueProp.Unpowered, Owner, null);
+        await CreatureCmd.Damage(choiceContext, enemies, Amount, ValueProp.Unpowered, Owner, null, null);
     }
 }

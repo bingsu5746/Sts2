@@ -82,8 +82,13 @@ public sealed class SkofnungLingeringSoulsPower : MagicSwordsmanPower
         return Task.CompletedTask;
     }
 
+#if STS2_V113 // game v0.113 added the killing card to AfterDeath (build with -p:Sts2Api=113)
+    public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, CardModel? source,
+        bool wasRemovalPrevented, float deathAnimLength)
+#else
     public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented,
         float deathAnimLength)
+#endif
     {
         var data = GetInternalData<Data>();
         if (!data.Dying.Remove(creature, out var scars) || scars <= 0 || !Owner.IsAlive) return;

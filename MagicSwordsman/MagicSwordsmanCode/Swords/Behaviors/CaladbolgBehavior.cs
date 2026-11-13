@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using System.Runtime.CompilerServices;
 using BaseLib.Patches.Features;
 using HarmonyLib;
@@ -7,6 +8,7 @@ using MagicSwordsman.MagicSwordsmanCode.Curses;
 using MagicSwordsman.MagicSwordsmanCode.Powers;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands.Builders;
+using MegaCrit.Sts2.Core.Extensions;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -145,7 +147,7 @@ public static class CaladbolgSpread
         if (max != AllEnemies && others.Count > max - 1)
         {
             // Same RNG stream the game uses for random attack targets (AttackCommand.Execute).
-            player.RunState.Rng.CombatTargets.Shuffle(others);
+            others = others.UnstableShuffle(player.RunState.Rng.CombatTargets); // Rng.Shuffle is gone in game v0.113
             others = others.Take(max - 1).ToList();
         }
 
