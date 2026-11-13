@@ -742,8 +742,13 @@ public class Mangeomchong : MagicSwordsmanRelic
     }
 
     /// <summary>Presentation only: the boss-kill cut-in when the boss fight's last enemy falls (BossKillCutIn).</summary>
+#if STS2_V113 // game v0.113 added the killing card to AfterDeath (build with -p:Sts2Api=113)
+    public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, CardModel? source,
+        bool wasRemovalPrevented, float deathAnimLength)
+#else
     public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented,
         float deathAnimLength)
+#endif
     {
         BossKillCutIn.OnDeath(Owner, creature, wasRemovalPrevented);
         return Task.CompletedTask;

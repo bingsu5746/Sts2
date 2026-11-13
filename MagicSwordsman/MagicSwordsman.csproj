@@ -18,6 +18,11 @@
         <NoWarn>$(NoWarn);MSB3270</NoWarn>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Sts2Api)' == '113'">
+        <!-- Game v0.113 (beta) hook signatures; default build targets v0.111. Use -p:Sts2Api=113 with v0.113 refs. -->
+        <DefineConstants>$(DefineConstants);STS2_V113</DefineConstants>
+    </PropertyGroup>
+
     <ItemGroup Condition="Exists('$(Sts2DataDir)')" >
         <Reference Include="0Harmony">
             <HintPath>$(Sts2DataDir)/0Harmony.dll</HintPath>

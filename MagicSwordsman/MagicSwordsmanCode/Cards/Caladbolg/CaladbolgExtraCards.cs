@@ -4,6 +4,7 @@ using MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Extensions;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -56,7 +57,7 @@ public sealed class CaladbolgExilesGrudge : CaladbolgCard
         var others = state.HittableEnemies.Where(c => c != target).ToList();
         if (others.Count > CaladbolgBehavior.MaxTargets - 1)
         {
-            Owner.RunState.Rng.CombatTargets.Shuffle(others);
+            others = others.UnstableShuffle(Owner.RunState.Rng.CombatTargets); // Rng.Shuffle is gone in game v0.113
             others = others.Take(CaladbolgBehavior.MaxTargets - 1).ToList();
         }
 

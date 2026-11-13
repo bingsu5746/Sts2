@@ -339,7 +339,7 @@ public sealed class TombResonanceEvent : CustomEventModel
     {
         // User report #42 (25 gold was too weak): a random relic instead, rarity rolled by the game like the
         // relic events (RoundTeaParty / UnrestSite: RelicFactory.PullNextRelicFromFront + RelicCmd.Obtain).
-        await RelicCmd.Obtain(RelicFactory.PullNextRelicFromFront(Owner!).ToMutable(), Owner!);
+        await RelicCmd.Obtain(GameCompat.PullNextRewardRelic(Owner!).ToMutable(), Owner!);
         if (SwordEventHelper.Tomb(Owner!) is { } tomb)
             await OfferPendingFirstSwordPick(tomb, new BlockingPlayerChoiceContext());
         MarkDone();
