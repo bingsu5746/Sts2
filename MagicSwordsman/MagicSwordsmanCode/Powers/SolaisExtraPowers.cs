@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
@@ -45,7 +46,7 @@ public sealed class SolaisSwordOfLightPower : MagicSwordsmanPower
         var enemies = combatState.HittableEnemies.ToList();
         if (enemies.Count == 0) return;
         Flash();
-        await CreatureCmd.Damage(choiceContext, enemies, light * perLight * Amount, ValueProp.Unpowered, Owner, null);
+        await CreatureCmd.Damage(choiceContext, enemies, light * perLight * Amount, ValueProp.Unpowered, Owner, null, null);
     }
 }
 
@@ -128,7 +129,7 @@ public sealed class SolaisKingshipPower : MagicSwordsmanPower
     protected override IEnumerable<IHoverTip> ExtraHoverTips => [HoverTipFactory.FromPower<SolaisLightPower>()];
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (dealer != Owner || !props.IsPoweredAttack() || Owner.Player is not { } player) return 0m;
         return SolaisLight.Get(player) >= LightNeeded ? Amount : 0m;

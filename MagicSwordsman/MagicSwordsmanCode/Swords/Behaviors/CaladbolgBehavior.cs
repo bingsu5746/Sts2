@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using System.Runtime.CompilerServices;
 using BaseLib.Patches.Features;
 using HarmonyLib;

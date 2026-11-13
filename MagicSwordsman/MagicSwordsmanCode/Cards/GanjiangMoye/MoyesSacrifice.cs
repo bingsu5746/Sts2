@@ -30,7 +30,7 @@ public sealed class MoyesSacrifice : GanjiangMoyeCard
     protected override async Task OnPairCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay, bool pair)
     {
         await CreatureCmd.Damage(choiceContext, Owner.Creature, DynamicVars["HpLoss"].IntValue,
-            ValueProp.Unblockable | ValueProp.Unpowered | ValueProp.Move, this);
+            ValueProp.Unblockable | ValueProp.Unpowered | ValueProp.Move, this, null);
         await PowerCmd.Apply<MoyesSacrificePower>(choiceContext, Owner.Creature, PairBlock, Owner.Creature, this);
     }
 }

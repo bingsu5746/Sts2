@@ -32,7 +32,7 @@ public static class EventChoiceScreen
     {
         var sync = RunManager.Instance.PlayerChoiceSynchronizer;
         var choiceId = sync.ReserveChoiceId(player);
-        await context.SignalPlayerChoiceBegun(PlayerChoiceOptions.None);
+        await context.SignalPlayerChoiceBegun(player, PlayerChoiceOptions.None);
         int index;
         if (LocalContext.IsMe(player) && RunManager.Instance.NetService.Type != MegaCrit.Sts2.Core.Multiplayer.Game.NetGameType.Replay)
         {

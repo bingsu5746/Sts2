@@ -26,6 +26,6 @@ public sealed class DainsleifMustSlay : DainsleifCard
     {
         var attack = await CommonActions.CardAttack(this, cardPlay).WithHitFx("vfx/vfx_attack_slash").Execute(choiceContext);
         if (!attack.Results.SelectMany(r => r).Any(r => r.WasTargetKilled))
-            await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this);
+            await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this, null);
     }
 }

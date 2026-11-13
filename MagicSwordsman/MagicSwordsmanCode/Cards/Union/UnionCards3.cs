@@ -119,7 +119,7 @@ public sealed class UnionAnvilAndRock : UnionCard
         if (cardPlay.Target is { } target && target.Block > 0)
         {
             var taken = target.Block;
-            await CreatureCmd.LoseBlock(target, taken);
+            await CreatureCmd.LoseBlock(choiceContext, target, taken, Owner.Creature);
             await CreatureCmd.GainBlock(Owner.Creature, Math.Min(taken, UnionValue(BaseCap, 1)),
                 MegaCrit.Sts2.Core.ValueProps.ValueProp.Unpowered, null);
         }

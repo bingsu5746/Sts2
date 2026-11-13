@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -63,7 +64,7 @@ public sealed class UnionSidheLightPower : MagicSwordsmanPower
         var enemies = combatState.HittableEnemies.ToList();
         if (enemies.Count == 0) return;
         Flash();
-        await CreatureCmd.Damage(choiceContext, enemies, light * Amount, ValueProp.Unpowered, Owner, null);
+        await CreatureCmd.Damage(choiceContext, enemies, light * Amount, ValueProp.Unpowered, Owner, null, null);
     }
 }
 
@@ -97,7 +98,7 @@ public sealed class UnionDwarvenEdgePower : MagicSwordsmanPower
     }
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (cardSource == null || dealer != Owner || !props.IsPoweredAttack()) return 0m;
         return GetInternalData<Data>().Bonus.GetValueOrDefault(cardSource);

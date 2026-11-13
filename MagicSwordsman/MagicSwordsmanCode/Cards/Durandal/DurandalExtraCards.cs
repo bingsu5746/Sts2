@@ -71,7 +71,7 @@ public sealed class DurandalOlifant : DurandalCard
 
     protected override async Task OnCardPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this);
+        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this, null);
         var combatState = Owner.Creature.CombatState;
         if (combatState != null && Owner.Creature.IsAlive)
             await PowerCmd.Apply<WeakPower>(choiceContext, combatState.HittableEnemies, WeakAmount, Owner.Creature,

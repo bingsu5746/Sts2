@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Cards.GanjiangMoye;
 using MagicSwordsman.MagicSwordsmanCode.Curses;
 using MegaCrit.Sts2.Core.Commands;

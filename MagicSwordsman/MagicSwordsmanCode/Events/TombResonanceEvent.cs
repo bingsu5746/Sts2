@@ -116,7 +116,8 @@ public sealed class TombResonanceEvent : CustomEventModel
         if (Owner != null && SwordEventHelper.Tomb(Owner) is { } tomb)
         {
             // The event Rng is seeded only by run seed + event id, so mix in the act: act 1 and act 2 roll differently.
-            var rng = new Rng(Rng.Seed, $"tomb_resonance_act{ActIndex}");
+            // game v0.111: Rng no longer exposes its seed, so seed from the owner's player seed (deterministic on every client).
+            var rng = new Rng(Owner.PlayerRng.Seed, $"tomb_resonance_act{ActIndex}");
             _candidates = SwordEventHelper.Roll(tomb, CandidateCount, rng);
         }
         _firstSwordRevealed = false;

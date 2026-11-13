@@ -45,7 +45,7 @@ public sealed class RolandsRock : SwordCurseCard
     }
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (!IsMutable || Owner == null || Pile?.Type != PileType.Hand) return 0m;
         return DurandalBehavior.IsEnemyAttackOn(Owner.Creature, target, props, dealer) ? ExtraDamage : 0m;

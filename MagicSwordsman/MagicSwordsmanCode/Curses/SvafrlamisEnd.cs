@@ -28,6 +28,6 @@ public sealed class SvafrlamisEnd : TyrfingDeedCurse
 
     protected override async Task OnTurnEndInHand(PlayerChoiceContext choiceContext)
     {
-        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, ValueProp.Unpowered | ValueProp.Move, this);
+        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, ValueProp.Unpowered | ValueProp.Move, this, null);
     }
 }

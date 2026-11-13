@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Cards.Gram;
 using MagicSwordsman.MagicSwordsmanCode.Curses;

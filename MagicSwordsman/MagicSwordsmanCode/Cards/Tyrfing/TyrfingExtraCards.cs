@@ -28,7 +28,7 @@ public sealed class TyrfingSamsoDuel : TyrfingCard
     protected override async Task OnTyrfingPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CommonActions.CardAttack(this, cardPlay).WithHitFx("vfx/vfx_attack_slash").Execute(choiceContext);
-        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this);
+        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this, null);
     }
 }
 
@@ -74,7 +74,7 @@ public sealed class TyrfingBarrowFires : TyrfingCard
 
     protected override async Task OnTyrfingPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this);
+        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this, null);
         var curses = PileType.Hand.GetPile(Owner).Cards.Where(c => c.Type == CardType.Curse).ToList();
         foreach (var curse in curses) await CardCmd.Exhaust(choiceContext, curse);
         if (curses.Count > 0) await CardPileCmd.Draw(choiceContext, curses.Count, Owner);

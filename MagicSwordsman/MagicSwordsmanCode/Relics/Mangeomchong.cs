@@ -583,7 +583,6 @@ public class Mangeomchong : MagicSwordsmanRelic
         // (PrismaticGem, DingyRug), while this filter only removes unowned swords' cards. SeaGlass,
         // TheFutureOfPotions and InfestedAutomaton build rewards from the owner's own pool with that flag and must
         // still respect spec §2 [확정] (rewards = common cards + owned swords' cards only).
-        if (options.CustomCardPool != null) return options;
         if (options.CardPools.Count == 0) return options;
         var previous = options.CardPoolFilter;
         if (previous != null && OwnFilters.TryGetValue(previous, out _)) return options; // already filtered
@@ -604,7 +603,7 @@ public class Mangeomchong : MagicSwordsmanRelic
         }
 
         OwnFilters.AddOrUpdate(filter, new object());
-        return options.WithCardPools(options.CardPools.ToList(), filter);
+        return options.WithFilter(filter); // game v0.111: the filter moved out of WithCardPools
     }
 
     public override IEnumerable<CardModel> ModifyMerchantCardPool(Player player, IEnumerable<CardModel> options)
@@ -787,7 +786,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     }
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         decimal sum = 0m;
         foreach (var (b, ctx) in PreviewEffects(cardSource))
@@ -796,7 +795,7 @@ public class Mangeomchong : MagicSwordsmanRelic
     }
 
     public override decimal ModifyDamageMultiplicative(Creature? target, decimal amount, ValueProp props,
-        Creature? dealer, CardModel? cardSource)
+        Creature? dealer, CardModel? cardSource, CardPlay? cardPlay)
     {
         decimal mult = 1m;
         foreach (var (b, ctx) in PreviewEffects(cardSource))

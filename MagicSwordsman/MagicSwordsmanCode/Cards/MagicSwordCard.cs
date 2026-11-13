@@ -145,7 +145,7 @@ public abstract class MagicSwordCard : ConstructedCardModel
     // the real damage AND to the hand preview.
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (_damagePerLevel == 0 || !ReferenceEquals(cardSource, this) || !props.IsPoweredAttack()) return 0m;
         return _damagePerLevel * SwordLevel;

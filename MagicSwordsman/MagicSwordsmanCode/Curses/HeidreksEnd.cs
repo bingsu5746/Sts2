@@ -25,6 +25,6 @@ public sealed class HeidreksEnd : SwordCurseCard
     public override async Task AfterCardDrawn(PlayerChoiceContext choiceContext, CardModel card, bool fromHandDraw)
     {
         if (card != this) return;
-        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, ValueProp.Unpowered | ValueProp.Move, this);
+        await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, ValueProp.Unpowered | ValueProp.Move, this, null);
     }
 }

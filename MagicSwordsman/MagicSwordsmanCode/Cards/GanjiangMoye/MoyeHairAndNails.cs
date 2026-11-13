@@ -27,7 +27,7 @@ public sealed class MoyeHairAndNails : GanjiangMoyeCard
     {
         if (!pair)
             await CreatureCmd.Damage(choiceContext, Owner.Creature, DynamicVars["HpLoss"].IntValue,
-                ValueProp.Unblockable | ValueProp.Unpowered | ValueProp.Move, this);
+                ValueProp.Unblockable | ValueProp.Unpowered | ValueProp.Move, this, null);
         await CommonActions.CardBlock(this, cardPlay);
     }
 }

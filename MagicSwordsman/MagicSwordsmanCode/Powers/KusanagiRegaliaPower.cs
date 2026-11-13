@@ -92,7 +92,7 @@ public sealed class KusanagiRegaliaPower : MagicSwordsmanPower, ISwordListener
     // ------------------------------------------------------------------ forwarded hooks (mirror CurrentSwordPower)
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         decimal sum = 0m;
         foreach (var (b, ctx) in Lingering(cardSource)) sum += b.ModifyDamageAdditive(ctx, target, amount, props, dealer, cardSource);
@@ -100,7 +100,7 @@ public sealed class KusanagiRegaliaPower : MagicSwordsmanPower, ISwordListener
     }
 
     public override decimal ModifyDamageMultiplicative(Creature? target, decimal amount, ValueProp props,
-        Creature? dealer, CardModel? cardSource)
+        Creature? dealer, CardModel? cardSource, CardPlay? cardPlay)
     {
         decimal mult = 1m;
         foreach (var (b, ctx) in Lingering(cardSource))
@@ -131,7 +131,16 @@ public sealed class KusanagiRegaliaPower : MagicSwordsmanPower, ISwordListener
         return hitCount;
     }
 
-    public override (PileType, CardPilePosition) ModifyCardPlayResultPileTypeAndPosition(CardModel card,
+    // Game v0.111 replaced ModifyCardPlayResultPileTypeAndPosition with ModifyCardPlayResultLocation (a CardLocation
+    // record); the original pile/position logic is kept below and adapted here.
+    public override CardLocation ModifyCardPlayResultLocation(CardModel card, bool isAutoPlay, ResourceInfo resources,
+        CardLocation cardLocation)
+    {
+        var (pile, pos) = ResultPileAndPosition(card, isAutoPlay, resources, cardLocation.pileType, cardLocation.position);
+        return cardLocation with { pileType = pile, position = pos };
+    }
+
+    private (PileType, CardPilePosition) ResultPileAndPosition(CardModel card,
         bool isAutoPlay, ResourceInfo resources, PileType pileType, CardPilePosition position)
     {
         var result = (pileType, position);

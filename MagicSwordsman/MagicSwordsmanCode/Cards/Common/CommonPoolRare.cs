@@ -176,7 +176,7 @@ public sealed class Issen : MagicSwordCard
     protected override bool ShouldGlowGoldInternal => IsFirstCardThisTurn();
 
     public override decimal ModifyDamageMultiplicative(Creature? target, decimal amount, ValueProp props,
-        Creature? dealer, CardModel? cardSource)
+        Creature? dealer, CardModel? cardSource, CardPlay? cardPlay)
     {
         if (!ReferenceEquals(cardSource, this) || !props.IsPoweredAttack()) return 1m;
         return IsFirstCardThisTurn() ? 2m : 1m;

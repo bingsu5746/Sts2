@@ -52,7 +52,7 @@ public sealed class BladeGalePower : MagicSwordsmanPower, ISwordListener
         var target = player.RunState.Rng.CombatTargets.NextItem(enemies);
         if (target == null) return;
         Flash();
-        await CreatureCmd.Damage(choiceContext, target, Amount, ValueProp.Unpowered, Owner, null);
+        await CreatureCmd.Damage(choiceContext, target, Amount, ValueProp.Unpowered, Owner, null, null);
     }
 }
 
@@ -256,7 +256,7 @@ public sealed class SwordlessPower : MagicSwordsmanPower
     public override PowerStackType StackType => PowerStackType.Counter;
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (dealer == null || dealer != Owner || !props.IsPoweredAttack()) return 0m;
         if (cardSource == null || cardSource.Type != CardType.Attack) return 0m;

@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MagicSwordsman.MagicSwordsmanCode.Swords.Behaviors;
@@ -94,7 +95,7 @@ public sealed class DurandalStPetersToothPower : MagicSwordsmanPower
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override decimal ModifyDamageCap(Creature? target, ValueProp props, Creature? dealer, CardModel? cardSource) =>
+    public override decimal ModifyDamageCap(Creature? target, ValueProp props, Creature? dealer, CardModel? cardSource, CardPlay? cardPlay) =>
         target == Owner ? Amount : decimal.MaxValue;
 
     public override Task AfterModifyingDamageAmount(CardModel? cardSource)
@@ -121,7 +122,7 @@ public sealed class DurandalHiddenBeneathPower : MagicSwordsmanPower
     public override PowerStackType StackType => PowerStackType.Single;
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (!DurandalBehavior.IsEnemyAttackOn(Owner, target, props, dealer)) return 0m;
         if (Owner.Player is not { } player) return 0m;

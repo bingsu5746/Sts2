@@ -30,6 +30,6 @@ public sealed class DainsleifShieldCastAsidePower : MagicSwordsmanPower
         var target = player.RunState.Rng.CombatTargets.NextItem(enemies);
         if (target == null) return;
         Flash();
-        await CreatureCmd.Damage(new ThrowingPlayerChoiceContext(), target, Amount, ValueProp.Unpowered, Owner, null);
+        await CreatureCmd.Damage(new ThrowingPlayerChoiceContext(), target, Amount, ValueProp.Unpowered, Owner, null, null);
     }
 }

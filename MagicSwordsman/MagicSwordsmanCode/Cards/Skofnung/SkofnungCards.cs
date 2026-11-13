@@ -222,7 +222,7 @@ public sealed class SkofnungTwelveSouls : SkofnungCard
         await PowerCmd.Remove(target.GetPower<SkofnungWoundPower>());
         VfxCmd.PlayOnCreature(target, "vfx/vfx_attack_slash");
         await CreatureCmd.Damage(choiceContext, target, wounds * PerWound, ValueProp.Unblockable | ValueProp.Unpowered,
-            Owner.Creature, this);
+            Owner.Creature, this, null);
     }
 }
 

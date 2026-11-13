@@ -159,7 +159,7 @@ public sealed class UnionBeforeTheSheath : UnionCard
         if (attack.Results.SelectMany(r => r).Any(r => r.WasTargetKilled))
             await PlayerCmd.GainEnergy(DynamicVars.Energy.IntValue, Owner);
         else
-            await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this);
+            await CreatureCmd.Damage(choiceContext, Owner.Creature, HpLoss, DamageProps.cardHpLoss, this, null);
     }
 }
 

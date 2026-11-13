@@ -27,7 +27,7 @@ public sealed class GramAnvilSplitter : GramCard
     {
         var target = cardPlay.Target;
         if (target == null) return;
-        if (target.Block > 0) await CreatureCmd.LoseBlock(target, target.Block);
+        if (target.Block > 0) await CreatureCmd.LoseBlock(choiceContext, target, target.Block, Owner.Creature);
         await CommonActions.CardAttack(this, cardPlay)
             .WithHitFx("vfx/vfx_attack_blunt")
             .Execute(choiceContext);

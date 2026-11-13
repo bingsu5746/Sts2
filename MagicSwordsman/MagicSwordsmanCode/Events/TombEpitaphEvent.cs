@@ -153,7 +153,7 @@ public sealed class TombEpitaphEvent : CustomEventModel
     private async Task Force()
     {
         await CreatureCmd.Damage(new ThrowingPlayerChoiceContext(), Owner!.Creature, DynamicVars[ForceHpVar].BaseValue,
-            ValueProp.Unblockable | ValueProp.Unpowered, (Creature?)null, (CardModel?)null);
+            ValueProp.Unblockable | ValueProp.Unpowered, (Creature?)null, (CardModel?)null, null);
         if (Owner.Creature.IsDead) return;
 
         var picked = await SwordAcquisition.PickSword(Owner, _forced, new BlockingPlayerChoiceContext(), canSkip: true,
@@ -207,7 +207,7 @@ public sealed class TombEpitaphEvent : CustomEventModel
         }
 
         await CreatureCmd.Damage(new ThrowingPlayerChoiceContext(), Owner!.Creature, DynamicVars[ReadHpVar].BaseValue,
-            ValueProp.Unblockable | ValueProp.Unpowered, (Creature?)null, (CardModel?)null);
+            ValueProp.Unblockable | ValueProp.Unpowered, (Creature?)null, (CardModel?)null, null);
         if (Owner.Creature.IsDead) return;
 
         var outcome = await SwordForge.ApplyEventUpgrade(Owner, sword, Rng);

@@ -1,3 +1,4 @@
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MagicSwordsman.MagicSwordsmanCode.Combat;
 using MagicSwordsman.MagicSwordsmanCode.Swords;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -28,7 +29,7 @@ public sealed class BalmungNothungPower : MagicSwordsmanPower
     }
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (dealer == null || dealer != Owner) return 0m;
         if (!props.IsPoweredAttack()) return 0m;

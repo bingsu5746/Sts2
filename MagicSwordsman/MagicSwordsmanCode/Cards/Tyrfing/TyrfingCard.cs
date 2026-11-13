@@ -37,17 +37,17 @@ public abstract class TyrfingCard(int cost, CardType type, CardRarity rarity, Ta
     protected virtual decimal DamageMultiplier(Creature? target) => 1m;
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
-        var bonus = base.ModifyDamageAdditive(target, amount, props, dealer, cardSource);
+        var bonus = base.ModifyDamageAdditive(target, amount, props, dealer, cardSource, cardPlay);
         if (ReferenceEquals(cardSource, this) && props.IsPoweredAttack()) bonus += BonusDamage(target);
         return bonus;
     }
 
     public override decimal ModifyDamageMultiplicative(Creature? target, decimal amount, ValueProp props,
-        Creature? dealer, CardModel? cardSource)
+        Creature? dealer, CardModel? cardSource, CardPlay? cardPlay)
     {
-        var mult = base.ModifyDamageMultiplicative(target, amount, props, dealer, cardSource);
+        var mult = base.ModifyDamageMultiplicative(target, amount, props, dealer, cardSource, cardPlay);
         if (ReferenceEquals(cardSource, this) && props.IsPoweredAttack()) mult *= DamageMultiplier(target);
         return mult;
     }

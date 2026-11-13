@@ -72,7 +72,7 @@ public sealed class DurandalSpringingSteelPower : MagicSwordsmanPower
         var damage = DurandalBehavior.ActiveReduction(player);
         if (damage <= 0) return;
         Flash();
-        await CreatureCmd.Damage(choiceContext, dealer, damage, ValueProp.Unpowered | ValueProp.SkipHurtAnim, Owner, null);
+        await CreatureCmd.Damage(choiceContext, dealer, damage, ValueProp.Unpowered | ValueProp.SkipHurtAnim, Owner, null, null);
     }
 }
 

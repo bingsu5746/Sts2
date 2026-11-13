@@ -37,7 +37,7 @@ public sealed class DainsleifDwarfForgedPower : MagicSwordsmanPower
     }
 
     public override decimal ModifyDamageAdditive(Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (cardSource == null || !props.IsPoweredAttack()) return 0m;
         return GetInternalData<Data>().Bonus.GetValueOrDefault(cardSource);
