@@ -1,0 +1,343 @@
+{
+ "theater_hall": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, an old abandoned underworld movie theater, rows of empty red velvet seats seen from behind in darkness, a pale glowing blank cinema screen far ahead, a beam of projector light cutting through dust and drifting smoke, three dark silhouettes sitting in the seats, no faces visible, lower third of the image dark",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 11,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_bridge": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, You were leading people across a collapsing bridge. It buckles, and fire rises behind you. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_siege": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, The last night of a besieged fortress. The gate is cracked and the arrows are gone. At dawn it ends. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_storm": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A storm at sea. The mast is broken and the ship lists. There is only one lifeboat. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_temple": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A burning temple. The roof is falling in, and people are still trapped inside. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_scaffold": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, The square before the scaffold. The crowd roars. Take back a single word, they say, and you will live. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_snowmarch": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A march through snowbound mountains. The road is buried, soldiers fall one by one. Turn back, and you live. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_flood": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A flooded village. The dike has burst and the water reaches the roofs. There is one boat. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_well": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A desert well. There is water enough for one, and thirsty people stand all around. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_mine": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A collapsing mine. The exit is blocked and the last lamp is dying. There is a narrow crack above. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_plague": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A gate in a time of plague. The sick are inside, refugees outside. Open the gate, and the sickness may spread. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_border": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A border bridge at night. The pursuers' torches draw near. Cut the bridge, and your own side cannot cross either. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_coronation": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, The eve of a coronation. Rebel blades approach through the cathedral crypt. The crown still rests on the altar. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_arena": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, The middle of an arena. The crowd wants blood, and your fallen opponent begs for their life. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_ambush": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, Ambushed in a narrow gorge. Arrows rain from the cliffs on both sides. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_mutiny": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A ship in mutiny. The crew have drawn blades and demand that you give up command. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_famine": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A city in famine. The granary key is in your hand. People in the villages outside are starving too. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_duel": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A duel at dawn. Your opponent is your old teacher. It ends only when one falls. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_exile": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, An exile's island in the middle of the sea. A guard ship circles it. Tonight, a single boat will land. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_false_order": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, In the command tent. A false order has come from court. Obey, and thousands die. Refuse, and you die. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_river": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A flooded riverbank. The pursuers are closing in. The boat is small, and the current is strong. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_tribunal": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, A tribunal. The witness has lied. Just before the verdict, you are given one chance to speak. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_hostage": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, The enemy commander holds a hostage. Lay down your arms, and they will be released. You cannot trust it. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_last_camp": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, The last camp after a defeat. By tomorrow the encirclement will close. The remaining soldiers look only to you. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "scene_tower": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, The top of a collapsing tower. The stairs are gone and fire climbs from below. The next tower might be one leap away. Wide establishing shot, no faces, people only as small distant silhouettes, the lower third of the image darker.",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 7,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "figure_guanyu": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, a wide river crossing among misty green mountains in ancient China at dusk, war banners on poles, an empty riverbank, no people, empty space in the center of the image, the lower third darker",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 5,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "figure_joan": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, a fortified medieval French walled city at dawn with tall towers and banners, a muddy siege field in front, no people, empty space in the center of the image, the lower third darker",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 5,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "figure_leonidas": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, the narrow coastal mountain pass of Thermopylae between steep cliffs and the sea at sunset, ancient Greek stone wall, no people, empty space in the center of the image, the lower third darker",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 5,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "figure_genghis": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, the endless Mongolian steppe at golden hour, round white felt gers in the distance, wild horses, vast sky, no people, empty space in the center of the image, the lower third darker",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 5,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "figure_yisunsin": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, the southern sea of Korea at dusk, Joseon panokseon warships and a turtle ship silhouette on calm water, islands, no people, empty space in the center of the image, the lower third darker",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 5,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ },
+ "figure_napoleon": {
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, a misty early nineteenth-century battlefield at dawn, a lone field cannon on a hill, distant ranks of infantry as tiny silhouettes, rising sun, empty space in the center of the image, the lower third darker",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
+  "seed": 5,
+  "w": 1024,
+  "h": 576,
+  "pp": [
+   "RealESRGAN_x2plus"
+  ],
+  "steps": 30
+ }
+}

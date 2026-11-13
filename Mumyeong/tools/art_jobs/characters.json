@@ -1,0 +1,338 @@
+{
+ "reaper_stand_3": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, a tall grim reaper man in a long black trench coat with the collar turned up and a black fedora hat, black leather gloves, his face completely hidden by swirling grey smoke under the hat brim, no face, no eyes, smoke drifting from his collar, standing calmly, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw, face, eyes, nose, mouth, skull",
+  "seed": 3,
+  "w": 576,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "reaper_sit_3": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, a tall grim reaper man in a long black trench coat with the collar turned up and a black fedora hat, black leather gloves, his face completely hidden by swirling grey smoke under the hat brim, no face, no eyes, smoke drifting from his collar, sitting on a low rock, side view facing right, elbows resting on his knees, relaxed",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw, face, eyes, nose, mouth, skull",
+  "seed": 3,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "reaper_stand_8": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, a tall grim reaper man in a long black trench coat with the collar turned up and a black fedora hat, black leather gloves, his face completely hidden by swirling grey smoke under the hat brim, no face, no eyes, smoke drifting from his collar, standing calmly, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw, face, eyes, nose, mouth, skull",
+  "seed": 8,
+  "w": 576,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "reaper_sit_8": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, a tall grim reaper man in a long black trench coat with the collar turned up and a black fedora hat, black leather gloves, his face completely hidden by swirling grey smoke under the hat brim, no face, no eyes, smoke drifting from his collar, sitting on a low rock, side view facing right, elbows resting on his knees, relaxed",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw, face, eyes, nose, mouth, skull",
+  "seed": 8,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_yisunsin_stand_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Joseon dynasty Korean admiral in traditional Korean general armor, a studded long armor coat (dujeonggap) and an iron helmet with a tall spike and red plume, holding a long Korean sword point down in front of him with both hands on the hilt, stern dignified expression, short beard, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_yisunsin_sit_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Joseon dynasty Korean admiral in traditional Korean general armor, a studded long armor coat (dujeonggap) and an iron helmet with a tall spike and red plume, holding a long Korean sword point down in front of him with both hands on the hilt, stern dignified expression, short beard, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_yisunsin_stand_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Joseon dynasty Korean admiral in traditional Korean general armor, a studded long armor coat (dujeonggap) and an iron helmet with a tall spike and red plume, holding a long Korean sword point down in front of him with both hands on the hilt, stern dignified expression, short beard, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_yisunsin_sit_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Joseon dynasty Korean admiral in traditional Korean general armor, a studded long armor coat (dujeonggap) and an iron helmet with a tall spike and red plume, holding a long Korean sword point down in front of him with both hands on the hilt, stern dignified expression, short beard, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_guanyu_stand_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Guan Yu, a Chinese general of the Three Kingdoms period, very long flowing black beard, dark green robe over armor, green headscarf, holding a guandao crescent-blade polearm upright beside him, stern noble expression, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_guanyu_sit_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Guan Yu, a Chinese general of the Three Kingdoms period, very long flowing black beard, dark green robe over armor, green headscarf, holding a guandao crescent-blade polearm upright beside him, stern noble expression, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_guanyu_stand_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Guan Yu, a Chinese general of the Three Kingdoms period, very long flowing black beard, dark green robe over armor, green headscarf, holding a guandao crescent-blade polearm upright beside him, stern noble expression, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_guanyu_sit_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Guan Yu, a Chinese general of the Three Kingdoms period, very long flowing black beard, dark green robe over armor, green headscarf, holding a guandao crescent-blade polearm upright beside him, stern noble expression, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_joan_stand_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Joan of Arc, a young French woman with a short bob haircut in full medieval plate armor, holding a white banner on a long staff, a sword at her hip, determined calm expression, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_joan_sit_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Joan of Arc, a young French woman with a short bob haircut in full medieval plate armor, holding a white banner on a long staff, a sword at her hip, determined calm expression, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_joan_stand_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Joan of Arc, a young French woman with a short bob haircut in full medieval plate armor, holding a white banner on a long staff, a sword at her hip, determined calm expression, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_joan_sit_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Joan of Arc, a young French woman with a short bob haircut in full medieval plate armor, holding a white banner on a long staff, a sword at her hip, determined calm expression, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_leonidas_stand_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Leonidas king of Sparta, bronze Corinthian helmet with a horsehair crest, bronze round hoplite shield with a lambda symbol, long spear, red cloak, muscular, bearded, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_leonidas_sit_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Leonidas king of Sparta, bronze Corinthian helmet with a horsehair crest, bronze round hoplite shield with a lambda symbol, long spear, red cloak, muscular, bearded, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_leonidas_stand_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Leonidas king of Sparta, bronze Corinthian helmet with a horsehair crest, bronze round hoplite shield with a lambda symbol, long spear, red cloak, muscular, bearded, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_leonidas_sit_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Leonidas king of Sparta, bronze Corinthian helmet with a horsehair crest, bronze round hoplite shield with a lambda symbol, long spear, red cloak, muscular, bearded, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_genghis_stand_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Genghis Khan, Mongol ruler, fur-trimmed pointed Mongol hat, long moustache and beard, Mongol deel robe with a wide sash, holding a recurve composite bow, quiver of arrows, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_genghis_sit_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Genghis Khan, Mongol ruler, fur-trimmed pointed Mongol hat, long moustache and beard, Mongol deel robe with a wide sash, holding a recurve composite bow, quiver of arrows, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_genghis_stand_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Genghis Khan, Mongol ruler, fur-trimmed pointed Mongol hat, long moustache and beard, Mongol deel robe with a wide sash, holding a recurve composite bow, quiver of arrows, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_genghis_sit_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Genghis Khan, Mongol ruler, fur-trimmed pointed Mongol hat, long moustache and beard, Mongol deel robe with a wide sash, holding a recurve composite bow, quiver of arrows, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_napoleon_stand_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Napoleon Bonaparte, black bicorne hat worn sideways, dark blue French uniform coat with gold epaulettes, white waistcoat and breeches, black boots, right hand tucked into his waistcoat, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_napoleon_sit_4": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Napoleon Bonaparte, black bicorne hat worn sideways, dark blue French uniform coat with gold epaulettes, white waistcoat and breeches, black boots, right hand tucked into his waistcoat, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 4,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_napoleon_stand_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Napoleon Bonaparte, black bicorne hat worn sideways, dark blue French uniform coat with gold epaulettes, white waistcoat and breeches, black boots, right hand tucked into his waistcoat, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_napoleon_sit_9": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character art, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Napoleon Bonaparte, black bicorne hat worn sideways, dark blue French uniform coat with gold epaulettes, white waistcoat and breeches, black boots, right hand tucked into his waistcoat, sitting on a rock, three-quarter view facing right, weapon resting beside",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw",
+  "seed": 9,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ }
+}

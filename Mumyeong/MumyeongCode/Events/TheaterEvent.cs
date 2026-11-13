@@ -168,6 +168,18 @@ public sealed class TheaterEvent : CustomEventModel
 
     // ------------------------------------------------------------------ DESCENT / WHO / DEED / CONTRACT
 
+    /// <summary>
+    /// 섞인 결 ([확정] design log §2, implemented 2026-11-13): in a 한 계약, the other figure you resonated with most
+    /// (ties: the one picked later) leaves one of its starter cards in your deck. It is not your figure's card, so
+    /// playing it builds 한 like any other.
+    /// </summary>
+    private FigureId? MixedGrain(FigureId winner)
+    {
+        var others = _picks.Select((f, i) => (f, i)).Where(x => x.f != winner).ToList();
+        if (others.Count == 0) return null;
+        return others.GroupBy(x => x.f).OrderByDescending(g => g.Count()).ThenByDescending(g => g.Max(x => x.i)).First().Key;
+    }
+
     /// <summary>Most resonance wins; a 1:1:1 tie goes to the figure of the last cut (spec §4.1).</summary>
     private FigureId Winner()
     {
@@ -216,6 +228,8 @@ public sealed class TheaterEvent : CustomEventModel
         desc.Add("Resonance", resonance);
         desc.Add("Contract", StageRules.ContractName(contract));
         desc.Add("ContractText", ContractText(contract));
+        var mixed = contract == ContractType.Grudge ? MixedGrain(winner) : null;
+        desc.Add("Mixed", mixed is { } m ? MixedText(m) : "");
 
         var tips = FigureRegistry.StarterCards(winner).Select(c => HoverTipFactory.FromCard(c)).ToList();
         var key = $"{PageKey("CONTRACT")}.options.TAKE";
@@ -224,6 +238,14 @@ public sealed class TheaterEvent : CustomEventModel
             new EventOption(this, () => MakeContract(winner, contract, resonance),
                 L10NLookup($"{key}.title"), L10NLookup($"{key}.description"), key, tips),
         ]);
+    }
+
+    private static string MixedText(FigureId mixed)
+    {
+        var text = FigureRegistry.Generic("MIXED_GRAIN");
+        text.Add("Figure", FigureRegistry.Name(mixed));
+        text.Add("Card", FigureRegistry.StarterCards(mixed)[0].Title);
+        return "\n\n" + text.GetFormattedText();
     }
 
     /// <summary>What the contract does, with the numbers from the code (spec §4.2 / §4.3).</summary>
@@ -264,7 +286,10 @@ public sealed class TheaterEvent : CustomEventModel
         core.SetRunCounter(SceneKey, Math.Max(0, TheaterScenes.All.ToList().IndexOf(_scene)));
         core.SetRunCounter(WordsKey, (int)_picks[^1] + 1);
         var results = new List<CardPileAddResult>();
-        foreach (var canonical in FigureRegistry.StarterCards(figure))
+        var starters = FigureRegistry.StarterCards(figure).ToList();
+        if (contract == ContractType.Grudge && MixedGrain(figure) is { } mixed && FigureRegistry.StarterCards(mixed).Count > 0)
+            starters.Add(FigureRegistry.StarterCards(mixed)[0]);
+        foreach (var canonical in starters)
         {
             var card = Owner.RunState.CreateCard(canonical, Owner);
             results.Add(await CardPileCmd.Add(card, PileType.Deck));
