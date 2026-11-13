@@ -7,8 +7,12 @@ namespace Mumyeong.MumyeongCode.Visuals;
 /// <summary>
 /// The character's body scenes, built in code at runtime (2026-10-24). The release .pck is made without the Godot editor
 /// (BSchneppe.StS2.PckPacker), which cannot pack .tscn files, so each scene is assembled here, packed into a PackedScene
-/// and registered at a res:// path (Resource.TakeOverPath + the game's asset cache). The game and BaseLib then load and
-/// convert it exactly like a scene file (BaseLib keys its scene conversion on PackedScene.ResourcePath).
+/// and given the res:// path below (Resource.TakeOverPath; BaseLib keys its scene conversion on PackedScene.ResourcePath).
+/// The game asks for these paths through AssetCache.GetScene; <see cref="RuntimeScenePatch"/> answers with the built scene.
+/// Not through the cache itself (fixed 2026-11-13, combat showed no creatures at all): the game unloads cache entries
+/// between rooms (Dispose) and marks paths it cannot load from disk as failed, after which GetScene throws — and an
+/// exception while creating the player's visuals stops the whole combat room from creating its creatures. So the scene
+/// is rebuilt whenever the previous one was disposed.
 ///
 ///   combat       reaper ("Visuals/Body") + guardian spirit ("Visuals/SpiritRoot/Spirit", hidden until SpiritVisuals
 ///                sets the figure); clips idle / Attack / Cast / Hit / Dead; the spirit floats on its own player.
@@ -42,6 +46,19 @@ public static class RuntimeScenes
     private static readonly Dictionary<string, PackedScene> Built = new();
     private static readonly HashSet<string> Failed = new();
 
+    public static bool IsOurs(string path) => path is Combat or RestSite or Merchant or CharSelect;
+
+    /// <summary>The built scene for one of our paths (rebuilt if the game disposed it), or null if it cannot be built.</summary>
+    public static PackedScene? Get(string path)
+    {
+        if (Failed.Contains(path)) return null;
+        if (Built.TryGetValue(path, out var scene) && GodotObject.IsInstanceValid(scene)) return scene;
+        scene = TryBuild(path);
+        if (scene == null) return null;
+        Built[path] = scene;
+        return scene;
+    }
+
     /// <summary>
     /// The scene's path once it was built and registered, else the fallback (placeholder visuals). The first call
     /// decides for the whole session: BaseLib registers the scene conversion of CustomVisualPath & co. once, at
@@ -51,13 +68,9 @@ public static class RuntimeScenes
     {
         if (Built.ContainsKey(path)) return path;
         if (Failed.Contains(path)) return fallback;
-        if (TryBuild(path) is not { } scene)
-        {
-            Failed.Add(path);
-            return fallback;
-        }
-        Built[path] = scene;
-        return path;
+        if (Get(path) != null) return path;
+        Failed.Add(path);
+        return fallback;
     }
 
     private static PackedScene? TryBuild(string path)
@@ -99,7 +112,6 @@ public static class RuntimeScenes
         var err = scene.Pack(root);
         if (err != Error.Ok) throw new Exception($"pack failed: {err}");
         scene.TakeOverPath(path);
-        PreloadManager.Cache.SetAsset(path, scene);
         return scene;
     }
 
@@ -294,5 +306,29 @@ public static class RuntimeScenes
         var player = Add(root, new AnimationPlayer(), name);
         player.AddAnimationLibrary("", lib);
         player.Autoplay = autoplay;
+    }
+}
+
+/// <summary>
+/// Answers AssetCache.GetScene for our runtime scene paths (see <see cref="RuntimeScenes"/>). Any other path goes to the
+/// game as usual. If our scene cannot be built the call also goes to the game (and fails there as before).
+/// </summary>
+[HarmonyLib.HarmonyPatch(typeof(AssetCache), nameof(AssetCache.GetScene))]
+internal static class RuntimeScenePatch
+{
+    private static bool Prefix(string path, ref PackedScene __result)
+    {
+        if (!RuntimeScenes.IsOurs(path)) return true;
+        try
+        {
+            if (RuntimeScenes.Get(path) is not { } scene) return true;
+            __result = scene;
+            return false;
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[RuntimeScenes] GetScene {path}: {e.Message}");
+            return true;
+        }
     }
 }

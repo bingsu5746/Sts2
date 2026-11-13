@@ -1,4 +1,4 @@
-# 무명 (Mumyeong) — STS2 캐릭터 모드 (베타 v0.2.1)
+# 무명 (Mumyeong) — STS2 캐릭터 모드 (베타 v0.2.2)
 
 검은 코트에 중절모, 얼굴은 연기에 가려진 저승사자 「무명」. 한 번 죽었다 깨어난 이름 없는 자다. 런을 시작하면 저승의 **황천 영사실**에서 자신의 마지막 1초를 고르고,
 그 선택에 가장 크게 공명한 위인 한 명의 코어를 받아 함께 싸운다. 영혼과의 관계는 런 동안
@@ -9,7 +9,7 @@
 
 ## 설치 A — 바로 설치 (빌드 없이)
 
-1. 저장소의 `releases/Mumyeong-v0.2.1-beta.zip`을 받는다.
+1. 저장소의 `releases/Mumyeong-v0.2.2-beta.zip`을 받는다.
 2. 압축을 풀면 나오는 `Mumyeong` 폴더(`Mumyeong.dll`, `Mumyeong.pck`, `Mumyeong.json`)를 게임 폴더의 `mods/` 안에 넣는다.
    예: `Steam/steamapps/common/Slay the Spire 2/mods/Mumyeong/`
 3. BaseLib 3.4.7 이상이 설치되어 있어야 한다(창작마당 구독 등).

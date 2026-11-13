@@ -6,6 +6,8 @@ using Mumyeong.MumyeongCode.Relics;
 using Mumyeong.MumyeongCode.Visuals;
 using Godot;
 using MegaCrit.Sts2.Core.Entities.Characters;
+using MegaCrit.Sts2.Core.Assets;
+using MegaCrit.Sts2.Core.Nodes.Combat;
 using MegaCrit.Sts2.Core.Models;
 
 namespace Mumyeong.MumyeongCode.Character;
@@ -57,6 +59,32 @@ public class MumyeongCharacter : PlaceholderCharacterModel
     // Body scenes: the reaper in a black coat and fedora, face hidden in smoke, with the contracted figure's spirit
     // behind him (SpiritVisuals). Built in code (RuntimeScenes: the .pck tool cannot pack .tscn files); BaseLib converts
     // them and plays their AnimationPlayer clips by name (idle / Attack / Cast / Hit / Dead). Art missing -> placeholder.
+    // Combat body: our runtime scene, or — if anything about it fails — the placeholder (Ironclad) body, never an
+    // exception: the combat room creates the player's visuals first, and a throw there leaves the whole room without
+    // creatures (2026-11-13 report: neither the player nor the monsters appeared).
+    public override NCreatureVisuals? CreateCustomVisuals()
+    {
+        try
+        {
+            if (RuntimeScenes.Get(RuntimeScenes.Combat) is { } scene)
+                return NodeFactory<NCreatureVisuals>.CreateFromScene(scene);
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[MumyeongCharacter] combat visuals: {e.Message}; using the placeholder body");
+        }
+
+        try
+        {
+            return PreloadManager.Cache.GetScene(base.CustomVisualPath).Instantiate<NCreatureVisuals>();
+        }
+        catch (Exception e)
+        {
+            MainFile.Logger.Warn($"[MumyeongCharacter] placeholder visuals: {e.Message}");
+            return null;
+        }
+    }
+
     public override string CustomVisualPath => RuntimeScenes.PathOr(RuntimeScenes.Combat, base.CustomVisualPath)!;
     public override string CustomRestSiteAnimPath =>
         RuntimeScenes.PathOr(RuntimeScenes.RestSite, base.CustomRestSiteAnimPath)!;
