@@ -8,7 +8,7 @@
      spirit_<k>_sit_<seed>      -> images/character/spirit_<k>_rest.png
 Which seed to use for each character is chosen in tools/art_jobs/picks.json ({"reaper_stand": 3, ...}); without an
 entry the first seed found is used.
-Usage (from Mumyeong/): python3 tools/import_art.py RAW_DIR [bg] [ch]
+Usage (from Mumyeong/): ISNET_MODEL=isnet-general-use.onnx python3 tools/import_art.py RAW_DIR [bg] [ch]
 """
 import glob
 import json
@@ -54,8 +54,37 @@ def backgrounds(raw):
 
 
 # ------------------------------------------------------------------------------------------------- characters
+ISNET = os.environ.get("ISNET_MODEL")  # rembg's isnet-general-use.onnx; not kept in the repo (178 MB)
+_sess = None
+
+
+def unbackground(img):
+    """AI Horde's strip_background sometimes returns the grey backdrop untouched: cut it out with ISNet
+    (github.com/danielgatis/rembg release model, run with onnxruntime) when ISNET_MODEL points at it."""
+    global _sess
+    a = np.asarray(img.getchannel("A"))
+    if a[0, 0] < 200 and a[0, -1] < 200:
+        return img
+    if not ISNET or not os.path.exists(ISNET):
+        print("  WARNING: backdrop left in; set ISNET_MODEL")
+        return img
+    import onnxruntime as ort
+    if _sess is None:
+        _sess = ort.InferenceSession(ISNET)
+    name = _sess.get_inputs()[0].name
+    x = np.asarray(img.convert("RGB").resize((1024, 1024), Image.LANCZOS), np.float32) / 255 - 0.5
+    m = _sess.run(None, {name: x.transpose(2, 0, 1)[None]})[0][0, 0]
+    m = (m - m.min()) / max(1e-6, m.max() - m.min())
+    m = Image.fromarray((m * 255).astype(np.uint8)).resize(img.size, Image.LANCZOS)
+    out = img.copy()
+    out.putalpha(Image.fromarray(np.minimum(np.asarray(m), a)))
+    print("  removed backdrop with ISNet")
+    return out
+
+
 def cut(img):
     """Crop to the opaque pixels (alpha > 24), dropping faint halo left by background removal."""
+    img = unbackground(img)
     a = np.asarray(img.getchannel("A"))
     a = np.where(a > 24, a, 0).astype(np.uint8)
     img.putalpha(Image.fromarray(a))

@@ -319,9 +319,9 @@
   "steps": 30
  },
  "figure_yisunsin": {
-  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, the southern sea of Korea at dusk, Joseon panokseon warships and a turtle ship silhouette on calm water, islands, no people, empty space in the center of the image, the lower third darker",
-  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw",
-  "seed": 5,
+  "p": "hand-painted gouache illustration, thick visible brush strokes, painterly dark fantasy, cinematic wide shot, muted desaturated palette with one warm accent, moody atmospheric lighting, film still, a narrow sea strait between dark rocky islands on the southern coast of Korea at dusk, strong tidal current swirling white around the rocks, pine trees on the cliffs, empty water, no people, empty space in the center of the image, the lower third darker",
+  "neg": "text, letters, words, watermark, signature, logo, frame, border, ui, photo, 3d render, anime, cartoon, close-up, modern objects, cars, nsfw, ship, ships, boat, galleon, sailing ship, mast, sails, pirate",
+  "seed": 7,
   "w": 1024,
   "h": 576,
   "pp": [
