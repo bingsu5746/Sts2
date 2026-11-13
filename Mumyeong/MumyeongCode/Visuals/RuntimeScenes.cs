@@ -40,8 +40,8 @@ public static class RuntimeScenes
     private static readonly Vector2 SpiritPos = new(0, -283);
     private static readonly Vector2 RestBodyPos = new(120, -203);
     private const float RestBodyScale = 0.72f;
-    private static readonly Vector2 RestSpiritPos = new(-50, -222);
-    private const float RestSpiritScale = 0.42f;
+    private static readonly Vector2 RestSpiritPos = new(-70, -288);
+    private const float RestSpiritScale = 0.55f;
 
     private static readonly Dictionary<string, PackedScene> Built = new();
     private static readonly HashSet<string> Failed = new();
@@ -150,7 +150,7 @@ public static class RuntimeScenes
             Position = new Vector2(-110, -430), Size = new Vector2(220, 430), MouseFilter = Control.MouseFilterEnum.Ignore,
         }, "Bounds");
         // where the game's own talk bubbles point: right edge of the smoke face
-        Add(root, new Marker2D { Position = new Vector2(31, -295) }, "TalkPos");
+        Add(root, new Marker2D { Position = new Vector2(10, -350) }, "TalkPos");
         MarkUnique(root, "TalkPos");
         var visuals = Add(root, new Node2D(), "Visuals");
         MarkUnique(root, "Visuals");
@@ -238,7 +238,7 @@ public static class RuntimeScenes
             var name = $"Spirit_{Figures[i]}";
             Add(stage, new Sprite2D
             {
-                Texture = Tex($"spirit_{Figures[i]}.png"), Position = new Vector2(1450, 430), Modulate = new Color(1, 1, 1, 0),
+                Texture = Tex($"spirit_{Figures[i]}.png"), Position = new Vector2(1450, 500), Scale = Vector2.One * 0.92f, Modulate = new Color(1, 1, 1, 0),
             }, name);
             // each spirit rises behind him in turn: 4 s each
             var t0 = i * 4f;
@@ -250,10 +250,10 @@ public static class RuntimeScenes
             keys.Add((t0 + 4f, new Color(1, 1, 1, 0)));
             if (t0 + 4f < 24f) keys.Add((24f, new Color(1, 1, 1, 0)));
             clip.Key($"Stage/{name}:modulate", keys.ToArray());
-            var moves = new List<(float, Variant)> { (0, new Vector2(1450, 430)) };
-            if (t0 > 0) moves.Add((t0, new Vector2(1450, 430)));
-            moves.Add((t0 + 4f, new Vector2(1450, 390)));
-            if (t0 + 4f < 24f) moves.Add((24f, new Vector2(1450, 390)));
+            var moves = new List<(float, Variant)> { (0, new Vector2(1450, 500)) };
+            if (t0 > 0) moves.Add((t0, new Vector2(1450, 500)));
+            moves.Add((t0 + 4f, new Vector2(1450, 470)));
+            if (t0 + 4f < 24f) moves.Add((24f, new Vector2(1450, 470)));
             clip.Key($"Stage/{name}:position", moves.ToArray());
         }
 

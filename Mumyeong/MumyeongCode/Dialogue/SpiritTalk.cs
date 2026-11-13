@@ -217,15 +217,15 @@ public static class SpiritTalk
 
     // ------------------------------------------------------------------ display
 
-    // Anchors: local points on the sprites (texture centre = 0,0), see tools/gen_character.py for the art layout.
+    // Anchors: local points on the sprites (texture centre = 0,0), see tools/import_art.py for the art layout.
     /// <summary>Right edge of the reaper's smoke face on reaper.png (560x860).</summary>
-    private static readonly Vector2 BodyFace = new(62, -194);
+    private static readonly Vector2 BodyFace = new(30, -304);
     /// <summary>Right edge of the spirit's head on spirit_*.png (680x1010, standing).</summary>
-    private static readonly Vector2 SpiritHead = new(40, -170);
+    private static readonly Vector2 SpiritHead = new(20, -350);
     /// <summary>Right edge of the reaper's smoke face on reaper_rest.png (420x480).</summary>
-    private static readonly Vector2 RestFace = new(42, -116);
+    private static readonly Vector2 RestFace = new(-30, -130);
     /// <summary>Right edge of the spirit's head on spirit_*_rest.png (680x1010, sitting).</summary>
-    private static readonly Vector2 RestSpiritHead = new(40, -30);
+    private static readonly Vector2 RestSpiritHead = new(30, 0);
 
     private static bool Show(Player player, string text, bool spirit, double seconds)
     {

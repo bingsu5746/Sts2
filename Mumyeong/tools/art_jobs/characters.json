@@ -334,5 +334,29 @@
    "strip_background"
   ],
   "steps": 30
+ },
+ "spirit_leonidas_stand_11": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character concept art, flat painting, full body from head to feet, single character, centered, plain flat light grey background, soft rim light, Leonidas king of Sparta, bronze Corinthian helmet with a horsehair crest, bronze round hoplite shield with a lambda symbol, long spear, red cloak, muscular, bearded, standing, three-quarter view facing right",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw, miniature, figurine, statue, base, pedestal, toy, plastic, 3d",
+  "seed": 11,
+  "w": 640,
+  "h": 1024,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
+ },
+ "spirit_leonidas_sit_11": {
+  "p": "hand-painted gouache illustration, painterly, dark fantasy game character concept art, flat painting, single character, centered, plain flat light grey background, soft rim light, a person SITTING DOWN on a low flat rock, seated pose, knees bent, legs folded, side view facing right, whole body visible including feet, Leonidas king of Sparta, bronze Corinthian helmet with a horsehair crest, bronze round hoplite shield with a lambda symbol, long spear, red cloak, muscular, bearded, weapon lying on the ground beside the rock, resting quietly by a campfire at night",
+  "neg": "text, letters, watermark, signature, frame, border, background scenery, multiple people, cropped, cut off feet, photo, 3d render, anime, nsfw, standing, walking, full height pose, miniature, figurine, statue, base, pedestal, toy, plastic, 3d",
+  "seed": 11,
+  "w": 832,
+  "h": 960,
+  "pp": [
+   "RealESRGAN_x2plus",
+   "strip_background"
+  ],
+  "steps": 30
  }
 }
