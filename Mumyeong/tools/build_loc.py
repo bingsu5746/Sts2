@@ -255,6 +255,33 @@ THEATER_EVENT = {
     "pages.NO_CORE.options.LEAVE.description": ("", ""),
 }
 
+# character select: the system in five short pages (CharSelectInfo); numbers come from the code constants
+INFO = {
+    "BUTTON": ("시스템 설명", "How it works"),
+    "PREV": ("이전", "Back"),
+    "NEXT": ("다음", "Next"),
+    "CLOSE": ("닫기", "Close"),
+    "TITLE.0": ("무명", "Mumyeong"),
+    "BODY.0": ("한 번 죽었다 깨어난 저승사자.\n\n위인 한 명의 [gold]코어[/gold]와 계약하고,\n그 영혼과 함께 싸우며 하나가 되어 간다.",
+               "A reaper who died once and woke again.\n\nBound to the [gold]core[/gold] of one great figure,\nthey fight together and slowly become one."),
+    "TITLE.1": ("황천 영사실", "The Projection Room"),
+    "BODY.1": ("런을 시작하면 당신의 마지막 1초가 상영된다.\n\n[gold]시선 · 행동 · 유언[/gold] — 세 컷에서 하나씩 고른다.\n가장 많이 공명한 위인이 당신과 계약한다.\n\n[aqua]셋으로 갈리면 유언이 답한다.[/aqua]",
+               "When the run begins, your last second is screened.\n\nPick one line in each of three cuts: [gold]gaze · action · last words[/gold].\nThe figure you resonate with most makes the contract.\n\n[aqua]If it splits three ways, the last words decide.[/aqua]"),
+    "TITLE.2": ("계약", "The Contract"),
+    "BODY.2": ("[gold]공명 계약[/gold] (3컷 모두 같은 위인)\n단계에 필요한 숙련이 줄어든다 ({Sync} / {Focus}).\n\n[gold]한 계약[/gold] (그 밖의 경우)\n전투를 힘 {Strength}로 시작한다.\n위인 카드가 아닌 카드를 쓰면 한이 쌓이고,\n한이 {Limit}에 이르면 체력을 {HpLoss} 잃는다.",
+               "[gold]Resonance[/gold] (all three cuts, one figure)\nStages need less Mastery ({Sync} / {Focus}).\n\n[gold]Grudge[/gold] (otherwise)\nStart each combat with {Strength} Strength.\nCards that are not your figure's build Grudge; at {Limit} you lose {HpLoss} HP."),
+    "TITLE.3": ("단계", "Stages"),
+    "BODY.3": ("위인 카드를 쓸 때마다 [gold]숙련[/gold]이 쌓인다.\n\n[gold]동기화[/gold]  {SyncAct}막부터 · 숙련 {Sync} → 위인 카드 1장\n[gold]집중[/gold]  {FocusAct}막부터 · 숙련 {Focus} → 제거 또는 강화\n[gold]강림[/gold]  {DescentAct}막 · 위인의 과제 → 전용 유물\n\n영혼은 단계가 오를수록 선명해진다.",
+               "Every figure card you play adds [gold]Mastery[/gold].\n\n[gold]Synchronization[/gold]  act {SyncAct}+ · Mastery {Sync} → a figure card\n[gold]Focus[/gold]  act {FocusAct}+ · Mastery {Focus} → remove or upgrade\n[gold]Descent[/gold]  act {DescentAct} · the figure's task → their relic\n\nThe spirit grows clearer with each stage."),
+    "TITLE.4": ("위인", "The Figures"),
+    "BODY.4": ("영사실에 앉아 있는 여섯 그림자.", "Six shadows sit in the projection room."),
+}
+
+INTRO = {
+    "TITLE": ("무명", "Mumyeong"),
+    "LINE": ("저승의 영사실이 문을 연다.", "The projection room of the dead opens its doors."),
+}
+
 STAGE_EVENT = {
     "title": ("영사실의 다음 릴", "The Next Reel"),
     "pages.INITIAL.description": (
@@ -406,6 +433,11 @@ def build(lang):
         events[f"{P}THEATER_EVENT.{part}"] = pair[i]
     for part, pair in STAGE_EVENT.items():
         events[f"{P}STAGE_UP_EVENT.{part}"] = pair[i]
+    events[f"{P}CINEMA.CONTINUE"] = "계속" if k else "Continue"
+    for part, pair in INFO.items():
+        events[f"{P}INFO.{part}"] = pair[i]
+    for part, pair in INTRO.items():
+        events[f"{P}INTRO.{part}"] = pair[i]
     for fig, sits in TALK.items():
         for sit, lines in sits.items():
             for n, (sk, rk, se, re_) in enumerate(lines):

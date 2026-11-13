@@ -201,6 +201,14 @@ public sealed class SoulCore : MumyeongRelic
         await base.AfterRoomEntered(room);
         UpdateStatus(); // the act index in the status line changes with the map
         SpiritTalk.OnRoomEntered(Owner, room); // shows the spirit (rest site / shop) and maybe a line by the fire
+
+        // the character's opening animation, once per run, over the first room (Neow)
+        if (room is EventRoom { CanonicalEvent: AncientEventModel } && Owner.RunState.CurrentActIndex == 0 &&
+            GetRunCounter(IntroKey) == 0)
+        {
+            SetRunCounter(IntroKey, 1);
+            if (MegaCrit.Sts2.Core.Context.LocalContext.IsMe(Owner)) Cinema.RunIntro.Play();
+        }
     }
 
     // =====================================================================================
@@ -264,6 +272,9 @@ public sealed class SoulCore : MumyeongRelic
     // =====================================================================================
     // Combat hooks: 한 계약 (spec §4.3) and the descent task (spec §5.1)
     // =====================================================================================
+
+    /// <summary>Run counter: the opening animation was shown.</summary>
+    public const string IntroKey = "intro.shown";
 
     public const int GrudgeLimit = 5;
     public const int GrudgeHpLoss = 3;

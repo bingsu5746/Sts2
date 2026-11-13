@@ -1,4 +1,4 @@
-"""Placeholder event backgrounds (1000x760) for the slots in MumyeongCode/Events/EventArt.cs.
+"""Placeholder event backgrounds (drawn as 1000x760, written as 1920x1080 full-screen frames) for the slots in MumyeongCode/Events/EventArt.cs.
 They exist so every page already has its own mood; replace any file with designed art of the same name and size
 (see docs/mumyeong-art-slots.md). Silhouette landscapes only, no text (text in pictures is not localised).
 
@@ -91,15 +91,35 @@ class Pic:
 
     def finish(self, path):
         img = self.img.resize((W, H), Image.LANCZOS).convert("RGB")
-        # vignette (no film grain: it made every placeholder ~1 MB)
-        a = np.asarray(img, np.float32)
-        yy, xx = np.mgrid[0:H, 0:W]
-        v = 1 - 0.55 * np.clip((((xx - W / 2) / (W * 0.62)) ** 2 + ((yy - H / 2) / (H * 0.62)) ** 2), 0, 1)
-        a = np.clip(a * v[:, :, None], 0, 255)
-        img = Image.fromarray(a.astype(np.uint8))
+        img = widescreen(img)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         img.save(path, optimize=True)
         print("wrote", path)
+
+
+OUT_W, OUT_H = 1920, 1080
+
+
+def widescreen(img):
+    """The 1000x760 composition as a full-screen 1920x1080 frame (the cinema draws it full-screen): the art scaled to the
+    full height in the middle, its own blurred and darkened copy filling the sides, the seam feathered, a vignette."""
+    mid_w = int(W * OUT_H / H)
+    mid = img.resize((mid_w, OUT_H), Image.LANCZOS)
+    fill = img.resize((OUT_W, int(H * OUT_W / W)), Image.LANCZOS)
+    top = (fill.size[1] - OUT_H) // 2
+    fill = fill.crop((0, top, OUT_W, top + OUT_H)).filter(ImageFilter.GaussianBlur(28))
+    fill = Image.fromarray((np.asarray(fill, np.float32) * 0.45).astype(np.uint8))
+    x0 = (OUT_W - mid_w) // 2
+    mask = np.ones((OUT_H, mid_w), np.float32)
+    edge = 90
+    ramp = np.linspace(0, 1, edge)
+    mask[:, :edge] *= ramp
+    mask[:, -edge:] *= ramp[::-1]
+    fill.paste(mid, (x0, 0), Image.fromarray((mask * 255).astype(np.uint8)))
+    a = np.asarray(fill, np.float32)
+    yy, xx = np.mgrid[0:OUT_H, 0:OUT_W]
+    v = 1 - 0.55 * np.clip((((xx - OUT_W / 2) / (OUT_W * 0.6)) ** 2 + ((yy - OUT_H / 2) / (OUT_H * 0.62)) ** 2), 0, 1)
+    return Image.fromarray(np.clip(a * v[:, :, None], 0, 255).astype(np.uint8))
 
 
 DARK = (8, 8, 12, 255)

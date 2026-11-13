@@ -1,4 +1,5 @@
 using BaseLib.Abstracts;
+using Mumyeong.MumyeongCode.Cinema;
 using Mumyeong.MumyeongCode.Extensions;
 using Mumyeong.MumyeongCode.Figures;
 using Mumyeong.MumyeongCode.Relics;
@@ -20,6 +21,8 @@ namespace Mumyeong.MumyeongCode.Events;
 /// 황천 영사실 — the run-start event (spec §4). Started by <see cref="EventTriggers"/> when the starting Ancient
 /// (Neow) PROCEED would open the map, and only while the 코어 has no figure yet.
 ///
+/// Shown by our own full-screen <see cref="CinemaScreen"/> (2026-11-13), not the game's event layout; this class only
+/// says what each page looks like (a <see cref="Shot"/>) before setting the page's text and options.
 /// Pages (2026-10-24: little text per page, a background per page, a cinematic for the contract):
 ///   INITIAL (hall) -> SHADOWS (hall: the three epithets) -> SCENE (scene background) -> CUT 0..2 (one option per
 ///   shadow) -> DESCENT (figure background, the shadow rises into the screen and becomes the spirit) -> WHO (who they
@@ -55,6 +58,7 @@ public sealed class TheaterEvent : CustomEventModel
 
     public override bool IsAllowed(IRunState runState) => false;
 
+    // Drawn by CinemaScreen (the game's layout is hidden); the portrait only shows if our screen cannot be built.
     public override string? CustomInitialPortraitPath => EventArt.Resolve(EventArt.Hall);
 
     private string PageKey(string page) => $"{Id.Entry}.pages.{page}";
@@ -80,6 +84,8 @@ public sealed class TheaterEvent : CustomEventModel
             pool.Remove(f);
         }
         _scene = rng.NextItem(TheaterScenes.All.ToList()) ?? TheaterScenes.All[0];
+        CinemaScreen.Direct(this, Owner,
+            NeedsContract ? new Shot(EventArt.Hall, CinemaFx.Blackout, TextDelay: 2.6) : new Shot(EventArt.Hall));
         return Task.CompletedTask;
     }
 
@@ -101,7 +107,7 @@ public sealed class TheaterEvent : CustomEventModel
 
     private void ShowShadows()
     {
-        EventArt.Show(Owner, EventArt.Hall);
+        CinemaScreen.Direct(this, Owner, new Shot(EventArt.Hall, CinemaFx.Shadows, _figures, TextDelay: 2.2));
         var desc = L10NLookup($"{PageKey("SHADOWS")}.description");
         desc.Add("Shadows", string.Join("\n", _figures.Select(f => $"[gold]「{FigureRegistry.Shadow(f)}」[/gold]")));
         SetEventState(desc, [Next("SHADOWS", "START", ShowScene)]);
@@ -109,7 +115,7 @@ public sealed class TheaterEvent : CustomEventModel
 
     private void ShowScene()
     {
-        EventArt.Show(Owner, EventArt.Scene(_scene));
+        CinemaScreen.Direct(this, Owner, new Shot(EventArt.Scene(_scene), CinemaFx.Cut, _figures, Picks: [], TextDelay: 1.0));
         var desc = L10NLookup($"{PageKey("SCENE")}.description");
         desc.Add("Scene", TheaterScenes.Description(_scene).GetFormattedText());
         SetEventState(desc, [Next("SCENE", "FREEZE", () => ShowCut(0))]);
@@ -119,6 +125,7 @@ public sealed class TheaterEvent : CustomEventModel
 
     private void ShowCut(int cut)
     {
+        CinemaScreen.Direct(this, Owner, new Shot(EventArt.Scene(_scene), CinemaFx.Cut, _figures, Picks: _picks.ToList()));
         var desc = L10NLookup($"{PageKey("CUT")}.description");
         desc.Add("Reaction", _picks.Count == 0 ? "" : Reaction(_picks[^1]));
         desc.Add("Prompt", TheaterScenes.Generic($"PROMPT.{TheaterScenes.Cuts[cut]}").GetFormattedText());
@@ -172,8 +179,7 @@ public sealed class TheaterEvent : CustomEventModel
     private void ShowDescent()
     {
         var winner = Winner();
-        EventArt.Show(Owner, EventArt.Figure(winner));
-        EventArt.PlayRise(Owner, winner);
+        CinemaScreen.Direct(this, Owner, new Shot(EventArt.Figure(winner), CinemaFx.Rise, _figures, winner, TextDelay: 3.4));
         var desc = L10NLookup($"{PageKey("DESCENT")}.description");
         AddShadow(desc, winner);
         desc.Add("Figure", FigureRegistry.Name(winner));
@@ -182,6 +188,7 @@ public sealed class TheaterEvent : CustomEventModel
 
     private void ShowWho(FigureId winner)
     {
+        CinemaScreen.Direct(this, Owner, new Shot(EventArt.Figure(winner), CinemaFx.Hold, Figure: winner));
         var desc = L10NLookup($"{PageKey("WHO")}.description");
         desc.Add("Figure", FigureRegistry.Name(winner));
         desc.Add("Intro", FigureRegistry.Text(winner, "INTRO").GetFormattedText());
@@ -191,6 +198,7 @@ public sealed class TheaterEvent : CustomEventModel
     /// <summary>Their real last moment next to the last words you chose (spec §4.1-5).</summary>
     private void ShowDeed(FigureId winner)
     {
+        CinemaScreen.Direct(this, Owner, new Shot(EventArt.Figure(winner), CinemaFx.Hold, Figure: winner));
         var desc = L10NLookup($"{PageKey("DEED")}.description");
         desc.Add("Figure", FigureRegistry.Name(winner));
         desc.Add("Deed", FigureRegistry.Text(winner, "LAST_DEED").GetFormattedText());
@@ -200,6 +208,7 @@ public sealed class TheaterEvent : CustomEventModel
 
     private void ShowContract(FigureId winner)
     {
+        CinemaScreen.Direct(this, Owner, new Shot(EventArt.Figure(winner), CinemaFx.Hold, Figure: winner));
         var resonance = _picks.Count(p => p == winner);
         var contract = resonance >= TheaterScenes.Cuts.Count ? ContractType.Resonance : ContractType.Grudge;
 
@@ -260,10 +269,10 @@ public sealed class TheaterEvent : CustomEventModel
             var card = Owner.RunState.CreateCard(canonical, Owner);
             results.Add(await CardPileCmd.Add(card, PileType.Deck));
         }
-        await EventArt.PlayMerge(Owner, figure);
+        await CinemaScreen.PlayMerge(this, Owner, figure);
         if (results.Count > 0) CardCmd.PreviewCardPileAdd(results);
 
-        EventArt.Show(Owner, EventArt.Figure(figure));
+        CinemaScreen.Direct(this, Owner, new Shot(EventArt.Figure(figure), TextDelay: 0.8));
         var desc = L10NLookup($"{PageKey("TEACH")}.description");
         var name = FigureRegistry.Name(figure);
         desc.Add("Figure", name);
@@ -278,6 +287,7 @@ public sealed class TheaterEvent : CustomEventModel
         var end = L10NLookup($"{PageKey("CONTRACTED")}.description");
         end.Add("Figure", FigureRegistry.Name(figure));
         end.Add("Contract", StageRules.ContractName(Core?.ContractKind ?? ContractType.None));
+        CinemaScreen.Direct(this, Owner, new Shot(EventArt.Hall, CinemaFx.LightsOn, TextDelay: 1.2));
         SetEventFinished(end);
     }
 }

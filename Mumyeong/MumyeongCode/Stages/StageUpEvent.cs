@@ -1,4 +1,5 @@
 using BaseLib.Abstracts;
+using Mumyeong.MumyeongCode.Cinema;
 using Mumyeong.MumyeongCode.Events;
 using Mumyeong.MumyeongCode.Extensions;
 using Mumyeong.MumyeongCode.Figures;
@@ -27,18 +28,9 @@ public sealed class StageUpEvent : CustomEventModel
 
     public override bool IsAllowed(IRunState runState) => false;
 
-    // The contracted figure's background (EventArt), the spirit rising in it once the page is up.
+    // Drawn by CinemaScreen: the figure's background and its spirit flickering in like an old reel.
     public override string? CustomInitialPortraitPath =>
         Owner?.GetRelic<SoulCore>()?.Figure is { } f ? EventArt.Resolve(EventArt.Figure(f)) : EventArt.Resolve(EventArt.Hall);
-
-    public override async Task AfterEventStarted()
-    {
-        await base.AfterEventStarted();
-        if (Core?.Figure is not { } figure || _stage == null || Owner == null) return;
-        var owner = Owner;
-        if (Godot.Engine.GetMainLoop() is Godot.SceneTree tree)
-            tree.CreateTimer(0.4).Timeout += () => EventArt.PlayRise(owner, figure);
-    }
 
     private string PageKey(string page) => $"{Id.Entry}.pages.{page}";
 
@@ -47,6 +39,9 @@ public sealed class StageUpEvent : CustomEventModel
     protected override Task BeforeEventStarted(bool isPreFinished)
     {
         _stage = Core is { } core ? StageRules.NextReadyStage(core) : null;
+        CinemaScreen.Direct(this, Owner, Core?.Figure is { } f && _stage != null
+            ? new Shot(EventArt.Figure(f), CinemaFx.Memory, Figure: f, TextDelay: 2.0)
+            : new Shot(EventArt.Hall));
         return Task.CompletedTask;
     }
 
@@ -124,6 +119,7 @@ public sealed class StageUpEvent : CustomEventModel
         var name = Core?.Figure is { } f ? FigureRegistry.Name(f) : "";
         end.Add("Figure", name);
         end.Add("Wa", Korean.Wa(name));
+        if (Core?.Figure is { } fig) CinemaScreen.Direct(this, Owner, new Shot(EventArt.Figure(fig), CinemaFx.Hold, Figure: fig));
         SetEventFinished(end);
     }
 }
